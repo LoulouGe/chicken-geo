@@ -412,10 +412,10 @@ function setupInput() {
     const dx = e.clientX - dragPrev.x;
     const dy = e.clientY - dragPrev.y;
     const sensitivity = 0.005;
-    globeRotY -= dx * sensitivity;
-    globeRotX += dy * sensitivity;
+    globeRotY += dx * sensitivity;
+    globeRotX -= dy * sensitivity;
     globeRotX = Math.max(-1.4, Math.min(1.4, globeRotX));
-    velocity = { lon: -dx * sensitivity, lat: dy * sensitivity };
+    velocity = { lon: dx * sensitivity, lat: -dy * sensitivity };
     dragPrev = { x: e.clientX, y: e.clientY };
   });
 
@@ -440,10 +440,10 @@ function setupInput() {
       const dx = e.touches[0].clientX - dragPrev.x;
       const dy = e.touches[0].clientY - dragPrev.y;
       const sensitivity = 0.005;
-      globeRotY -= dx * sensitivity;
-      globeRotX += dy * sensitivity;
+      globeRotY += dx * sensitivity;
+      globeRotX -= dy * sensitivity;
       globeRotX = Math.max(-1.4, Math.min(1.4, globeRotX));
-      velocity = { lon: -dx * sensitivity, lat: dy * sensitivity };
+      velocity = { lon: dx * sensitivity, lat: -dy * sensitivity };
       dragPrev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     },
     { passive: true },
