@@ -51,11 +51,19 @@ body {
 /* ── Start Screen ───────────────────────────────────── */
 #start-screen {
   background-image: url("splash.jpg");
-  background-position: center center;
+  background-position: center 40%;
   background-size: cover;
   background-repeat: no-repeat;
   background-color: var(--bg);
-  gap: 20px;
+  justify-content: space-between;
+  padding: 10vh 0;
+}
+
+@media (max-width: 600px) {
+  #start-screen {
+    background-size: 90% auto;
+    background-position: center 30%;
+  }
 }
 
 .title {
@@ -166,6 +174,23 @@ body {
   inset: 0;
   z-index: 0;
   touch-action: none;
+}
+
+/* ── Feedback Chicken Image ─────────────────────────── */
+#feedback-chicken {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  width: min(40vw, 220px);
+  z-index: 15;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#feedback-chicken.show {
+  opacity: 1;
+  transform: scale(1) !important;
 }
 
 /* ── Feedback Overlay ───────────────────────────────── */

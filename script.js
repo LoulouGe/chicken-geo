@@ -1,55 +1,178 @@
-// ── Country data (ISO id → French name) ────────────────────
+// ── Country data (id must match GeoJSON feature.properties.name) ─
 const COUNTRY_LIST = [
-  { id: "France", nameFr: "France" },
-  { id: "Brazil", nameFr: "Brésil" },
-  { id: "Japan", nameFr: "Japon" },
-  { id: "Australia", nameFr: "Australie" },
-  { id: "Canada", nameFr: "Canada" },
-  { id: "China", nameFr: "Chine" },
-  { id: "India", nameFr: "Inde" },
-  { id: "Russia", nameFr: "Russie" },
-  { id: "United States of America", nameFr: "États-Unis" },
-  { id: "Mexico", nameFr: "Mexique" },
-  { id: "Argentina", nameFr: "Argentine" },
+  // ── Afrique ──
+  { id: "Algeria", nameFr: "Algérie" },
+  { id: "Angola", nameFr: "Angola" },
+  { id: "Benin", nameFr: "Bénin" },
+  { id: "Botswana", nameFr: "Botswana" },
+  { id: "Burkina Faso", nameFr: "Burkina Faso" },
+  { id: "Burundi", nameFr: "Burundi" },
+  { id: "Cameroon", nameFr: "Cameroun" },
+  { id: "Central African Republic", nameFr: "Centrafrique" },
+  { id: "Chad", nameFr: "Tchad" },
+  { id: "Democratic Republic of the Congo", nameFr: "Rép. dém. du Congo" },
+  { id: "Republic of the Congo", nameFr: "Rép. du Congo" },
+  { id: "Djibouti", nameFr: "Djibouti" },
   { id: "Egypt", nameFr: "Égypte" },
+  { id: "Equatorial Guinea", nameFr: "Guinée équatoriale" },
+  { id: "Eritrea", nameFr: "Érythrée" },
+  { id: "Ethiopia", nameFr: "Éthiopie" },
+  { id: "Gabon", nameFr: "Gabon" },
+  { id: "Gambia", nameFr: "Gambie" },
+  { id: "Ghana", nameFr: "Ghana" },
+  { id: "Guinea", nameFr: "Guinée" },
+  { id: "Guinea Bissau", nameFr: "Guinée-Bissau" },
+  { id: "Ivory Coast", nameFr: "Côte d'Ivoire" },
+  { id: "Kenya", nameFr: "Kenya" },
+  { id: "Lesotho", nameFr: "Lesotho" },
+  { id: "Liberia", nameFr: "Libéria" },
+  { id: "Libya", nameFr: "Libye" },
+  { id: "Madagascar", nameFr: "Madagascar" },
+  { id: "Malawi", nameFr: "Malawi" },
+  { id: "Mali", nameFr: "Mali" },
+  { id: "Mauritania", nameFr: "Mauritanie" },
+  { id: "Morocco", nameFr: "Maroc" },
+  { id: "Mozambique", nameFr: "Mozambique" },
+  { id: "Namibia", nameFr: "Namibie" },
+  { id: "Niger", nameFr: "Niger" },
+  { id: "Nigeria", nameFr: "Nigéria" },
+  { id: "Rwanda", nameFr: "Rwanda" },
+  { id: "Senegal", nameFr: "Sénégal" },
+  { id: "Sierra Leone", nameFr: "Sierra Leone" },
+  { id: "Somalia", nameFr: "Somalie" },
   { id: "South Africa", nameFr: "Afrique du Sud" },
-  { id: "Germany", nameFr: "Allemagne" },
-  { id: "Italy", nameFr: "Italie" },
-  { id: "Spain", nameFr: "Espagne" },
-  { id: "United Kingdom", nameFr: "Royaume-Uni" },
-  { id: "Turkey", nameFr: "Turquie" },
-  { id: "Saudi Arabia", nameFr: "Arabie saoudite" },
-  { id: "Iran", nameFr: "Iran" },
-  { id: "Thailand", nameFr: "Thaïlande" },
-  { id: "Indonesia", nameFr: "Indonésie" },
+  { id: "South Sudan", nameFr: "Soudan du Sud" },
+  { id: "Sudan", nameFr: "Soudan" },
+  { id: "Swaziland", nameFr: "Eswatini" },
+  { id: "Togo", nameFr: "Togo" },
+  { id: "Tunisia", nameFr: "Tunisie" },
+  { id: "Uganda", nameFr: "Ouganda" },
+  { id: "United Republic of Tanzania", nameFr: "Tanzanie" },
+  { id: "Zambia", nameFr: "Zambie" },
+  { id: "Zimbabwe", nameFr: "Zimbabwe" },
+  // ── Amérique du Nord & Centrale ──
+  { id: "USA", nameFr: "États-Unis" },
+  { id: "Canada", nameFr: "Canada" },
+  { id: "Mexico", nameFr: "Mexique" },
+  { id: "Guatemala", nameFr: "Guatemala" },
+  { id: "Belize", nameFr: "Belize" },
+  { id: "Honduras", nameFr: "Honduras" },
+  { id: "El Salvador", nameFr: "Salvador" },
+  { id: "Nicaragua", nameFr: "Nicaragua" },
+  { id: "Costa Rica", nameFr: "Costa Rica" },
+  { id: "Panama", nameFr: "Panama" },
+  { id: "Cuba", nameFr: "Cuba" },
+  { id: "Jamaica", nameFr: "Jamaïque" },
+  { id: "Haiti", nameFr: "Haïti" },
+  { id: "Dominican Republic", nameFr: "Rép. dominicaine" },
+  { id: "The Bahamas", nameFr: "Bahamas" },
+  { id: "Trinidad and Tobago", nameFr: "Trinité-et-Tobago" },
+  // ── Amérique du Sud ──
+  { id: "Brazil", nameFr: "Brésil" },
+  { id: "Argentina", nameFr: "Argentine" },
+  { id: "Chile", nameFr: "Chili" },
   { id: "Colombia", nameFr: "Colombie" },
   { id: "Peru", nameFr: "Pérou" },
-  { id: "Nigeria", nameFr: "Nigéria" },
-  { id: "Kenya", nameFr: "Kenya" },
-  { id: "Morocco", nameFr: "Maroc" },
-  { id: "Algeria", nameFr: "Algérie" },
-  { id: "Norway", nameFr: "Norvège" },
-  { id: "Sweden", nameFr: "Suède" },
+  { id: "Venezuela", nameFr: "Venezuela" },
+  { id: "Ecuador", nameFr: "Équateur" },
+  { id: "Bolivia", nameFr: "Bolivie" },
+  { id: "Paraguay", nameFr: "Paraguay" },
+  { id: "Uruguay", nameFr: "Uruguay" },
+  { id: "Guyana", nameFr: "Guyana" },
+  { id: "Suriname", nameFr: "Suriname" },
+  // ── Europe ──
+  { id: "France", nameFr: "France" },
+  { id: "Germany", nameFr: "Allemagne" },
+  { id: "England", nameFr: "Royaume-Uni" },
+  { id: "Italy", nameFr: "Italie" },
+  { id: "Spain", nameFr: "Espagne" },
+  { id: "Portugal", nameFr: "Portugal" },
+  { id: "Greece", nameFr: "Grèce" },
+  { id: "Turkey", nameFr: "Turquie" },
   { id: "Poland", nameFr: "Pologne" },
   { id: "Ukraine", nameFr: "Ukraine" },
-  { id: "Greece", nameFr: "Grèce" },
-  { id: "Portugal", nameFr: "Portugal" },
-  { id: "Chile", nameFr: "Chili" },
-  { id: "Venezuela", nameFr: "Venezuela" },
+  { id: "Romania", nameFr: "Roumanie" },
+  { id: "Netherlands", nameFr: "Pays-Bas" },
+  { id: "Belgium", nameFr: "Belgique" },
+  { id: "Czech Republic", nameFr: "République tchèque" },
+  { id: "Hungary", nameFr: "Hongrie" },
+  { id: "Austria", nameFr: "Autriche" },
+  { id: "Switzerland", nameFr: "Suisse" },
+  { id: "Sweden", nameFr: "Suède" },
+  { id: "Norway", nameFr: "Norvège" },
+  { id: "Finland", nameFr: "Finlande" },
+  { id: "Denmark", nameFr: "Danemark" },
+  { id: "Ireland", nameFr: "Irlande" },
+  { id: "Iceland", nameFr: "Islande" },
+  { id: "Croatia", nameFr: "Croatie" },
+  { id: "Bosnia and Herzegovina", nameFr: "Bosnie-Herzégovine" },
+  { id: "Republic of Serbia", nameFr: "Serbie" },
+  { id: "Montenegro", nameFr: "Monténégro" },
+  { id: "Albania", nameFr: "Albanie" },
+  { id: "Macedonia", nameFr: "Macédoine du Nord" },
+  { id: "Bulgaria", nameFr: "Bulgarie" },
+  { id: "Slovakia", nameFr: "Slovaquie" },
+  { id: "Slovenia", nameFr: "Slovénie" },
+  { id: "Moldova", nameFr: "Moldavie" },
+  { id: "Belarus", nameFr: "Biélorussie" },
+  { id: "Lithuania", nameFr: "Lituanie" },
+  { id: "Latvia", nameFr: "Lettonie" },
+  { id: "Estonia", nameFr: "Estonie" },
+  { id: "Luxembourg", nameFr: "Luxembourg" },
+  { id: "Cyprus", nameFr: "Chypre" },
+  { id: "Kosovo", nameFr: "Kosovo" },
+  // ── Asie ──
+  { id: "Russia", nameFr: "Russie" },
+  { id: "China", nameFr: "Chine" },
+  { id: "India", nameFr: "Inde" },
+  { id: "Japan", nameFr: "Japon" },
+  { id: "South Korea", nameFr: "Corée du Sud" },
+  { id: "North Korea", nameFr: "Corée du Nord" },
+  { id: "Mongolia", nameFr: "Mongolie" },
+  { id: "Indonesia", nameFr: "Indonésie" },
+  { id: "Thailand", nameFr: "Thaïlande" },
+  { id: "Vietnam", nameFr: "Viêt Nam" },
+  { id: "Myanmar", nameFr: "Myanmar" },
+  { id: "Malaysia", nameFr: "Malaisie" },
+  { id: "Philippines", nameFr: "Philippines" },
+  { id: "Cambodia", nameFr: "Cambodge" },
+  { id: "Laos", nameFr: "Laos" },
+  { id: "Bangladesh", nameFr: "Bangladesh" },
   { id: "Pakistan", nameFr: "Pakistan" },
   { id: "Afghanistan", nameFr: "Afghanistan" },
+  { id: "Iran", nameFr: "Iran" },
   { id: "Iraq", nameFr: "Irak" },
-  { id: "Madagascar", nameFr: "Madagascar" },
-  { id: "Mongolia", nameFr: "Mongolie" },
-  { id: "Finland", nameFr: "Finlande" },
-  { id: "Vietnam", nameFr: "Viêt Nam" },
-  { id: "South Korea", nameFr: "Corée du Sud" },
+  { id: "Saudi Arabia", nameFr: "Arabie saoudite" },
+  { id: "Yemen", nameFr: "Yémen" },
+  { id: "Oman", nameFr: "Oman" },
+  { id: "United Arab Emirates", nameFr: "Émirats arabes unis" },
+  { id: "Qatar", nameFr: "Qatar" },
+  { id: "Kuwait", nameFr: "Koweït" },
+  { id: "Jordan", nameFr: "Jordanie" },
+  { id: "Israel", nameFr: "Israël" },
+  { id: "Lebanon", nameFr: "Liban" },
+  { id: "Syria", nameFr: "Syrie" },
+  { id: "Georgia", nameFr: "Géorgie" },
+  { id: "Armenia", nameFr: "Arménie" },
+  { id: "Azerbaijan", nameFr: "Azerbaïdjan" },
+  { id: "Kazakhstan", nameFr: "Kazakhstan" },
+  { id: "Uzbekistan", nameFr: "Ouzbékistan" },
+  { id: "Turkmenistan", nameFr: "Turkménistan" },
+  { id: "Tajikistan", nameFr: "Tadjikistan" },
+  { id: "Kyrgyzstan", nameFr: "Kirghizistan" },
+  { id: "Nepal", nameFr: "Népal" },
+  { id: "Bhutan", nameFr: "Bhoutan" },
+  { id: "Sri Lanka", nameFr: "Sri Lanka" },
+  { id: "Taiwan", nameFr: "Taïwan" },
+  { id: "Brunei", nameFr: "Brunei" },
+  { id: "East Timor", nameFr: "Timor oriental" },
+  // ── Océanie ──
+  { id: "Australia", nameFr: "Australie" },
   { id: "New Zealand", nameFr: "Nouvelle-Zélande" },
-  { id: "Cuba", nameFr: "Cuba" },
-  { id: "Iceland", nameFr: "Islande" },
-  { id: "Libya", nameFr: "Libye" },
-  { id: "Sudan", nameFr: "Soudan" },
-  { id: "Dem. Rep. Congo", nameFr: "Rép. dém. du Congo" },
+  { id: "Papua New Guinea", nameFr: "Papouasie-Nouvelle-Guinée" },
+  { id: "Fiji", nameFr: "Fidji" },
+  { id: "Solomon Islands", nameFr: "Îles Salomon" },
+  { id: "Vanuatu", nameFr: "Vanuatu" },
 ];
 
 // ── Constants ───────────────────────────────────────────────
@@ -57,8 +180,8 @@ const MAX_ROUNDS = 5;
 const ROUND_TIME = 12; // seconds
 const DEG = Math.PI / 180;
 
-const CAM_START_Z = 4.5;
-const CAM_END_Z = 2.0;
+const CAM_START_Z = 3.5;
+const CAM_END_Z = 2.8;
 
 // ── State ───────────────────────────────────────────────────
 let geoData = null;
@@ -77,10 +200,18 @@ let velocity = { lon: 0, lat: 0 };
 let globeRotY = 0; // longitude rotation (radians)
 let globeRotX = 0.35; // latitude rotation (radians) — slight tilt
 
+// Recenter animation state (used on wrong answer)
+let recenterAnim = null;
+
 // Three.js objects
 let scene, camera, renderer;
 let globeMesh, globeTexCanvas, globeTexCtx, globeTexture;
 let chickenGroup;
+
+// 3D speed particles
+const SPEED_PARTICLE_COUNT = 120;
+let speedPoints, speedPosAttr;
+let speedParticleData = [];
 
 // Particles overlay (2D confetti)
 let particlesCanvas, particlesCtx;
@@ -103,6 +234,7 @@ async function boot() {
 
   initThree();
   buildChicken();
+  initSpeedParticles();
 
   window.addEventListener("resize", onResize);
   setupInput();
@@ -142,11 +274,15 @@ function initThree() {
   container.appendChild(renderer.domElement);
 
   // Lights
-  const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+  const ambient = new THREE.AmbientLight(0xffffff, 0.65);
   scene.add(ambient);
   const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
   dirLight.position.set(5, 3, 8);
   scene.add(dirLight);
+  // Subtle back light for rim effect
+  const backLight = new THREE.DirectionalLight(0x8888ff, 0.3);
+  backLight.position.set(-3, -2, -5);
+  scene.add(backLight);
 
   // Globe geometry
   const sphereGeo = new THREE.SphereGeometry(1, 64, 64);
@@ -192,7 +328,7 @@ function sizeParticlesCanvas() {
 }
 
 // ── Globe Texture (equirectangular) ─────────────────────────
-function buildGlobeTexture(highlightId) {
+function buildGlobeTexture(highlightId, correctAnswerId) {
   if (!geoData) return;
   const ctx = globeTexCtx;
   const w = globeTexCanvas.width;
@@ -236,9 +372,12 @@ function buildGlobeTexture(highlightId) {
           : [];
 
     const isHighlight = highlightId && feature.properties.name === highlightId;
-    const color = isHighlight
-      ? "rgba(93,211,158,0.9)"
-      : PASTEL_COLORS[featureIdx % PASTEL_COLORS.length];
+    const isCorrectAnswer = correctAnswerId && feature.properties.name === correctAnswerId;
+    const color = isCorrectAnswer
+      ? "rgba(220,40,40,0.9)"
+      : isHighlight
+        ? "rgba(93,211,158,0.9)"
+        : PASTEL_COLORS[featureIdx % PASTEL_COLORS.length];
 
     for (const polygon of polys) {
       const ring = polygon[0];
@@ -254,9 +393,20 @@ function buildGlobeTexture(highlightId) {
       ctx.closePath();
       ctx.fillStyle = color;
       ctx.fill();
-      ctx.strokeStyle = "rgba(0,0,0,0.6)";
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
+      // Red glow around correct answer
+      if (isCorrectAnswer) {
+        ctx.save();
+        ctx.shadowColor = "rgba(255,60,60,0.8)";
+        ctx.shadowBlur = 30;
+        ctx.strokeStyle = "rgba(255,60,60,0.9)";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        ctx.strokeStyle = "rgba(0,0,0,0.6)";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
     }
     featureIdx++;
   }
@@ -283,6 +433,8 @@ function pointInPoly(poly, lon, lat) {
   for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
     const xi = poly[i][0], yi = poly[i][1];
     const xj = poly[j][0], yj = poly[j][1];
+    // Skip edges that cross the antimeridian (|Δlon| > 180)
+    if (Math.abs(xi - xj) > 180) continue;
     const intersect =
       yi > lat !== yj > lat &&
       lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi;
@@ -299,9 +451,16 @@ function getCountryAtCenter() {
   const hits = raycaster.intersectObject(globeMesh);
   if (hits.length === 0) return null;
 
-  const uv = hits[0].uv;
-  const lon = uv.x * 360 - 180;
-  const lat = uv.y * 180 - 90;
+  // Use 3D intersection point for precision
+  const p = hits[0].point.clone();
+  globeMesh.worldToLocal(p);
+  p.normalize();
+
+  const phi = Math.atan2(p.z, -p.x);
+  let u = phi / (2 * Math.PI);
+  if (u < 0) u += 1;
+  const lon = u * 360 - 180;
+  const lat = Math.asin(p.y) / DEG;
 
   for (const cf of countryFeatures) {
     const geom = cf.feature.geometry;
@@ -316,6 +475,58 @@ function getCountryAtCenter() {
   return null;
 }
 
+// ── Country centroid + recenter animation ────────────────────
+function getCountryCentroid(cf) {
+  const geom = cf.feature.geometry;
+  const coords =
+    geom.type === "Polygon"
+      ? geom.coordinates[0]
+      : geom.type === "MultiPolygon"
+        ? geom.coordinates[0][0]
+        : null;
+  if (!coords) return null;
+  let sumLon = 0, sumLat = 0;
+  for (const c of coords) {
+    sumLon += c[0];
+    sumLat += c[1];
+  }
+  return { lon: sumLon / coords.length, lat: sumLat / coords.length };
+}
+
+function startRecenterAnimation(cf) {
+  const centroid = getCountryCentroid(cf);
+  if (!centroid) return;
+
+  // Target globe rotations to center this lon/lat
+  // Center lon at globeRotY: centerLon = -90 - globeRotY / DEG
+  // So: globeRotY = -(targetLon + 90) * DEG
+  const targetRotY_raw = -(centroid.lon + 90) * DEG;
+
+  // Shortest path (wrap around)
+  let deltaRotY = targetRotY_raw - globeRotY;
+  while (deltaRotY > Math.PI) deltaRotY -= 2 * Math.PI;
+  while (deltaRotY < -Math.PI) deltaRotY += 2 * Math.PI;
+
+  const targetRotY = globeRotY + deltaRotY;
+
+  // Latitude: globeRotX = targetLat * DEG
+  const targetRotX = centroid.lat * DEG;
+
+  recenterAnim = {
+    startTime: performance.now(),
+    duration: 2000,
+    fromRotY: globeRotY,
+    toRotY: targetRotY,
+    fromRotX: globeRotX,
+    toRotX: targetRotX,
+    fromCamZ: camera.position.z,
+    toCamZ: 2.2,
+  };
+
+  // Stop any inertia
+  velocity = { lon: 0, lat: 0 };
+}
+
 // ── Chicken Sprite (PNG) ─────────────────────────────────────
 function buildChicken() {
   const loader = new THREE.TextureLoader();
@@ -327,13 +538,90 @@ function buildChicken() {
       depthWrite: false,
     });
     chickenGroup = new THREE.Sprite(mat);
-    // Aspect ratio of the image (~1.4:1 landscape)
     chickenGroup.scale.set(0.7, 0.55, 1);
     scene.add(chickenGroup);
   });
 }
 
-// Speed lines are now drawn on 2D overlay canvas (see drawSpeedLines)
+// ── 3D Speed Particles ──────────────────────────────────────
+function initSpeedParticles() {
+  const positions = new Float32Array(SPEED_PARTICLE_COUNT * 3);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+
+  const mat = new THREE.PointsMaterial({
+    color: 0xcceeFF,
+    size: 0.04,
+    transparent: true,
+    opacity: 0.6,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+
+  speedPoints = new THREE.Points(geo, mat);
+  scene.add(speedPoints);
+  speedPosAttr = geo.attributes.position;
+
+  for (let i = 0; i < SPEED_PARTICLE_COUNT; i++) {
+    speedParticleData.push({
+      life: 0,
+      vy: 0,
+      vz: 0,
+      vx: 0,
+    });
+    // Position offscreen
+    positions[i * 3] = 0;
+    positions[i * 3 + 1] = -100;
+    positions[i * 3 + 2] = 0;
+  }
+}
+
+function updateSpeedParticles() {
+  if (!chickenGroup || !roundActive) {
+    if (speedPoints) speedPoints.visible = false;
+    return;
+  }
+  speedPoints.visible = true;
+
+  const intensity = chickenY * chickenY;
+  const spawnChance = intensity * 0.4; // per particle per frame
+  const cPos = chickenGroup.position;
+  const arr = speedPosAttr.array;
+
+  for (let i = 0; i < SPEED_PARTICLE_COUNT; i++) {
+    const d = speedParticleData[i];
+
+    if (d.life <= 0) {
+      // Maybe respawn
+      if (Math.random() < spawnChance) {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 0.08 + Math.random() * 0.2;
+        arr[i * 3] = cPos.x + Math.cos(angle) * radius;
+        arr[i * 3 + 1] = cPos.y + (Math.random() - 0.3) * 0.15;
+        arr[i * 3 + 2] = cPos.z + Math.sin(angle) * radius * 0.4;
+
+        d.vx = (Math.random() - 0.5) * 0.003;
+        d.vy = 0.025 + Math.random() * 0.04; // upward (opposite to dive)
+        d.vz = 0.008 + Math.random() * 0.015; // toward camera
+        d.life = 0.4 + Math.random() * 0.6;
+      }
+    } else {
+      arr[i * 3] += d.vx;
+      arr[i * 3 + 1] += d.vy;
+      arr[i * 3 + 2] += d.vz;
+      d.life -= 0.025;
+
+      // Fade out: move offscreen when dead
+      if (d.life <= 0) {
+        arr[i * 3 + 1] = -100;
+      }
+    }
+  }
+
+  speedPosAttr.needsUpdate = true;
+  // Adjust opacity based on intensity
+  speedPoints.material.opacity = Math.min(0.7, intensity * 1.2);
+}
 
 // ── Screens ─────────────────────────────────────────────────
 function showScreen(id) {
@@ -375,7 +663,11 @@ function nextRound() {
   bar.style.width = "100%";
   bar.classList.remove("warning");
 
+  // Reset highlight
   lastHighlightId = null;
+
+  // Reset globe texture (no highlight)
+  buildGlobeTexture();
 }
 
 let lastHighlightId = null;
@@ -408,14 +700,14 @@ function setupInput() {
   });
 
   window.addEventListener("mousemove", (e) => {
-    if (!dragging) return;
+    if (!dragging || recenterAnim) return;
     const dx = e.clientX - dragPrev.x;
     const dy = e.clientY - dragPrev.y;
     const sensitivity = 0.005;
-    globeRotY += dx * sensitivity;
+    globeRotY -= dx * sensitivity;
     globeRotX -= dy * sensitivity;
     globeRotX = Math.max(-1.4, Math.min(1.4, globeRotX));
-    velocity = { lon: dx * sensitivity, lat: -dy * sensitivity };
+    velocity = { lon: -dx * sensitivity, lat: -dy * sensitivity };
     dragPrev = { x: e.clientX, y: e.clientY };
   });
 
@@ -436,14 +728,14 @@ function setupInput() {
   window.addEventListener(
     "touchmove",
     (e) => {
-      if (!dragging || e.touches.length !== 1) return;
+      if (!dragging || recenterAnim || e.touches.length !== 1) return;
       const dx = e.touches[0].clientX - dragPrev.x;
       const dy = e.touches[0].clientY - dragPrev.y;
       const sensitivity = 0.005;
-      globeRotY += dx * sensitivity;
+      globeRotY -= dx * sensitivity;
       globeRotX -= dy * sensitivity;
       globeRotX = Math.max(-1.4, Math.min(1.4, globeRotX));
-      velocity = { lon: dx * sensitivity, lat: -dy * sensitivity };
+      velocity = { lon: -dx * sensitivity, lat: -dy * sensitivity };
       dragPrev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     },
     { passive: true },
@@ -452,7 +744,7 @@ function setupInput() {
 
 // ── Inertia ─────────────────────────────────────────────────
 function applyInertia() {
-  if (dragging) return;
+  if (dragging || recenterAnim) return;
   globeRotY += velocity.lon;
   globeRotX -= velocity.lat;
   globeRotX = Math.max(-1.4, Math.min(1.4, globeRotX));
@@ -470,11 +762,9 @@ function updateTimer() {
   const remaining = Math.max(0, ROUND_TIME - elapsed);
   const frac = remaining / ROUND_TIME;
 
-  // Ease-in cubic: t³ — earth starts far and accelerates toward camera
+  // Ease-in quadratic: t² — earth approaches progressively
   const t = 1 - frac;
-  chickenY = t * t * t;
-  // Remap to 0-1 for the full range since t³ at t=1 is 1
-  // chickenY is already 0→1
+  chickenY = t * t;
 
   const bar = document.getElementById("timer-bar");
   bar.style.width = frac * 100 + "%";
@@ -497,6 +787,7 @@ function resolveRound() {
   const correct = hoveredCountry && hoveredCountry.id === currentTarget.id;
 
   const overlay = document.getElementById("feedback-overlay");
+  const fbChicken = document.getElementById("feedback-chicken");
 
   if (correct) {
     score++;
@@ -504,18 +795,41 @@ function resolveRound() {
     const cx = window.innerWidth / 2;
     const cy = window.innerHeight / 2;
     spawnConfetti(cx, cy);
+    fbChicken.src = "chicken-happy.png";
+    // Center bottom
+    fbChicken.style.left = "50%";
+    fbChicken.style.top = "auto";
+    fbChicken.style.bottom = "5%";
+    fbChicken.style.transform = "translateX(-50%) scale(0)";
   } else {
     overlay.className = "incorrect";
-    // Shake the scene-container
     const container = document.getElementById("scene-container");
     container.classList.add("shake");
     setTimeout(() => container.classList.remove("shake"), 400);
+    buildGlobeTexture(null, currentTarget.id);
+
+    // Recenter globe on correct country + zoom in
+    startRecenterAnimation(currentTarget);
+
+    // Position chicken-point just to the right of the country
+    const imgH = Math.min(window.innerWidth * 0.4, 220) * 0.8;
+    fbChicken.src = "chicken-point.png";
+    fbChicken.style.left = (window.innerWidth / 2 + 60) + "px";
+    fbChicken.style.top = (window.innerHeight / 2 - imgH / 2) + "px";
+    fbChicken.style.bottom = "auto";
+    fbChicken.style.transform = "scale(0)";
   }
 
+  // Show feedback chicken with bounce-in
+  fbChicken.classList.add("show");
+
+  const feedbackDuration = correct ? 2000 : 4000;
   setTimeout(() => {
     overlay.className = "";
+    fbChicken.classList.remove("show");
+    recenterAnim = null;
     nextRound();
-  }, 1200);
+  }, feedbackDuration);
 }
 
 // ── Confetti (2D overlay) ───────────────────────────────────
@@ -548,7 +862,7 @@ function updateAndDrawParticles() {
   // Draw crosshair on 2D overlay when round is active
   if (roundActive) {
     drawCrosshair(ctx, w / 2, h / 2);
-    // Speed lines around chicken
+    // 2D speed lines around chicken
     if (chickenY > 0.03) {
       drawSpeedLines(ctx, w / 2, h / 2);
     }
@@ -581,7 +895,6 @@ function drawSpeedLines(ctx, cx, cy) {
   const numLines = Math.floor(intensity * maxLines);
 
   ctx.save();
-  // Lines radiate outward from chicken position (slightly below center)
   const chickenScreenY = cy + 30;
 
   for (let i = 0; i < numLines; i++) {
@@ -634,7 +947,23 @@ function renderLoop() {
   applyInertia();
   updateTimer();
 
-  // Update globe rotation
+  // Recenter animation (on wrong answer: interpolate Euler angles)
+  if (recenterAnim) {
+    const elapsed = performance.now() - recenterAnim.startTime;
+    const t = Math.min(1, elapsed / recenterAnim.duration);
+    // Ease-in-out cubic
+    const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    globeRotY = recenterAnim.fromRotY + (recenterAnim.toRotY - recenterAnim.fromRotY) * e;
+    globeRotX = recenterAnim.fromRotX + (recenterAnim.toRotX - recenterAnim.fromRotX) * e;
+    camera.position.z = recenterAnim.fromCamZ + (recenterAnim.toCamZ - recenterAnim.fromCamZ) * e;
+
+    if (t >= 1) {
+      recenterAnim = null;
+    }
+  }
+
+  // Always set globe rotation from Euler angles
   globeMesh.rotation.set(globeRotX, globeRotY, 0);
 
   // Camera dive animation
@@ -643,23 +972,36 @@ function renderLoop() {
     camera.position.z = z;
   }
 
-  // Position chicken between camera and globe, just below crosshair
+  // Position chicken sprite between camera and globe
   if (chickenGroup) {
-    // Always keep chicken in front of globe (renderOrder ensures visibility)
-    const chickenZ = camera.position.z - 1.2;
-    chickenGroup.position.set(0, -0.1, chickenZ);
-    chickenGroup.renderOrder = 999;
+    chickenGroup.visible = roundActive;
 
-    // Slight bobbing
-    const bob = Math.sin(performance.now() * 0.005) * 0.02 * (1 - chickenY);
-    chickenGroup.position.y += bob;
+    if (roundActive) {
+      const chickenZ = camera.position.z - 1.2;
+      chickenGroup.position.set(0, -0.1, chickenZ);
+      chickenGroup.renderOrder = 999;
 
-    // Scale: small sprite, shrinks slightly during dive
-    const baseW = 0.32;
-    const baseH = 0.25;
-    const s = 1.0 - chickenY * 0.15;
-    chickenGroup.scale.set(baseW * s, baseH * s, 1);
+      // Slight bobbing
+      const bob = Math.sin(performance.now() * 0.005) * 0.02 * (1 - chickenY);
+      chickenGroup.position.y += bob;
+
+      // Scale: shrinks slightly during dive
+      const baseW = 0.32;
+      const baseH = 0.25;
+      const s = 1.0 - chickenY * 0.15;
+      chickenGroup.scale.set(baseW * s, baseH * s, 1);
+
+      // Slight vibration at high speed
+      if (chickenY > 0.5) {
+        const shake = (chickenY - 0.5) * 0.01;
+        chickenGroup.position.x += (Math.random() - 0.5) * shake;
+        chickenGroup.position.y += (Math.random() - 0.5) * shake;
+      }
+    }
   }
+
+  // Update 3D speed particles
+  updateSpeedParticles();
 
   // Highlight country at center
   if (roundActive && geoData) {
