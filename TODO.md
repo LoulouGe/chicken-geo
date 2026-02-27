@@ -1,0 +1,5 @@
+- Dessiner/animer la poule
+- Créer le globe rotatif avec les pays
+- Afficher la question (nom du pays)
+- Détecter si la poule atterrit sur le bon pays
+- Ajouter le score et le feedback
