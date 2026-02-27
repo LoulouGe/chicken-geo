@@ -50,7 +50,7 @@ body {
 
 /* ── Start Screen ───────────────────────────────────── */
 #start-screen {
-  background: radial-gradient(ellipse at 50% 40%, #1e3a5f 0%, var(--bg) 70%);
+  background: url("splash.jpg") center center / cover no-repeat, var(--bg);
   gap: 20px;
 }
 
