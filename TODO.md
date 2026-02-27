@@ -1,4 +1,1 @@
-- raprocher la terre au debut et ralentir pour quand meme faire le meme temps
-- faire un bouton accelérer pour arrivé plus vite a la terre
 - pour la france pointe sur la metropole plutot que sur la guyanne
-- remettre la poule qui pleure (image 4; chicken-sad.png) quand tu fais une mauvaise reponse au meme endroit que la poule qui est heureuse quand tu fais une bonne réponse.
