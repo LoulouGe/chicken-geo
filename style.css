@@ -1,0 +1,256 @@
+/* ── Variables & Reset ───────────────────────────────── */
+:root {
+  --bg: #0f1b2d;
+  --bg-light: #162a4a;
+  --accent: #ffb347;
+  --accent-hover: #ffc97a;
+  --correct: #5dd39e;
+  --incorrect: #ff6b6b;
+  --ocean: #1a6daa;
+  --ocean-deep: #0e4a75;
+  --land: #8ecfa0;
+  --highlight: #ffe066;
+  --text: #f0f0f0;
+  --font-heading: "Playfair Display", serif;
+  --font-body: "Poppins", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  overflow: hidden;
+  width: 100vw;
+  height: 100dvh;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ── Screens ────────────────────────────────────────── */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.screen.active {
+  display: flex;
+}
+
+/* ── Start Screen ───────────────────────────────────── */
+#start-screen {
+  background: radial-gradient(ellipse at 50% 40%, #1e3a5f 0%, var(--bg) 70%);
+  gap: 20px;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: clamp(3rem, 8vw, 5.5rem);
+  font-weight: 900;
+  color: var(--accent);
+  text-shadow:
+    0 4px 0 #c97e20,
+    0 8px 20px rgba(0, 0, 0, 0.5);
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  font-size: clamp(1rem, 3vw, 1.4rem);
+  color: rgba(240, 240, 240, 0.8);
+  margin-bottom: 10px;
+}
+
+.btn-play {
+  font-family: var(--font-body);
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  font-weight: 700;
+  color: #1a1a2e;
+  background: var(--accent);
+  border: none;
+  border-radius: 50px;
+  padding: 16px 60px;
+  cursor: pointer;
+  box-shadow:
+    0 6px 0 #c97e20,
+    0 10px 25px rgba(0, 0, 0, 0.4);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+
+.btn-play:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 9px 0 #c97e20,
+    0 14px 30px rgba(0, 0, 0, 0.5);
+  background: var(--accent-hover);
+}
+
+.btn-play:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 3px 0 #c97e20,
+    0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Game Screen ────────────────────────────────────── */
+#game-screen {
+  background: radial-gradient(ellipse at 50% 60%, #162a4a 0%, var(--bg) 80%);
+  flex-direction: column;
+}
+
+#hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding: 12px 16px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+#timer-container {
+  width: min(90%, 420px);
+  height: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+#timer-bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #5dd39e, #a3e635);
+  border-radius: 7px;
+  transition: width 0.1s linear;
+}
+
+#timer-bar.warning {
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+}
+
+#country-name {
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 5vw, 2.4rem);
+  font-weight: 700;
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+}
+
+#score-display {
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  opacity: 0.8;
+}
+
+#globe {
+  display: block;
+  touch-action: none;
+}
+
+/* ── Feedback Overlay ───────────────────────────────── */
+#feedback-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 5;
+}
+
+#feedback-overlay.correct {
+  background: radial-gradient(
+    circle at center,
+    rgba(93, 211, 158, 0.25) 0%,
+    transparent 70%
+  );
+  opacity: 1;
+}
+
+#feedback-overlay.incorrect {
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 107, 107, 0.25) 0%,
+    transparent 70%
+  );
+  opacity: 1;
+}
+
+/* ── Particles Canvas ───────────────────────────────── */
+#particles-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* ── End Screen ─────────────────────────────────────── */
+#end-screen {
+  background: radial-gradient(ellipse at 50% 40%, #1e3a5f 0%, var(--bg) 70%);
+  gap: 24px;
+}
+
+.end-title {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+}
+
+.final-score {
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ── Animations ─────────────────────────────────────── */
+@keyframes globe-grow {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.globe-enter {
+  animation: globe-grow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(8px);
+  }
+  60% {
+    transform: translateX(-5px);
+  }
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+.shake {
+  animation: shake 0.4s ease;
+}
