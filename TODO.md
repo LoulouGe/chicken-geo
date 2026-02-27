@@ -1,5 +1,4 @@
-- Dessiner/animer la poule
-- Créer le globe rotatif avec les pays
-- Afficher la question (nom du pays)
-- Détecter si la poule atterrit sur le bon pays
-- Ajouter le score et le feedback
+- raprocher la terre au debut et ralentir pour quand meme faire le meme temps
+- faire un bouton accelérer pour arrivé plus vite a la terre
+- pour la france pointe sur la metropole plutot que sur la guyanne
+- remettre la poule qui pleure (image 4; chicken-sad.png) quand tu fais une mauvaise reponse au meme endroit que la poule qui est heureuse quand tu fais une bonne réponse.
