@@ -50,7 +50,11 @@ body {
 
 /* ── Start Screen ───────────────────────────────────── */
 #start-screen {
-  background: url("splash.jpg") center center / cover no-repeat, var(--bg);
+  background-image: url("splash.jpg");
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-color: var(--bg);
   gap: 20px;
 }
 
