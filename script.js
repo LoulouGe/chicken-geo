@@ -307,8 +307,13 @@ function getCountryAtCenter() {
   globeMesh.worldToLocal(p);
   p.normalize();
 
+  // SphereGeometry: x = -cos(phi)*sin(theta), y = cos(theta), z = sin(phi)*sin(theta)
+  // phi = azimuthal angle, maps to texture u = phi/(2PI) → lon = u*360-180
+  const phi = Math.atan2(p.z, -p.x);
+  let u = phi / (2 * Math.PI);
+  if (u < 0) u += 1;
+  const lon = u * 360 - 180;
   const lat = Math.asin(p.y) / DEG;
-  const lon = Math.atan2(-p.x, p.z) / DEG;
 
   for (const cf of countryFeatures) {
     const geom = cf.feature.geometry;
@@ -419,10 +424,10 @@ function setupInput() {
     const dx = e.clientX - dragPrev.x;
     const dy = e.clientY - dragPrev.y;
     const sensitivity = 0.005;
-    globeRotY += dx * sensitivity;
+    globeRotY -= dx * sensitivity;
     globeRotX -= dy * sensitivity;
     globeRotX = Math.max(-1.4, Math.min(1.4, globeRotX));
-    velocity = { lon: dx * sensitivity, lat: -dy * sensitivity };
+    velocity = { lon: -dx * sensitivity, lat: -dy * sensitivity };
     dragPrev = { x: e.clientX, y: e.clientY };
   });
 
@@ -447,10 +452,10 @@ function setupInput() {
       const dx = e.touches[0].clientX - dragPrev.x;
       const dy = e.touches[0].clientY - dragPrev.y;
       const sensitivity = 0.005;
-      globeRotY += dx * sensitivity;
+      globeRotY -= dx * sensitivity;
       globeRotX -= dy * sensitivity;
       globeRotX = Math.max(-1.4, Math.min(1.4, globeRotX));
-      velocity = { lon: dx * sensitivity, lat: -dy * sensitivity };
+      velocity = { lon: -dx * sensitivity, lat: -dy * sensitivity };
       dragPrev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     },
     { passive: true },
@@ -504,6 +509,7 @@ function resolveRound() {
   const correct = hoveredCountry && hoveredCountry.id === currentTarget.id;
 
   const overlay = document.getElementById("feedback-overlay");
+  const fbChicken = document.getElementById("feedback-chicken");
 
   if (correct) {
     score++;
@@ -511,20 +517,24 @@ function resolveRound() {
     const cx = window.innerWidth / 2;
     const cy = window.innerHeight / 2;
     spawnConfetti(cx, cy);
+    fbChicken.src = "chicken-happy.png";
   } else {
     overlay.className = "incorrect";
-    // Shake the scene-container
     const container = document.getElementById("scene-container");
     container.classList.add("shake");
     setTimeout(() => container.classList.remove("shake"), 400);
-    // Show the correct country in orange
     buildGlobeTexture(null, currentTarget.id);
+    fbChicken.src = "chicken-sad.png";
   }
+
+  // Show feedback chicken with bounce-in
+  fbChicken.classList.add("show");
 
   setTimeout(() => {
     overlay.className = "";
+    fbChicken.classList.remove("show");
     nextRound();
-  }, 1500);
+  }, 2000);
 }
 
 // ── Confetti (2D overlay) ───────────────────────────────────
