@@ -53,7 +53,7 @@ const COUNTRY_LIST = [
 ];
 
 // ── Constants ───────────────────────────────────────────────
-const MAX_ROUNDS = 10;
+const MAX_ROUNDS = 5;
 const ROUND_TIME = 12; // seconds
 const DEG = Math.PI / 180;
 
@@ -367,7 +367,7 @@ function nextRound() {
 
   document.getElementById("country-name").textContent = currentTarget.nameFr;
   document.getElementById("score-display").textContent =
-    score + " / " + MAX_ROUNDS;
+    "Question " + round + " / " + MAX_ROUNDS;
 
   // Reset timer
   timerStart = performance.now();
@@ -385,8 +385,8 @@ function endGame() {
   showScreen("end-screen");
 
   let msg;
-  if (score >= 8) msg = "Incroyable ! ";
-  else if (score >= 5) msg = "Bien joué ! ";
+  if (score >= 4) msg = "Incroyable ! ";
+  else if (score >= 3) msg = "Bien joué ! ";
   else msg = "Continue de t\u2019entraîner ! ";
 
   document.getElementById("final-score").textContent =
@@ -454,7 +454,7 @@ function setupInput() {
 function applyInertia() {
   if (dragging) return;
   globeRotY += velocity.lon;
-  globeRotX += velocity.lat;
+  globeRotX -= velocity.lat;
   globeRotX = Math.max(-1.4, Math.min(1.4, globeRotX));
   velocity.lon *= 0.92;
   velocity.lat *= 0.92;
@@ -500,8 +500,6 @@ function resolveRound() {
 
   if (correct) {
     score++;
-    document.getElementById("score-display").textContent =
-      score + " / " + MAX_ROUNDS;
     overlay.className = "correct";
     const cx = window.innerWidth / 2;
     const cy = window.innerHeight / 2;
