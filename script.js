@@ -180,7 +180,7 @@ const MAX_ROUNDS = 5;
 const ROUND_TIME = 12; // seconds
 const DEG = Math.PI / 180;
 
-const CAM_START_Z = 12;
+const CAM_START_Z = 3.5;
 const CAM_END_Z = 2.8;
 
 // ── State ───────────────────────────────────────────────────
@@ -762,9 +762,9 @@ function updateTimer() {
   const remaining = Math.max(0, ROUND_TIME - elapsed);
   const frac = remaining / ROUND_TIME;
 
-  // Ease-in cubic: t³ — earth starts far and accelerates toward camera
+  // Ease-in quadratic: t² — earth approaches progressively
   const t = 1 - frac;
-  chickenY = t * t * t;
+  chickenY = t * t;
 
   const bar = document.getElementById("timer-bar");
   bar.style.width = frac * 100 + "%";
