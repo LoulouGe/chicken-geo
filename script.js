@@ -192,7 +192,7 @@ function sizeParticlesCanvas() {
 }
 
 // ── Globe Texture (equirectangular) ─────────────────────────
-function buildGlobeTexture(highlightId) {
+function buildGlobeTexture(highlightId, correctAnswerId) {
   if (!geoData) return;
   const ctx = globeTexCtx;
   const w = globeTexCanvas.width;
@@ -236,9 +236,12 @@ function buildGlobeTexture(highlightId) {
           : [];
 
     const isHighlight = highlightId && feature.properties.name === highlightId;
-    const color = isHighlight
-      ? "rgba(93,211,158,0.9)"
-      : PASTEL_COLORS[featureIdx % PASTEL_COLORS.length];
+    const isCorrectAnswer = correctAnswerId && feature.properties.name === correctAnswerId;
+    const color = isCorrectAnswer
+      ? "rgba(255,160,40,0.9)"
+      : isHighlight
+        ? "rgba(93,211,158,0.9)"
+        : PASTEL_COLORS[featureIdx % PASTEL_COLORS.length];
 
     for (const polygon of polys) {
       const ring = polygon[0];
@@ -299,9 +302,13 @@ function getCountryAtCenter() {
   const hits = raycaster.intersectObject(globeMesh);
   if (hits.length === 0) return null;
 
-  const uv = hits[0].uv;
-  const lon = uv.x * 360 - 180;
-  const lat = uv.y * 180 - 90;
+  // Use 3D intersection point for precision (UV interpolation is unreliable near seams/poles)
+  const p = hits[0].point.clone();
+  globeMesh.worldToLocal(p);
+  p.normalize();
+
+  const lat = Math.asin(p.y) / DEG;
+  const lon = Math.atan2(-p.x, p.z) / DEG;
 
   for (const cf of countryFeatures) {
     const geom = cf.feature.geometry;
@@ -510,12 +517,14 @@ function resolveRound() {
     const container = document.getElementById("scene-container");
     container.classList.add("shake");
     setTimeout(() => container.classList.remove("shake"), 400);
+    // Show the correct country in orange
+    buildGlobeTexture(null, currentTarget.id);
   }
 
   setTimeout(() => {
     overlay.className = "";
     nextRound();
-  }, 1200);
+  }, 1500);
 }
 
 // ── Confetti (2D overlay) ───────────────────────────────────

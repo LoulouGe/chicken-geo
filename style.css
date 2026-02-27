@@ -51,11 +51,18 @@ body {
 /* ── Start Screen ───────────────────────────────────── */
 #start-screen {
   background-image: url("splash.jpg");
-  background-position: center center;
+  background-position: center 40%;
   background-size: cover;
   background-repeat: no-repeat;
   background-color: var(--bg);
   gap: 20px;
+}
+
+@media (max-width: 600px) {
+  #start-screen {
+    background-size: 90% auto;
+    background-position: center 30%;
+  }
 }
 
 .title {
