@@ -177,11 +177,11 @@ const COUNTRY_LIST = [
 
 // ── Constants ───────────────────────────────────────────────
 const MAX_ROUNDS = 5;
-const ROUND_TIME = 12; // seconds
+const ROUND_TIME = 18; // seconds
 const DEG = Math.PI / 180;
 
 const CAM_START_Z = 3.5;
-const CAM_END_Z = 2.8;
+const CAM_END_Z = 1.8;
 
 // ── State ───────────────────────────────────────────────────
 let geoData = null;
@@ -192,6 +192,9 @@ let currentTarget = null;
 let timerStart = 0;
 let roundActive = false;
 let chickenY = 0; // 0 = far, 1 = landed
+let accelerating = false;
+let timerAccum = 0; // accumulated virtual time (seconds)
+let lastTimerTick = 0; // real timestamp of last timer update
 
 // Drag / rotation state
 let dragging = false;
@@ -202,9 +205,15 @@ let globeQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.35, 0, 0))
 let velocityLon = 0, velocityLat = 0; // inertia (rad/frame)
 const _qLon = new THREE.Quaternion();
 const _qLat = new THREE.Quaternion();
+const _qRoll = new THREE.Quaternion();
 const AXIS_X = new THREE.Vector3(1, 0, 0);
 const AXIS_Y = new THREE.Vector3(0, 1, 0);
+const AXIS_Z = new THREE.Vector3(0, 0, 1);
 const INITIAL_EULER = new THREE.Euler(0.35, 0, 0);
+
+// Two-finger rotation state
+let twoFingerAngle = null;
+let velocityRoll = 0;
 
 // Recenter animation state (used on wrong answer)
 let recenterAnim = null;
@@ -252,6 +261,22 @@ async function boot() {
 
   document.getElementById("btn-play").addEventListener("click", startGame);
   document.getElementById("btn-replay").addEventListener("click", startGame);
+
+  // Accelerate button (pointer events work for both mouse and touch)
+  const btnAccel = document.getElementById("btn-accelerate");
+  btnAccel.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    accelerating = true;
+    btnAccel.classList.add("pressing");
+  });
+  window.addEventListener("pointerup", () => {
+    accelerating = false;
+    btnAccel.classList.remove("pressing");
+  });
+  window.addEventListener("pointercancel", () => {
+    accelerating = false;
+    btnAccel.classList.remove("pressing");
+  });
 
   try {
     const res = await fetch(
@@ -724,11 +749,18 @@ function nextRound() {
   round++;
   roundActive = true;
   chickenY = 0;
+  accelerating = false;
+  timerAccum = 0;
+  lastTimerTick = performance.now();
+
+  // Show accelerate button
+  document.getElementById("btn-accelerate").classList.add("visible");
 
   // Reset globe orientation and camera
   globeQuat.setFromEuler(INITIAL_EULER);
   velocityLon = 0;
   velocityLat = 0;
+  velocityRoll = 0;
   camera.position.set(0, 0, CAM_START_Z);
 
   // Pick random country
@@ -756,6 +788,8 @@ let lastHighlightId = null;
 
 function endGame() {
   roundActive = false;
+  accelerating = false;
+  document.getElementById("btn-accelerate").classList.remove("visible", "pressing");
   showScreen("end-screen");
 
   let msg;
@@ -799,10 +833,19 @@ function setupInput() {
     dragPrev = { x: e.clientX, y: e.clientY };
   });
 
+  function getTwoFingerAngle(t0, t1) {
+    return Math.atan2(t1.clientY - t0.clientY, t1.clientX - t0.clientX);
+  }
+
   container.addEventListener(
     "touchstart",
     (e) => {
-      if (e.touches.length === 1) {
+      if (e.touches.length === 2) {
+        // Start two-finger roll — cancel single-finger drag
+        dragging = false;
+        twoFingerAngle = getTwoFingerAngle(e.touches[0], e.touches[1]);
+        velocityRoll = 0;
+      } else if (e.touches.length === 1 && twoFingerAngle === null) {
         dragging = true;
         dragPrev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         velocityLon = 0;
@@ -812,16 +855,32 @@ function setupInput() {
     { passive: true },
   );
 
-  window.addEventListener("touchend", () => { dragging = false; }, { passive: true });
+  window.addEventListener("touchend", (e) => {
+    if (e.touches.length < 2) {
+      twoFingerAngle = null;
+    }
+    if (e.touches.length === 0) {
+      dragging = false;
+    }
+  }, { passive: true });
 
   window.addEventListener(
     "touchmove",
     (e) => {
-      if (!dragging || recenterAnim || e.touches.length !== 1) return;
-      const dx = e.touches[0].clientX - dragPrev.x;
-      const dy = e.touches[0].clientY - dragPrev.y;
-      applyDragDelta(dx, dy);
-      dragPrev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      if (recenterAnim) return;
+      if (e.touches.length === 2 && twoFingerAngle !== null) {
+        const newAngle = getTwoFingerAngle(e.touches[0], e.touches[1]);
+        const deltaAngle = newAngle - twoFingerAngle;
+        twoFingerAngle = newAngle;
+        _qRoll.setFromAxisAngle(AXIS_Z, deltaAngle);
+        globeQuat.premultiply(_qRoll);
+        velocityRoll = deltaAngle;
+      } else if (dragging && e.touches.length === 1) {
+        const dx = e.touches[0].clientX - dragPrev.x;
+        const dy = e.touches[0].clientY - dragPrev.y;
+        applyDragDelta(dx, dy);
+        dragPrev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
     },
     { passive: true },
   );
@@ -839,14 +898,25 @@ function applyInertia() {
     if (Math.abs(velocityLon) < 0.0001) velocityLon = 0;
     if (Math.abs(velocityLat) < 0.0001) velocityLat = 0;
   }
+  if (twoFingerAngle === null && velocityRoll !== 0) {
+    _qRoll.setFromAxisAngle(AXIS_Z, velocityRoll);
+    globeQuat.premultiply(_qRoll);
+    velocityRoll *= 0.92;
+    if (Math.abs(velocityRoll) < 0.0001) velocityRoll = 0;
+  }
 }
 
 // ── Timer & Round ───────────────────────────────────────────
 function updateTimer() {
   if (!roundActive) return;
 
-  const elapsed = (performance.now() - timerStart) / 1000;
-  const remaining = Math.max(0, ROUND_TIME - elapsed);
+  const now = performance.now();
+  const realDelta = (now - lastTimerTick) / 1000;
+  lastTimerTick = now;
+  const speed = accelerating ? 3 : 1;
+  timerAccum += realDelta * speed;
+
+  const remaining = Math.max(0, ROUND_TIME - timerAccum);
   const frac = remaining / ROUND_TIME;
 
   // Ease-in quadratic: t² — earth approaches progressively
@@ -869,6 +939,8 @@ function updateTimer() {
 
 function resolveRound() {
   roundActive = false;
+  accelerating = false;
+  document.getElementById("btn-accelerate").classList.remove("visible", "pressing");
 
   const hoveredCountry = getCountryAtCenter();
   const correct = hoveredCountry && hoveredCountry.id === currentTarget.id;
