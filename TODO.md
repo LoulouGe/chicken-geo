@@ -1,5 +1,1 @@
-- Dessiner/animer la poule
-- Créer le globe rotatif avec les pays
-- Afficher la question (nom du pays)
-- Détecter si la poule atterrit sur le bon pays
-- Ajouter le score et le feedback
+- pour la france pointe sur la metropole plutot que sur la guyanne

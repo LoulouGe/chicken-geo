@@ -1,0 +1,25 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"**/.DS_Store": true,
+			"**/Thumbs.db": true
+		},
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"html.format.wrapLineLength": 120,
+		"css.validate": true,
+		"javascript.suggest.autoImports": false
+	},
+	"extensions": {
+		"recommendations": [
+			"esbenp.prettier-vscode",
+			"ritwickdey.liveserver",
+			"dbaeumer.vscode-eslint"
+		]
+	}
+}
