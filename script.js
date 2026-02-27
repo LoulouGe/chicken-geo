@@ -57,8 +57,8 @@ const MAX_ROUNDS = 5;
 const ROUND_TIME = 12; // seconds
 const DEG = Math.PI / 180;
 
-const CAM_START_Z = 4.5;
-const CAM_END_Z = 2.0;
+const CAM_START_Z = 12;
+const CAM_END_Z = 2.8;
 
 // ── State ───────────────────────────────────────────────────
 let geoData = null;
@@ -85,6 +85,11 @@ let scene, camera, renderer;
 let globeMesh, globeTexCanvas, globeTexCtx, globeTexture;
 let chickenGroup;
 
+// 3D speed particles
+const SPEED_PARTICLE_COUNT = 120;
+let speedPoints, speedPosAttr;
+let speedParticleData = [];
+
 // Particles overlay (2D confetti)
 let particlesCanvas, particlesCtx;
 let particles = [];
@@ -106,6 +111,7 @@ async function boot() {
 
   initThree();
   buildChicken();
+  initSpeedParticles();
 
   window.addEventListener("resize", onResize);
   setupInput();
@@ -145,11 +151,15 @@ function initThree() {
   container.appendChild(renderer.domElement);
 
   // Lights
-  const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+  const ambient = new THREE.AmbientLight(0xffffff, 0.65);
   scene.add(ambient);
   const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
   dirLight.position.set(5, 3, 8);
   scene.add(dirLight);
+  // Subtle back light for rim effect
+  const backLight = new THREE.DirectionalLight(0x8888ff, 0.3);
+  backLight.position.set(-3, -2, -5);
+  scene.add(backLight);
 
   // Globe geometry
   const sphereGeo = new THREE.SphereGeometry(1, 64, 64);
@@ -316,13 +326,11 @@ function getCountryAtCenter() {
   const hits = raycaster.intersectObject(globeMesh);
   if (hits.length === 0) return null;
 
-  // Use 3D intersection point for precision (UV interpolation is unreliable near seams/poles)
+  // Use 3D intersection point for precision
   const p = hits[0].point.clone();
   globeMesh.worldToLocal(p);
   p.normalize();
 
-  // SphereGeometry: x = -cos(phi)*sin(theta), y = cos(theta), z = sin(phi)*sin(theta)
-  // phi = azimuthal angle, maps to texture u = phi/(2PI) → lon = u*360-180
   const phi = Math.atan2(p.z, -p.x);
   let u = phi / (2 * Math.PI);
   if (u < 0) u += 1;
@@ -340,49 +348,6 @@ function getCountryAtCenter() {
     }
   }
   return null;
-}
-
-// ── Project country centroid to screen position ─────────────
-function getCountryScreenPos(cf) {
-  if (!cf || !cf.feature) return null;
-  const geom = cf.feature.geometry;
-  const coords =
-    geom.type === "Polygon"
-      ? geom.coordinates[0]
-      : geom.type === "MultiPolygon"
-        ? geom.coordinates[0][0]
-        : null;
-  if (!coords) return null;
-
-  // Compute centroid
-  let sumLon = 0, sumLat = 0;
-  for (const c of coords) {
-    sumLon += c[0];
-    sumLat += c[1];
-  }
-  const cLon = sumLon / coords.length;
-  const cLat = sumLat / coords.length;
-
-  // Convert lon/lat to 3D point on sphere (matching SphereGeometry mapping)
-  const u = (cLon + 180) / 360;
-  const v = (90 - cLat) / 180;
-  const theta = v * Math.PI;
-  const phi2 = u * 2 * Math.PI;
-  const point3d = new THREE.Vector3(
-    -Math.cos(phi2) * Math.sin(theta),
-    Math.cos(theta),
-    Math.sin(phi2) * Math.sin(theta),
-  );
-
-  // Transform to world space
-  point3d.applyMatrix4(globeMesh.matrixWorld);
-
-  // Project to screen
-  point3d.project(camera);
-  const sx = (point3d.x * 0.5 + 0.5) * window.innerWidth;
-  const sy = (-point3d.y * 0.5 + 0.5) * window.innerHeight;
-
-  return { x: sx, y: sy };
 }
 
 // ── Country centroid + recenter animation ────────────────────
@@ -403,62 +368,32 @@ function getCountryCentroid(cf) {
   return { lon: sumLon / coords.length, lat: sumLat / coords.length };
 }
 
-function getCenterLonLat() {
-  // Compute what lon/lat the camera currently sees at center
-  const p = new THREE.Vector3(0, 0, 1);
-  const invMatrix = new THREE.Matrix4()
-    .makeRotationFromEuler(new THREE.Euler(globeRotX, globeRotY, 0, "XYZ"))
-    .invert();
-  p.applyMatrix4(invMatrix);
-  const ph = Math.atan2(p.z, -p.x);
-  let uu = ph / (2 * Math.PI);
-  if (uu < 0) uu += 1;
-  return {
-    lon: uu * 360 - 180,
-    lat: Math.asin(Math.max(-1, Math.min(1, p.y))) / DEG,
-  };
-}
-
-function lonLatToRotation(lon, lat) {
-  // Compute globe rotation (as quaternion) that shows (lon, lat) at center
-  // using YXZ decomposition: Y spins to longitude, X tilts to latitude
-  // This guarantees north stays up (no roll)
-  const u = (lon + 180) / 360;
-  const v = (90 - lat) / 180;
-  const theta = v * Math.PI;
-  const phi = u * 2 * Math.PI;
-  const px = -Math.cos(phi) * Math.sin(theta);
-  const py = Math.cos(theta);
-  const pz = Math.sin(phi) * Math.sin(theta);
-
-  const ry = Math.atan2(-px, pz);
-  const qz = Math.sqrt(px * px + pz * pz); // always positive
-  const rx = Math.atan2(py, qz);
-
-  return new THREE.Quaternion().setFromEuler(
-    new THREE.Euler(rx, ry, 0, "YXZ"),
-  );
-}
-
 function startRecenterAnimation(cf) {
   const centroid = getCountryCentroid(cf);
   if (!centroid) return;
 
-  // Current center
-  const from = getCenterLonLat();
+  // Target globe rotations to center this lon/lat
+  // Center lon at globeRotY: centerLon = -90 - globeRotY / DEG
+  // So: globeRotY = -(targetLon + 90) * DEG
+  const targetRotY_raw = -(centroid.lon + 90) * DEG;
 
-  // Shortest longitude path (wrap around ±180)
-  let deltaLon = centroid.lon - from.lon;
-  if (deltaLon > 180) deltaLon -= 360;
-  if (deltaLon < -180) deltaLon += 360;
+  // Shortest path (wrap around)
+  let deltaRotY = targetRotY_raw - globeRotY;
+  while (deltaRotY > Math.PI) deltaRotY -= 2 * Math.PI;
+  while (deltaRotY < -Math.PI) deltaRotY += 2 * Math.PI;
+
+  const targetRotY = globeRotY + deltaRotY;
+
+  // Latitude: globeRotX = targetLat * DEG
+  const targetRotX = centroid.lat * DEG;
 
   recenterAnim = {
     startTime: performance.now(),
     duration: 2000,
-    fromLon: from.lon,
-    fromLat: from.lat,
-    deltaLon: deltaLon,
-    deltaLat: 0, // No vertical rotation — north stays up, no tilt change
+    fromRotY: globeRotY,
+    toRotY: targetRotY,
+    fromRotX: globeRotX,
+    toRotX: targetRotX,
     fromCamZ: camera.position.z,
     toCamZ: 2.2,
   };
@@ -478,13 +413,90 @@ function buildChicken() {
       depthWrite: false,
     });
     chickenGroup = new THREE.Sprite(mat);
-    // Aspect ratio of the image (~1.4:1 landscape)
     chickenGroup.scale.set(0.7, 0.55, 1);
     scene.add(chickenGroup);
   });
 }
 
-// Speed lines are now drawn on 2D overlay canvas (see drawSpeedLines)
+// ── 3D Speed Particles ──────────────────────────────────────
+function initSpeedParticles() {
+  const positions = new Float32Array(SPEED_PARTICLE_COUNT * 3);
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+
+  const mat = new THREE.PointsMaterial({
+    color: 0xcceeFF,
+    size: 0.04,
+    transparent: true,
+    opacity: 0.6,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+
+  speedPoints = new THREE.Points(geo, mat);
+  scene.add(speedPoints);
+  speedPosAttr = geo.attributes.position;
+
+  for (let i = 0; i < SPEED_PARTICLE_COUNT; i++) {
+    speedParticleData.push({
+      life: 0,
+      vy: 0,
+      vz: 0,
+      vx: 0,
+    });
+    // Position offscreen
+    positions[i * 3] = 0;
+    positions[i * 3 + 1] = -100;
+    positions[i * 3 + 2] = 0;
+  }
+}
+
+function updateSpeedParticles() {
+  if (!chickenGroup || !roundActive) {
+    if (speedPoints) speedPoints.visible = false;
+    return;
+  }
+  speedPoints.visible = true;
+
+  const intensity = chickenY * chickenY;
+  const spawnChance = intensity * 0.4; // per particle per frame
+  const cPos = chickenGroup.position;
+  const arr = speedPosAttr.array;
+
+  for (let i = 0; i < SPEED_PARTICLE_COUNT; i++) {
+    const d = speedParticleData[i];
+
+    if (d.life <= 0) {
+      // Maybe respawn
+      if (Math.random() < spawnChance) {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = 0.08 + Math.random() * 0.2;
+        arr[i * 3] = cPos.x + Math.cos(angle) * radius;
+        arr[i * 3 + 1] = cPos.y + (Math.random() - 0.3) * 0.15;
+        arr[i * 3 + 2] = cPos.z + Math.sin(angle) * radius * 0.4;
+
+        d.vx = (Math.random() - 0.5) * 0.003;
+        d.vy = 0.025 + Math.random() * 0.04; // upward (opposite to dive)
+        d.vz = 0.008 + Math.random() * 0.015; // toward camera
+        d.life = 0.4 + Math.random() * 0.6;
+      }
+    } else {
+      arr[i * 3] += d.vx;
+      arr[i * 3 + 1] += d.vy;
+      arr[i * 3 + 2] += d.vz;
+      d.life -= 0.025;
+
+      // Fade out: move offscreen when dead
+      if (d.life <= 0) {
+        arr[i * 3 + 1] = -100;
+      }
+    }
+  }
+
+  speedPosAttr.needsUpdate = true;
+  // Adjust opacity based on intensity
+  speedPoints.material.opacity = Math.min(0.7, intensity * 1.2);
+}
 
 // ── Screens ─────────────────────────────────────────────────
 function showScreen(id) {
@@ -526,7 +538,11 @@ function nextRound() {
   bar.style.width = "100%";
   bar.classList.remove("warning");
 
+  // Reset highlight
   lastHighlightId = null;
+
+  // Reset globe texture (no highlight)
+  buildGlobeTexture();
 }
 
 let lastHighlightId = null;
@@ -624,8 +640,6 @@ function updateTimer() {
   // Ease-in cubic: t³ — earth starts far and accelerates toward camera
   const t = 1 - frac;
   chickenY = t * t * t;
-  // Remap to 0-1 for the full range since t³ at t=1 is 1
-  // chickenY is already 0→1
 
   const bar = document.getElementById("timer-bar");
   bar.style.width = frac * 100 + "%";
@@ -672,7 +686,7 @@ function resolveRound() {
     // Recenter globe on correct country + zoom in
     startRecenterAnimation(currentTarget);
 
-    // Position chicken-point just to the right of the country (which will be centered)
+    // Position chicken-point just to the right of the country
     const imgH = Math.min(window.innerWidth * 0.4, 220) * 0.8;
     fbChicken.src = "chicken-point.png";
     fbChicken.style.left = (window.innerWidth / 2 + 60) + "px";
@@ -723,7 +737,7 @@ function updateAndDrawParticles() {
   // Draw crosshair on 2D overlay when round is active
   if (roundActive) {
     drawCrosshair(ctx, w / 2, h / 2);
-    // Speed lines around chicken
+    // 2D speed lines around chicken
     if (chickenY > 0.03) {
       drawSpeedLines(ctx, w / 2, h / 2);
     }
@@ -756,7 +770,6 @@ function drawSpeedLines(ctx, cx, cy) {
   const numLines = Math.floor(intensity * maxLines);
 
   ctx.save();
-  // Lines radiate outward from chicken position (slightly below center)
   const chickenScreenY = cy + 30;
 
   for (let i = 0; i < numLines; i++) {
@@ -809,35 +822,24 @@ function renderLoop() {
   applyInertia();
   updateTimer();
 
-  // Recenter animation (on wrong answer: interpolate lon/lat, north stays up)
+  // Recenter animation (on wrong answer: interpolate Euler angles)
   if (recenterAnim) {
     const elapsed = performance.now() - recenterAnim.startTime;
     const t = Math.min(1, elapsed / recenterAnim.duration);
     // Ease-in-out cubic
     const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
-    const lon = recenterAnim.fromLon + recenterAnim.deltaLon * e;
-    const lat = recenterAnim.fromLat + recenterAnim.deltaLat * e;
-
-    // Compute rotation that shows (lon, lat) at center with north up
-    const q = lonLatToRotation(lon, lat);
-    globeMesh.quaternion.copy(q);
-
+    globeRotY = recenterAnim.fromRotY + (recenterAnim.toRotY - recenterAnim.fromRotY) * e;
+    globeRotX = recenterAnim.fromRotX + (recenterAnim.toRotX - recenterAnim.fromRotX) * e;
     camera.position.z = recenterAnim.fromCamZ + (recenterAnim.toCamZ - recenterAnim.fromCamZ) * e;
 
     if (t >= 1) {
-      // Convert final quaternion back to XYZ Euler for drag interactions
-      const finalEuler = new THREE.Euler().setFromQuaternion(q, "XYZ");
-      globeRotX = finalEuler.x;
-      globeRotY = finalEuler.y;
       recenterAnim = null;
     }
   }
 
-  // Update globe rotation (skip during recenter which sets quaternion directly)
-  if (!recenterAnim) {
-    globeMesh.rotation.set(globeRotX, globeRotY, 0);
-  }
+  // Always set globe rotation from Euler angles
+  globeMesh.rotation.set(globeRotX, globeRotY, 0);
 
   // Camera dive animation
   if (roundActive) {
@@ -845,9 +847,8 @@ function renderLoop() {
     camera.position.z = z;
   }
 
-  // Position chicken between camera and globe, just below crosshair
+  // Position chicken sprite between camera and globe
   if (chickenGroup) {
-    // Hide 3D chicken sprite when round is not active (e.g. during recenter feedback)
     chickenGroup.visible = roundActive;
 
     if (roundActive) {
@@ -859,13 +860,23 @@ function renderLoop() {
       const bob = Math.sin(performance.now() * 0.005) * 0.02 * (1 - chickenY);
       chickenGroup.position.y += bob;
 
-      // Scale: small sprite, shrinks slightly during dive
+      // Scale: shrinks slightly during dive
       const baseW = 0.32;
       const baseH = 0.25;
       const s = 1.0 - chickenY * 0.15;
       chickenGroup.scale.set(baseW * s, baseH * s, 1);
+
+      // Slight vibration at high speed
+      if (chickenY > 0.5) {
+        const shake = (chickenY - 0.5) * 0.01;
+        chickenGroup.position.x += (Math.random() - 0.5) * shake;
+        chickenGroup.position.y += (Math.random() - 0.5) * shake;
+      }
     }
   }
+
+  // Update 3D speed particles
+  updateSpeedParticles();
 
   // Highlight country at center
   if (roundActive && geoData) {
