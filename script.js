@@ -196,9 +196,15 @@ let chickenY = 0; // 0 = far, 1 = landed
 // Drag / rotation state
 let dragging = false;
 let dragPrev = { x: 0, y: 0 };
-let velocity = { lon: 0, lat: 0 };
-let globeRotY = 0; // longitude rotation (radians)
-let globeRotX = 0.35; // latitude rotation (radians) — slight tilt
+
+// Quaternion-based globe orientation
+let globeQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.35, 0, 0));
+let velocityLon = 0, velocityLat = 0; // inertia (rad/frame)
+const _qLon = new THREE.Quaternion();
+const _qLat = new THREE.Quaternion();
+const AXIS_X = new THREE.Vector3(1, 0, 0);
+const AXIS_Y = new THREE.Vector3(0, 1, 0);
+const INITIAL_EULER = new THREE.Euler(0.35, 0, 0);
 
 // Recenter animation state (used on wrong answer)
 let recenterAnim = null;
@@ -206,6 +212,7 @@ let recenterAnim = null;
 // Three.js objects
 let scene, camera, renderer;
 let globeMesh, globeTexCanvas, globeTexCtx, globeTexture;
+let baseTexCanvas, baseTexCtx;
 let chickenGroup;
 
 // 3D speed particles
@@ -223,6 +230,10 @@ const PASTEL_COLORS = [
   "#fbe29a", "#a0e7e5", "#f9c2d0", "#c5e1a5", "#ffe0b2",
   "#b3c7e6", "#f8bbd0", "#c8e6c9", "#ffe082", "#b2dfdb", "#d1c4e9",
 ];
+
+// Reusable raycaster & screen-center vector
+const _raycaster = new THREE.Raycaster();
+const _screenCenter = new THREE.Vector2(0, 0);
 
 // ── Boot ────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", boot);
@@ -248,9 +259,19 @@ async function boot() {
     );
     geoData = await res.json();
     indexCountries();
+    buildBaseTexture();
     buildGlobeTexture();
   } catch (e) {
     console.error("Failed to load GeoJSON:", e);
+    const btn = document.getElementById("btn-play");
+    btn.disabled = true;
+    btn.textContent = "Erreur de chargement";
+    const err = document.createElement("p");
+    err.textContent =
+      "Impossible de charger la carte. Vérifie ta connexion et recharge la page.";
+    err.style.color = "#ff6b6b";
+    err.style.marginTop = "1rem";
+    btn.parentElement.appendChild(err);
   }
 
   requestAnimationFrame(renderLoop);
@@ -293,6 +314,12 @@ function initThree() {
   globeTexCanvas.height = 2048;
   globeTexCtx = globeTexCanvas.getContext("2d");
 
+  // Offscreen canvas for cached base layer (ocean + grid + all countries)
+  baseTexCanvas = document.createElement("canvas");
+  baseTexCanvas.width = 4096;
+  baseTexCanvas.height = 2048;
+  baseTexCtx = baseTexCanvas.getContext("2d");
+
   globeTexture = new THREE.CanvasTexture(globeTexCanvas);
   globeTexture.minFilter = THREE.LinearFilter;
   globeTexture.magFilter = THREE.LinearFilter;
@@ -328,11 +355,54 @@ function sizeParticlesCanvas() {
 }
 
 // ── Globe Texture (equirectangular) ─────────────────────────
-function buildGlobeTexture(highlightId, correctAnswerId) {
+
+// Render a single feature's polygons onto a context
+function drawFeature(ctx, feature, w, h, color, glow) {
+  const geom = feature.geometry;
+  const polys =
+    geom.type === "Polygon"
+      ? [geom.coordinates]
+      : geom.type === "MultiPolygon"
+        ? geom.coordinates
+        : [];
+
+  for (const polygon of polys) {
+    const ring = polygon[0];
+    ctx.beginPath();
+    for (let i = 0; i < ring.length; i++) {
+      const lon = ring[i][0];
+      const lat = ring[i][1];
+      const x = ((lon + 180) / 360) * w;
+      const y = ((90 - lat) / 180) * h;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    if (glow) {
+      ctx.save();
+      ctx.shadowColor = "rgba(255,60,60,0.8)";
+      ctx.shadowBlur = 30;
+      ctx.strokeStyle = "rgba(255,60,60,0.9)";
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      ctx.restore();
+    } else {
+      ctx.strokeStyle = "rgba(0,0,0,0.6)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+  }
+}
+
+// Build the cached base texture (ocean + grid + all countries in default colors).
+// Called once after GeoJSON loads.
+function buildBaseTexture() {
   if (!geoData) return;
-  const ctx = globeTexCtx;
-  const w = globeTexCanvas.width;
-  const h = globeTexCanvas.height;
+  const ctx = baseTexCtx;
+  const w = baseTexCanvas.width;
+  const h = baseTexCanvas.height;
 
   // Ocean
   const oceanGrad = ctx.createLinearGradient(0, 0, 0, h);
@@ -360,55 +430,35 @@ function buildGlobeTexture(highlightId, correctAnswerId) {
     ctx.stroke();
   }
 
-  // Draw countries
+  // Draw all countries in default pastel colors
   let featureIdx = 0;
   for (const feature of geoData.features) {
-    const geom = feature.geometry;
-    const polys =
-      geom.type === "Polygon"
-        ? [geom.coordinates]
-        : geom.type === "MultiPolygon"
-          ? geom.coordinates
-          : [];
+    drawFeature(ctx, feature, w, h, PASTEL_COLORS[featureIdx % PASTEL_COLORS.length], false);
+    featureIdx++;
+  }
+}
 
-    const isHighlight = highlightId && feature.properties.name === highlightId;
-    const isCorrectAnswer = correctAnswerId && feature.properties.name === correctAnswerId;
-    const color = isCorrectAnswer
-      ? "rgba(220,40,40,0.9)"
-      : isHighlight
-        ? "rgba(93,211,158,0.9)"
-        : PASTEL_COLORS[featureIdx % PASTEL_COLORS.length];
+// Build the visible globe texture. Blits the cached base then overdraws
+// only the 1-2 highlighted / correct-answer features.
+function buildGlobeTexture(highlightId, correctAnswerId) {
+  if (!geoData) return;
+  const ctx = globeTexCtx;
+  const w = globeTexCanvas.width;
+  const h = globeTexCanvas.height;
 
-    for (const polygon of polys) {
-      const ring = polygon[0];
-      ctx.beginPath();
-      for (let i = 0; i < ring.length; i++) {
-        const lon = ring[i][0];
-        const lat = ring[i][1];
-        const x = ((lon + 180) / 360) * w;
-        const y = ((90 - lat) / 180) * h;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.closePath();
-      ctx.fillStyle = color;
-      ctx.fill();
-      // Red glow around correct answer
-      if (isCorrectAnswer) {
-        ctx.save();
-        ctx.shadowColor = "rgba(255,60,60,0.8)";
-        ctx.shadowBlur = 30;
-        ctx.strokeStyle = "rgba(255,60,60,0.9)";
-        ctx.lineWidth = 4;
-        ctx.stroke();
-        ctx.restore();
-      } else {
-        ctx.strokeStyle = "rgba(0,0,0,0.6)";
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
+  // Blit cached base
+  ctx.drawImage(baseTexCanvas, 0, 0);
+
+  // Overdraw highlighted / correct features only
+  if (highlightId || correctAnswerId) {
+    for (const feature of geoData.features) {
+      const name = feature.properties.name;
+      if (name === correctAnswerId) {
+        drawFeature(ctx, feature, w, h, "rgba(220,40,40,0.9)", true);
+      } else if (name === highlightId) {
+        drawFeature(ctx, feature, w, h, "rgba(93,211,158,0.9)", false);
       }
     }
-    featureIdx++;
   }
 
   globeTexture.needsUpdate = true;
@@ -446,9 +496,8 @@ function pointInPoly(poly, lon, lat) {
 function getCountryAtCenter() {
   if (!geoData) return null;
   // Raycast from camera center to globe
-  const raycaster = new THREE.Raycaster();
-  raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-  const hits = raycaster.intersectObject(globeMesh);
+  _raycaster.setFromCamera(_screenCenter, camera);
+  const hits = _raycaster.intersectObject(globeMesh);
   if (hits.length === 0) return null;
 
   // Use 3D intersection point for precision
@@ -476,55 +525,85 @@ function getCountryAtCenter() {
 }
 
 // ── Country centroid + recenter animation ────────────────────
+
+// Signed area of a polygon ring (shoelace formula)
+function ringSignedArea(ring) {
+  let area = 0;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    area += (ring[j][0] - ring[i][0]) * (ring[j][1] + ring[i][1]);
+  }
+  return area / 2;
+}
+
+// Centroid of a polygon ring using signed-area-weighted formula
+function ringCentroid(ring) {
+  let area = 0, cx = 0, cy = 0;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const x0 = ring[j][0], y0 = ring[j][1];
+    const x1 = ring[i][0], y1 = ring[i][1];
+    const cross = x0 * y1 - x1 * y0;
+    area += cross;
+    cx += (x0 + x1) * cross;
+    cy += (y0 + y1) * cross;
+  }
+  area /= 2;
+  if (Math.abs(area) < 1e-10) {
+    // Degenerate polygon: fall back to simple average
+    let sx = 0, sy = 0;
+    for (const c of ring) { sx += c[0]; sy += c[1]; }
+    return { lon: sx / ring.length, lat: sy / ring.length };
+  }
+  return { lon: cx / (6 * area), lat: cy / (6 * area) };
+}
+
 function getCountryCentroid(cf) {
   const geom = cf.feature.geometry;
-  const coords =
+  const polys =
     geom.type === "Polygon"
-      ? geom.coordinates[0]
+      ? [geom.coordinates]
       : geom.type === "MultiPolygon"
-        ? geom.coordinates[0][0]
-        : null;
-  if (!coords) return null;
-  let sumLon = 0, sumLat = 0;
-  for (const c of coords) {
-    sumLon += c[0];
-    sumLat += c[1];
+        ? geom.coordinates
+        : [];
+  if (polys.length === 0) return null;
+
+  // Find the polygon with the largest area and use its centroid
+  let bestRing = null;
+  let bestArea = -1;
+  for (const poly of polys) {
+    const ring = poly[0];
+    const a = Math.abs(ringSignedArea(ring));
+    if (a > bestArea) {
+      bestArea = a;
+      bestRing = ring;
+    }
   }
-  return { lon: sumLon / coords.length, lat: sumLat / coords.length };
+  if (!bestRing) return null;
+  return ringCentroid(bestRing);
 }
 
 function startRecenterAnimation(cf) {
   const centroid = getCountryCentroid(cf);
   if (!centroid) return;
 
-  // Target globe rotations to center this lon/lat
-  // Center lon at globeRotY: centerLon = -90 - globeRotY / DEG
-  // So: globeRotY = -(targetLon + 90) * DEG
-  const targetRotY_raw = -(centroid.lon + 90) * DEG;
-
-  // Shortest path (wrap around)
-  let deltaRotY = targetRotY_raw - globeRotY;
-  while (deltaRotY > Math.PI) deltaRotY -= 2 * Math.PI;
-  while (deltaRotY < -Math.PI) deltaRotY += 2 * Math.PI;
-
-  const targetRotY = globeRotY + deltaRotY;
-
-  // Latitude: globeRotX = targetLat * DEG
+  // Target globe orientation to center this lon/lat
+  const targetRotY = -(centroid.lon + 90) * DEG;
   const targetRotX = centroid.lat * DEG;
+  const toQuat = new THREE.Quaternion().setFromEuler(
+    new THREE.Euler(targetRotX, targetRotY, 0),
+  );
 
   recenterAnim = {
     startTime: performance.now(),
     duration: 2000,
-    fromRotY: globeRotY,
-    toRotY: targetRotY,
-    fromRotX: globeRotX,
-    toRotX: targetRotX,
+    fromQuat: globeQuat.clone(),
+    toQuat: toQuat,
     fromCamZ: camera.position.z,
     toCamZ: 2.2,
   };
 
   // Stop any inertia
-  velocity = { lon: 0, lat: 0 };
+  velocityLon = 0;
+  velocityLat = 0;
 }
 
 // ── Chicken Sprite (PNG) ─────────────────────────────────────
@@ -646,7 +725,10 @@ function nextRound() {
   roundActive = true;
   chickenY = 0;
 
-  // Reset camera
+  // Reset globe orientation and camera
+  globeQuat.setFromEuler(INITIAL_EULER);
+  velocityLon = 0;
+  velocityLat = 0;
   camera.position.set(0, 0, CAM_START_Z);
 
   // Pick random country
@@ -689,10 +771,20 @@ function endGame() {
 function setupInput() {
   const container = document.getElementById("scene-container");
 
+  function applyDragDelta(dx, dy) {
+    const sensitivity = 0.005;
+    _qLon.setFromAxisAngle(AXIS_Y, -dx * sensitivity);
+    _qLat.setFromAxisAngle(AXIS_X, -dy * sensitivity);
+    globeQuat.premultiply(_qLon).premultiply(_qLat);
+    velocityLon = -dx * sensitivity;
+    velocityLat = -dy * sensitivity;
+  }
+
   container.addEventListener("mousedown", (e) => {
     dragging = true;
     dragPrev = { x: e.clientX, y: e.clientY };
-    velocity = { lon: 0, lat: 0 };
+    velocityLon = 0;
+    velocityLat = 0;
   });
 
   window.addEventListener("mouseup", () => {
@@ -703,11 +795,7 @@ function setupInput() {
     if (!dragging || recenterAnim) return;
     const dx = e.clientX - dragPrev.x;
     const dy = e.clientY - dragPrev.y;
-    const sensitivity = 0.005;
-    globeRotY -= dx * sensitivity;
-    globeRotX -= dy * sensitivity;
-    globeRotX = Math.max(-1.4, Math.min(1.4, globeRotX));
-    velocity = { lon: -dx * sensitivity, lat: -dy * sensitivity };
+    applyDragDelta(dx, dy);
     dragPrev = { x: e.clientX, y: e.clientY };
   });
 
@@ -717,7 +805,8 @@ function setupInput() {
       if (e.touches.length === 1) {
         dragging = true;
         dragPrev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        velocity = { lon: 0, lat: 0 };
+        velocityLon = 0;
+        velocityLat = 0;
       }
     },
     { passive: true },
@@ -731,11 +820,7 @@ function setupInput() {
       if (!dragging || recenterAnim || e.touches.length !== 1) return;
       const dx = e.touches[0].clientX - dragPrev.x;
       const dy = e.touches[0].clientY - dragPrev.y;
-      const sensitivity = 0.005;
-      globeRotY -= dx * sensitivity;
-      globeRotX -= dy * sensitivity;
-      globeRotX = Math.max(-1.4, Math.min(1.4, globeRotX));
-      velocity = { lon: -dx * sensitivity, lat: -dy * sensitivity };
+      applyDragDelta(dx, dy);
       dragPrev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     },
     { passive: true },
@@ -745,13 +830,15 @@ function setupInput() {
 // ── Inertia ─────────────────────────────────────────────────
 function applyInertia() {
   if (dragging || recenterAnim) return;
-  globeRotY += velocity.lon;
-  globeRotX -= velocity.lat;
-  globeRotX = Math.max(-1.4, Math.min(1.4, globeRotX));
-  velocity.lon *= 0.92;
-  velocity.lat *= 0.92;
-  if (Math.abs(velocity.lon) < 0.0001) velocity.lon = 0;
-  if (Math.abs(velocity.lat) < 0.0001) velocity.lat = 0;
+  if (velocityLon !== 0 || velocityLat !== 0) {
+    _qLon.setFromAxisAngle(AXIS_Y, velocityLon);
+    _qLat.setFromAxisAngle(AXIS_X, velocityLat);
+    globeQuat.premultiply(_qLon).premultiply(_qLat);
+    velocityLon *= 0.92;
+    velocityLat *= 0.92;
+    if (Math.abs(velocityLon) < 0.0001) velocityLon = 0;
+    if (Math.abs(velocityLat) < 0.0001) velocityLat = 0;
+  }
 }
 
 // ── Timer & Round ───────────────────────────────────────────
@@ -947,15 +1034,14 @@ function renderLoop() {
   applyInertia();
   updateTimer();
 
-  // Recenter animation (on wrong answer: interpolate Euler angles)
+  // Recenter animation (on wrong answer: slerp quaternion, shortest path)
   if (recenterAnim) {
     const elapsed = performance.now() - recenterAnim.startTime;
     const t = Math.min(1, elapsed / recenterAnim.duration);
     // Ease-in-out cubic
     const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
-    globeRotY = recenterAnim.fromRotY + (recenterAnim.toRotY - recenterAnim.fromRotY) * e;
-    globeRotX = recenterAnim.fromRotX + (recenterAnim.toRotX - recenterAnim.fromRotX) * e;
+    globeQuat.copy(recenterAnim.fromQuat).slerp(recenterAnim.toQuat, e);
     camera.position.z = recenterAnim.fromCamZ + (recenterAnim.toCamZ - recenterAnim.fromCamZ) * e;
 
     if (t >= 1) {
@@ -963,8 +1049,8 @@ function renderLoop() {
     }
   }
 
-  // Always set globe rotation from Euler angles
-  globeMesh.rotation.set(globeRotX, globeRotY, 0);
+  // Apply quaternion orientation to globe mesh
+  globeMesh.quaternion.copy(globeQuat);
 
   // Camera dive animation
   if (roundActive) {
