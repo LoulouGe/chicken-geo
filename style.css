@@ -181,8 +181,7 @@ body {
   position: absolute;
   bottom: 5%;
   left: 50%;
-  transform: translateX(-50%) scale(0);
-  width: min(50vw, 280px);
+  width: min(40vw, 220px);
   z-index: 15;
   pointer-events: none;
   opacity: 0;
@@ -191,7 +190,7 @@ body {
 
 #feedback-chicken.show {
   opacity: 1;
-  transform: translateX(-50%) scale(1);
+  transform: scale(1) !important;
 }
 
 /* ── Feedback Overlay ───────────────────────────────── */

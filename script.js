@@ -77,6 +77,9 @@ let velocity = { lon: 0, lat: 0 };
 let globeRotY = 0; // longitude rotation (radians)
 let globeRotX = 0.35; // latitude rotation (radians) — slight tilt
 
+// Recenter animation state (used on wrong answer)
+let recenterAnim = null;
+
 // Three.js objects
 let scene, camera, renderer;
 let globeMesh, globeTexCanvas, globeTexCtx, globeTexture;
@@ -238,7 +241,7 @@ function buildGlobeTexture(highlightId, correctAnswerId) {
     const isHighlight = highlightId && feature.properties.name === highlightId;
     const isCorrectAnswer = correctAnswerId && feature.properties.name === correctAnswerId;
     const color = isCorrectAnswer
-      ? "rgba(255,160,40,0.9)"
+      ? "rgba(220,40,40,0.9)"
       : isHighlight
         ? "rgba(93,211,158,0.9)"
         : PASTEL_COLORS[featureIdx % PASTEL_COLORS.length];
@@ -257,9 +260,20 @@ function buildGlobeTexture(highlightId, correctAnswerId) {
       ctx.closePath();
       ctx.fillStyle = color;
       ctx.fill();
-      ctx.strokeStyle = "rgba(0,0,0,0.6)";
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
+      // Red glow around correct answer
+      if (isCorrectAnswer) {
+        ctx.save();
+        ctx.shadowColor = "rgba(255,60,60,0.8)";
+        ctx.shadowBlur = 30;
+        ctx.strokeStyle = "rgba(255,60,60,0.9)";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        ctx.strokeStyle = "rgba(0,0,0,0.6)";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
     }
     featureIdx++;
   }
@@ -326,6 +340,131 @@ function getCountryAtCenter() {
     }
   }
   return null;
+}
+
+// ── Project country centroid to screen position ─────────────
+function getCountryScreenPos(cf) {
+  if (!cf || !cf.feature) return null;
+  const geom = cf.feature.geometry;
+  const coords =
+    geom.type === "Polygon"
+      ? geom.coordinates[0]
+      : geom.type === "MultiPolygon"
+        ? geom.coordinates[0][0]
+        : null;
+  if (!coords) return null;
+
+  // Compute centroid
+  let sumLon = 0, sumLat = 0;
+  for (const c of coords) {
+    sumLon += c[0];
+    sumLat += c[1];
+  }
+  const cLon = sumLon / coords.length;
+  const cLat = sumLat / coords.length;
+
+  // Convert lon/lat to 3D point on sphere (matching SphereGeometry mapping)
+  const u = (cLon + 180) / 360;
+  const v = (90 - cLat) / 180;
+  const theta = v * Math.PI;
+  const phi2 = u * 2 * Math.PI;
+  const point3d = new THREE.Vector3(
+    -Math.cos(phi2) * Math.sin(theta),
+    Math.cos(theta),
+    Math.sin(phi2) * Math.sin(theta),
+  );
+
+  // Transform to world space
+  point3d.applyMatrix4(globeMesh.matrixWorld);
+
+  // Project to screen
+  point3d.project(camera);
+  const sx = (point3d.x * 0.5 + 0.5) * window.innerWidth;
+  const sy = (-point3d.y * 0.5 + 0.5) * window.innerHeight;
+
+  return { x: sx, y: sy };
+}
+
+// ── Country centroid + recenter animation ────────────────────
+function getCountryCentroid(cf) {
+  const geom = cf.feature.geometry;
+  const coords =
+    geom.type === "Polygon"
+      ? geom.coordinates[0]
+      : geom.type === "MultiPolygon"
+        ? geom.coordinates[0][0]
+        : null;
+  if (!coords) return null;
+  let sumLon = 0, sumLat = 0;
+  for (const c of coords) {
+    sumLon += c[0];
+    sumLat += c[1];
+  }
+  return { lon: sumLon / coords.length, lat: sumLat / coords.length };
+}
+
+function getCenterLonLat() {
+  // Compute what lon/lat the camera currently sees at center
+  const p = new THREE.Vector3(0, 0, 1);
+  const invMatrix = new THREE.Matrix4()
+    .makeRotationFromEuler(new THREE.Euler(globeRotX, globeRotY, 0, "XYZ"))
+    .invert();
+  p.applyMatrix4(invMatrix);
+  const ph = Math.atan2(p.z, -p.x);
+  let uu = ph / (2 * Math.PI);
+  if (uu < 0) uu += 1;
+  return {
+    lon: uu * 360 - 180,
+    lat: Math.asin(Math.max(-1, Math.min(1, p.y))) / DEG,
+  };
+}
+
+function lonLatToRotation(lon, lat) {
+  // Compute globe rotation (as quaternion) that shows (lon, lat) at center
+  // using YXZ decomposition: Y spins to longitude, X tilts to latitude
+  // This guarantees north stays up (no roll)
+  const u = (lon + 180) / 360;
+  const v = (90 - lat) / 180;
+  const theta = v * Math.PI;
+  const phi = u * 2 * Math.PI;
+  const px = -Math.cos(phi) * Math.sin(theta);
+  const py = Math.cos(theta);
+  const pz = Math.sin(phi) * Math.sin(theta);
+
+  const ry = Math.atan2(-px, pz);
+  const qz = Math.sqrt(px * px + pz * pz); // always positive
+  const rx = Math.atan2(py, qz);
+
+  return new THREE.Quaternion().setFromEuler(
+    new THREE.Euler(rx, ry, 0, "YXZ"),
+  );
+}
+
+function startRecenterAnimation(cf) {
+  const centroid = getCountryCentroid(cf);
+  if (!centroid) return;
+
+  // Current center
+  const from = getCenterLonLat();
+
+  // Shortest longitude path (wrap around ±180)
+  let deltaLon = centroid.lon - from.lon;
+  if (deltaLon > 180) deltaLon -= 360;
+  if (deltaLon < -180) deltaLon += 360;
+
+  recenterAnim = {
+    startTime: performance.now(),
+    duration: 2000,
+    fromLon: from.lon,
+    fromLat: from.lat,
+    deltaLon: deltaLon,
+    deltaLat: 0, // No vertical rotation — north stays up, no tilt change
+    fromCamZ: camera.position.z,
+    toCamZ: 2.2,
+  };
+
+  // Stop any inertia
+  velocity = { lon: 0, lat: 0 };
 }
 
 // ── Chicken Sprite (PNG) ─────────────────────────────────────
@@ -420,7 +559,7 @@ function setupInput() {
   });
 
   window.addEventListener("mousemove", (e) => {
-    if (!dragging) return;
+    if (!dragging || recenterAnim) return;
     const dx = e.clientX - dragPrev.x;
     const dy = e.clientY - dragPrev.y;
     const sensitivity = 0.005;
@@ -448,7 +587,7 @@ function setupInput() {
   window.addEventListener(
     "touchmove",
     (e) => {
-      if (!dragging || e.touches.length !== 1) return;
+      if (!dragging || recenterAnim || e.touches.length !== 1) return;
       const dx = e.touches[0].clientX - dragPrev.x;
       const dy = e.touches[0].clientY - dragPrev.y;
       const sensitivity = 0.005;
@@ -464,7 +603,7 @@ function setupInput() {
 
 // ── Inertia ─────────────────────────────────────────────────
 function applyInertia() {
-  if (dragging) return;
+  if (dragging || recenterAnim) return;
   globeRotY += velocity.lon;
   globeRotX -= velocity.lat;
   globeRotX = Math.max(-1.4, Math.min(1.4, globeRotX));
@@ -518,23 +657,40 @@ function resolveRound() {
     const cy = window.innerHeight / 2;
     spawnConfetti(cx, cy);
     fbChicken.src = "chicken-happy.png";
+    // Center bottom
+    fbChicken.style.left = "50%";
+    fbChicken.style.top = "auto";
+    fbChicken.style.bottom = "5%";
+    fbChicken.style.transform = "translateX(-50%) scale(0)";
   } else {
     overlay.className = "incorrect";
     const container = document.getElementById("scene-container");
     container.classList.add("shake");
     setTimeout(() => container.classList.remove("shake"), 400);
     buildGlobeTexture(null, currentTarget.id);
-    fbChicken.src = "chicken-sad.png";
+
+    // Recenter globe on correct country + zoom in
+    startRecenterAnimation(currentTarget);
+
+    // Position chicken-point just to the right of the country (which will be centered)
+    const imgH = Math.min(window.innerWidth * 0.4, 220) * 0.8;
+    fbChicken.src = "chicken-point.png";
+    fbChicken.style.left = (window.innerWidth / 2 + 60) + "px";
+    fbChicken.style.top = (window.innerHeight / 2 - imgH / 2) + "px";
+    fbChicken.style.bottom = "auto";
+    fbChicken.style.transform = "scale(0)";
   }
 
   // Show feedback chicken with bounce-in
   fbChicken.classList.add("show");
 
+  const feedbackDuration = correct ? 2000 : 4000;
   setTimeout(() => {
     overlay.className = "";
     fbChicken.classList.remove("show");
+    recenterAnim = null;
     nextRound();
-  }, 2000);
+  }, feedbackDuration);
 }
 
 // ── Confetti (2D overlay) ───────────────────────────────────
@@ -653,8 +809,35 @@ function renderLoop() {
   applyInertia();
   updateTimer();
 
-  // Update globe rotation
-  globeMesh.rotation.set(globeRotX, globeRotY, 0);
+  // Recenter animation (on wrong answer: interpolate lon/lat, north stays up)
+  if (recenterAnim) {
+    const elapsed = performance.now() - recenterAnim.startTime;
+    const t = Math.min(1, elapsed / recenterAnim.duration);
+    // Ease-in-out cubic
+    const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    const lon = recenterAnim.fromLon + recenterAnim.deltaLon * e;
+    const lat = recenterAnim.fromLat + recenterAnim.deltaLat * e;
+
+    // Compute rotation that shows (lon, lat) at center with north up
+    const q = lonLatToRotation(lon, lat);
+    globeMesh.quaternion.copy(q);
+
+    camera.position.z = recenterAnim.fromCamZ + (recenterAnim.toCamZ - recenterAnim.fromCamZ) * e;
+
+    if (t >= 1) {
+      // Convert final quaternion back to XYZ Euler for drag interactions
+      const finalEuler = new THREE.Euler().setFromQuaternion(q, "XYZ");
+      globeRotX = finalEuler.x;
+      globeRotY = finalEuler.y;
+      recenterAnim = null;
+    }
+  }
+
+  // Update globe rotation (skip during recenter which sets quaternion directly)
+  if (!recenterAnim) {
+    globeMesh.rotation.set(globeRotX, globeRotY, 0);
+  }
 
   // Camera dive animation
   if (roundActive) {
@@ -664,20 +847,24 @@ function renderLoop() {
 
   // Position chicken between camera and globe, just below crosshair
   if (chickenGroup) {
-    // Always keep chicken in front of globe (renderOrder ensures visibility)
-    const chickenZ = camera.position.z - 1.2;
-    chickenGroup.position.set(0, -0.1, chickenZ);
-    chickenGroup.renderOrder = 999;
+    // Hide 3D chicken sprite when round is not active (e.g. during recenter feedback)
+    chickenGroup.visible = roundActive;
 
-    // Slight bobbing
-    const bob = Math.sin(performance.now() * 0.005) * 0.02 * (1 - chickenY);
-    chickenGroup.position.y += bob;
+    if (roundActive) {
+      const chickenZ = camera.position.z - 1.2;
+      chickenGroup.position.set(0, -0.1, chickenZ);
+      chickenGroup.renderOrder = 999;
 
-    // Scale: small sprite, shrinks slightly during dive
-    const baseW = 0.32;
-    const baseH = 0.25;
-    const s = 1.0 - chickenY * 0.15;
-    chickenGroup.scale.set(baseW * s, baseH * s, 1);
+      // Slight bobbing
+      const bob = Math.sin(performance.now() * 0.005) * 0.02 * (1 - chickenY);
+      chickenGroup.position.y += bob;
+
+      // Scale: small sprite, shrinks slightly during dive
+      const baseW = 0.32;
+      const baseH = 0.25;
+      const s = 1.0 - chickenY * 0.15;
+      chickenGroup.scale.set(baseW * s, baseH * s, 1);
+    }
   }
 
   // Highlight country at center
