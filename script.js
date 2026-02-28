@@ -1227,8 +1227,8 @@ function renderLoop() {
       const t = Math.min(1, elapsed / diveAnim.duration);
       const e = t * t; // ease-in (accelerating)
 
-      // Keep in front of globe, move upward to just below crosshair
-      chickenGroup.position.z = camera.position.z - 0.5;
+      // Stay at same z (depthTest off ensures visibility), move toward crosshair
+      chickenGroup.position.z = diveAnim.startZ;
       chickenGroup.position.x = 0;
       const targetY = -0.02;
       chickenGroup.position.y = diveAnim.startY + (targetY - diveAnim.startY) * e;
