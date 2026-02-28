@@ -200,16 +200,19 @@ let lastTimerTick = 0; // real timestamp of last timer update
 let dragging = false;
 let dragPrev = { x: 0, y: 0 };
 
-// Quaternion-based globe orientation
-let globeQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.35, 0, 0));
+// Globe orientation as lon/lat/roll (keeps north up naturally)
+let globeLon = 0;       // Y-axis rotation (longitude)
+let globeLat = 0.35;    // X-axis rotation (latitude, initial tilt)
+let globeRoll = 0;      // Z-axis rotation (two-finger only)
+let globeQuat = new THREE.Quaternion();
 let velocityLon = 0, velocityLat = 0; // inertia (rad/frame)
-const _qLon = new THREE.Quaternion();
-const _qLat = new THREE.Quaternion();
-const _qRoll = new THREE.Quaternion();
-const AXIS_X = new THREE.Vector3(1, 0, 0);
-const AXIS_Y = new THREE.Vector3(0, 1, 0);
-const AXIS_Z = new THREE.Vector3(0, 0, 1);
-const INITIAL_EULER = new THREE.Euler(0.35, 0, 0);
+const _globeEuler = new THREE.Euler();
+const LAT_LIMIT = Math.PI / 2 - 0.01;
+
+function updateGlobeQuat() {
+  _globeEuler.set(globeLat, globeLon, globeRoll, "XYZ");
+  globeQuat.setFromEuler(_globeEuler);
+}
 
 // Two-finger rotation state
 let twoFingerAngle = null;
@@ -610,18 +613,22 @@ function startRecenterAnimation(cf) {
   const centroid = getCountryCentroid(cf);
   if (!centroid) return;
 
-  // Target globe orientation to center this lon/lat
-  const targetRotY = -(centroid.lon + 90) * DEG;
-  const targetRotX = centroid.lat * DEG;
-  const toQuat = new THREE.Quaternion().setFromEuler(
-    new THREE.Euler(targetRotX, targetRotY, 0),
-  );
+  const targetLon = -(centroid.lon + 90) * DEG;
+  const targetLat = centroid.lat * DEG;
+
+  // Shortest-path for longitude
+  let dLon = targetLon - globeLon;
+  if (dLon > Math.PI) dLon -= 2 * Math.PI;
+  if (dLon < -Math.PI) dLon += 2 * Math.PI;
 
   recenterAnim = {
     startTime: performance.now(),
     duration: 2000,
-    fromQuat: globeQuat.clone(),
-    toQuat: toQuat,
+    fromLon: globeLon,
+    toLon: globeLon + dLon,
+    fromLat: globeLat,
+    toLat: targetLat,
+    fromRoll: globeRoll,
     fromCamZ: camera.position.z,
     toCamZ: 2.2,
   };
@@ -629,6 +636,7 @@ function startRecenterAnimation(cf) {
   // Stop any inertia
   velocityLon = 0;
   velocityLat = 0;
+  velocityRoll = 0;
 }
 
 // ── Chicken Sprite (PNG) ─────────────────────────────────────
@@ -757,7 +765,9 @@ function nextRound() {
   document.getElementById("btn-accelerate").classList.add("visible");
 
   // Reset globe orientation and camera
-  globeQuat.setFromEuler(INITIAL_EULER);
+  globeLon = 0;
+  globeLat = 0.35;
+  globeRoll = 0;
   velocityLon = 0;
   velocityLat = 0;
   velocityRoll = 0;
@@ -807,9 +817,9 @@ function setupInput() {
 
   function applyDragDelta(dx, dy) {
     const sensitivity = 0.005;
-    _qLon.setFromAxisAngle(AXIS_Y, -dx * sensitivity);
-    _qLat.setFromAxisAngle(AXIS_X, -dy * sensitivity);
-    globeQuat.premultiply(_qLon).premultiply(_qLat);
+    globeLon -= dx * sensitivity;
+    globeLat -= dy * sensitivity;
+    globeLat = Math.max(-LAT_LIMIT, Math.min(LAT_LIMIT, globeLat));
     velocityLon = -dx * sensitivity;
     velocityLat = -dy * sensitivity;
   }
@@ -872,8 +882,7 @@ function setupInput() {
         const newAngle = getTwoFingerAngle(e.touches[0], e.touches[1]);
         const deltaAngle = newAngle - twoFingerAngle;
         twoFingerAngle = newAngle;
-        _qRoll.setFromAxisAngle(AXIS_Z, deltaAngle);
-        globeQuat.premultiply(_qRoll);
+        globeRoll += deltaAngle;
         velocityRoll = deltaAngle;
       } else if (dragging && e.touches.length === 1) {
         const dx = e.touches[0].clientX - dragPrev.x;
@@ -890,20 +899,43 @@ function setupInput() {
 function applyInertia() {
   if (dragging || recenterAnim) return;
   if (velocityLon !== 0 || velocityLat !== 0) {
-    _qLon.setFromAxisAngle(AXIS_Y, velocityLon);
-    _qLat.setFromAxisAngle(AXIS_X, velocityLat);
-    globeQuat.premultiply(_qLon).premultiply(_qLat);
+    globeLon += velocityLon;
+    globeLat += velocityLat;
+    globeLat = Math.max(-LAT_LIMIT, Math.min(LAT_LIMIT, globeLat));
     velocityLon *= 0.92;
     velocityLat *= 0.92;
     if (Math.abs(velocityLon) < 0.0001) velocityLon = 0;
     if (Math.abs(velocityLat) < 0.0001) velocityLat = 0;
   }
   if (twoFingerAngle === null && velocityRoll !== 0) {
-    _qRoll.setFromAxisAngle(AXIS_Z, velocityRoll);
-    globeQuat.premultiply(_qRoll);
+    globeRoll += velocityRoll;
     velocityRoll *= 0.92;
     if (Math.abs(velocityRoll) < 0.0001) velocityRoll = 0;
   }
+}
+
+// ── North-up correction ─────────────────────────────────────
+// Smoothly drives globeRoll toward zero.  Near the poles the
+// constraint relaxes to allow free rotation.
+function correctNorthUp() {
+  if (recenterAnim) return;
+  if (Math.abs(globeRoll) < 0.0001) { globeRoll = 0; return; }
+
+  const absLatAngle = Math.abs(globeLat);
+  const POLE_START = 58 * DEG; // begin relaxing
+  const POLE_END   = 82 * DEG; // fully relaxed
+
+  let strength;
+  if (absLatAngle < POLE_START) {
+    strength = 1.0;
+  } else if (absLatAngle > POLE_END) {
+    strength = 0.0;
+  } else {
+    const t = (absLatAngle - POLE_START) / (POLE_END - POLE_START);
+    strength = 1.0 - t * t * (3 - 2 * t); // smoothstep
+  }
+
+  globeRoll *= 1 - strength * 0.12;
 }
 
 // ── Timer & Round ───────────────────────────────────────────
@@ -1114,16 +1146,19 @@ function drawCrosshair(ctx, cx, cy) {
 // ── Render Loop ─────────────────────────────────────────────
 function renderLoop() {
   applyInertia();
+  correctNorthUp();
   updateTimer();
 
-  // Recenter animation (on wrong answer: slerp quaternion, shortest path)
+  // Recenter animation (on wrong answer: interpolate lon/lat/roll)
   if (recenterAnim) {
     const elapsed = performance.now() - recenterAnim.startTime;
     const t = Math.min(1, elapsed / recenterAnim.duration);
     // Ease-in-out cubic
     const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
-    globeQuat.copy(recenterAnim.fromQuat).slerp(recenterAnim.toQuat, e);
+    globeLon = recenterAnim.fromLon + (recenterAnim.toLon - recenterAnim.fromLon) * e;
+    globeLat = recenterAnim.fromLat + (recenterAnim.toLat - recenterAnim.fromLat) * e;
+    globeRoll = recenterAnim.fromRoll * (1 - e);
     camera.position.z = recenterAnim.fromCamZ + (recenterAnim.toCamZ - recenterAnim.fromCamZ) * e;
 
     if (t >= 1) {
@@ -1131,7 +1166,8 @@ function renderLoop() {
     }
   }
 
-  // Apply quaternion orientation to globe mesh
+  // Build quaternion from lon/lat/roll and apply to globe mesh
+  updateGlobeQuat();
   globeMesh.quaternion.copy(globeQuat);
 
   // Camera dive animation
