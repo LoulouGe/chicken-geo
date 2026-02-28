@@ -195,6 +195,7 @@ let chickenY = 0; // 0 = far, 1 = landed
 let accelerating = false;
 let timerAccum = 0; // accumulated virtual time (seconds)
 let lastTimerTick = 0; // real timestamp of last timer update
+let diveAnim = null; // chicken dive-into-globe animation
 
 // Drag / rotation state
 let dragging = false;
@@ -648,6 +649,7 @@ function buildChicken() {
       map: tex,
       transparent: true,
       depthWrite: false,
+      depthTest: false,
     });
     chickenGroup = new THREE.Sprite(mat);
     chickenGroup.scale.set(0.7, 0.55, 1);
@@ -977,6 +979,21 @@ function resolveRound() {
   const hoveredCountry = getCountryAtCenter();
   const correct = hoveredCountry && hoveredCountry.id === currentTarget.id;
 
+  // Start chicken dive-into-globe animation
+  diveAnim = {
+    startTime: performance.now(),
+    duration: 500,
+    startZ: chickenGroup ? chickenGroup.position.z : camera.position.z - 1.2,
+    startY: chickenGroup ? chickenGroup.position.y : -0.1,
+    startScaleW: chickenGroup ? chickenGroup.scale.x : 0.32,
+    startScaleH: chickenGroup ? chickenGroup.scale.y : 0.25,
+  };
+
+  // Show feedback after dive completes
+  setTimeout(() => showFeedback(correct), 520);
+}
+
+function showFeedback(correct) {
   const overlay = document.getElementById("feedback-overlay");
   const fbChicken = document.getElementById("feedback-chicken");
   const fbPoint = document.getElementById("feedback-chicken-point");
@@ -1178,7 +1195,7 @@ function renderLoop() {
 
   // Position chicken sprite between camera and globe
   if (chickenGroup) {
-    chickenGroup.visible = roundActive;
+    chickenGroup.visible = roundActive || diveAnim !== null;
 
     if (roundActive) {
       const chickenZ = camera.position.z - 1.2;
@@ -1200,6 +1217,30 @@ function renderLoop() {
         const shake = (chickenY - 0.5) * 0.01;
         chickenGroup.position.x += (Math.random() - 0.5) * shake;
         chickenGroup.position.y += (Math.random() - 0.5) * shake;
+      }
+    } else if (diveAnim) {
+      // Chicken shrinks and rises toward crosshair, simulating a dive
+      const elapsed = performance.now() - diveAnim.startTime;
+      const t = Math.min(1, elapsed / diveAnim.duration);
+      const e = t * t; // ease-in (accelerating)
+
+      // Keep in front of globe, move upward to just below crosshair
+      chickenGroup.position.z = camera.position.z - 0.5;
+      chickenGroup.position.x = 0;
+      const targetY = -0.02;
+      chickenGroup.position.y = diveAnim.startY + (targetY - diveAnim.startY) * e;
+      chickenGroup.renderOrder = 999;
+
+      // Shrink uniformly to tiny
+      const shrink = 1 - e * 0.95;
+      chickenGroup.scale.set(
+        diveAnim.startScaleW * shrink,
+        diveAnim.startScaleH * shrink,
+        1,
+      );
+
+      if (t >= 1) {
+        diveAnim = null;
       }
     }
   }
