@@ -7,7 +7,9 @@
 	"settings": {
 		"files.exclude": {
 			"**/.DS_Store": true,
-			"**/Thumbs.db": true
+			"**/Thumbs.db": true,
+			".venv": true,
+			".claude": true
 		},
 		"editor.formatOnSave": true,
 		"editor.defaultFormatter": "esbenp.prettier-vscode",
