@@ -16,8 +16,17 @@
   <body>
     <!-- Start Screen -->
     <div id="start-screen" class="screen active">
+      <div class="lang-toggle">
+        <button class="btn-lang selected" data-lang="fr">&#x1F1EB;&#x1F1F7;</button>
+        <button class="btn-lang" data-lang="en">&#x1F1EC;&#x1F1E7;</button>
+        <button class="btn-lang" data-lang="es">&#x1F1EA;&#x1F1F8;</button>
+      </div>
       <h1 class="title">Chicken Geo</h1>
-      <button id="btn-play" class="btn-play">Jouer !</button>
+      <div class="mode-buttons">
+        <button class="btn-mode" data-mode="countries" id="btn-mode-countries">Pays</button>
+        <button class="btn-mode" data-mode="flags" id="btn-mode-flags">Drapeaux</button>
+        <button class="btn-mode" data-mode="capitals" id="btn-mode-capitals">Capitales</button>
+      </div>
     </div>
 
     <!-- Game Screen -->
@@ -26,11 +35,11 @@
         <div id="timer-container">
           <div id="timer-bar"></div>
         </div>
-        <p class="subtitle">Fais atterrir la poule sur le bon pays !</p>
+        <p class="subtitle" id="game-subtitle">Fais atterrir la poule sur le bon pays !</p>
         <div id="country-name"></div>
         <div id="score-display"></div>
       </div>
-      <button id="btn-accelerate" class="btn-accelerate">Accélérer !</button>
+      <button id="btn-accelerate" class="btn-accelerate">Acc&eacute;l&eacute;rer !</button>
       <div id="scene-container"></div>
       <div id="feedback-overlay"></div>
       <img id="feedback-chicken" src="" alt="" />
@@ -39,9 +48,10 @@
 
     <!-- End Screen -->
     <div id="end-screen" class="screen">
-      <h1 class="title end-title">Partie terminée !</h1>
+      <h1 class="title end-title" id="end-title">Partie termin&eacute;e !</h1>
       <p id="final-score" class="final-score"></p>
       <button id="btn-replay" class="btn-play">Rejouer</button>
+      <button id="btn-back-menu" class="btn-secondary">Retour au menu</button>
     </div>
 
     <canvas id="particles-canvas"></canvas>
