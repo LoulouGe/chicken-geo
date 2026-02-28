@@ -817,6 +817,8 @@ function endGame() {
 function setupInput() {
   const container = document.getElementById("scene-container");
 
+  let lastMoveTime = 0; // timestamp of last drag move event
+
   function applyDragDelta(dx, dy) {
     const sensitivity = 0.005;
     globeLon -= dx * sensitivity;
@@ -824,6 +826,15 @@ function setupInput() {
     globeLat = Math.max(-LAT_LIMIT, Math.min(LAT_LIMIT, globeLat));
     velocityLon = -dx * sensitivity;
     velocityLat = -dy * sensitivity;
+    lastMoveTime = performance.now();
+  }
+
+  function killInertiaIfPaused() {
+    // If the user paused before releasing, cancel inertia
+    if (performance.now() - lastMoveTime > 60) {
+      velocityLon = 0;
+      velocityLat = 0;
+    }
   }
 
   container.addEventListener("mousedown", (e) => {
@@ -835,6 +846,7 @@ function setupInput() {
 
   window.addEventListener("mouseup", () => {
     dragging = false;
+    killInertiaIfPaused();
   });
 
   window.addEventListener("mousemove", (e) => {
@@ -873,6 +885,7 @@ function setupInput() {
     }
     if (e.touches.length === 0) {
       dragging = false;
+      killInertiaIfPaused();
     }
   }, { passive: true });
 
