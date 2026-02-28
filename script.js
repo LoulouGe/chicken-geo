@@ -81,6 +81,7 @@ let countryFeatures = [];
 let score = 0;
 let round = 0;
 let currentTarget = null;
+let previousTarget = null;
 let timerStart = 0;
 let roundActive = false;
 let chickenY = 0; // 0 = far, 1 = landed
@@ -745,18 +746,28 @@ function nextRound() {
   // Show accelerate button
   document.getElementById("btn-accelerate").classList.add("visible");
 
-  // Reset globe orientation and camera
-  globeLon = 0;
-  globeLat = 0.35;
+  // Pick random country
+  currentTarget =
+    countryFeatures[Math.floor(Math.random() * countryFeatures.length)];
+
+  // Center globe on previous answer (or random country for round 1)
+  const startCountry =
+    round === 1
+      ? countryFeatures[Math.floor(Math.random() * countryFeatures.length)]
+      : previousTarget;
+  const centroid = startCountry ? getCountryCentroid(startCountry) : null;
+  if (centroid) {
+    globeLon = -(centroid.lon + 90) * DEG;
+    globeLat = centroid.lat * DEG;
+  } else {
+    globeLon = 0;
+    globeLat = 0.35;
+  }
   globeRoll = 0;
   velocityLon = 0;
   velocityLat = 0;
   velocityRoll = 0;
   camera.position.set(0, 0, CAM_START_Z);
-
-  // Pick random country
-  currentTarget =
-    countryFeatures[Math.floor(Math.random() * countryFeatures.length)];
 
   // Display question based on mode
   const nameEl = document.getElementById("country-name");
@@ -1006,6 +1017,7 @@ function updateTimer() {
 }
 
 function resolveRound() {
+  previousTarget = currentTarget;
   roundActive = false;
   accelerating = false;
   document
