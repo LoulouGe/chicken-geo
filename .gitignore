@@ -1,2 +1,3 @@
 .DS_Store
 .venv/
+PZ_geo_location_guesser_*.json

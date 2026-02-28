@@ -329,3 +329,107 @@ body {
 .shake {
   animation: shake 0.4s ease;
 }
+
+/* ── Utility ───────────────────────────────────────── */
+.hidden {
+  display: none !important;
+}
+
+/* ── Language Toggle ───────────────────────────────── */
+.lang-toggle {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.btn-lang {
+  font-size: 1.6rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  line-height: 1;
+}
+
+.btn-lang:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-lang.selected {
+  border-color: var(--accent);
+  background: rgba(255, 179, 71, 0.2);
+}
+
+/* ── Mode Buttons ──────────────────────────────────── */
+.mode-buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 0 16px;
+}
+
+.btn-mode {
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 2.5vw, 1.3rem);
+  font-weight: 700;
+  color: #1a1a2e;
+  background: var(--accent);
+  border: none;
+  border-radius: 20px;
+  padding: 20px 36px;
+  cursor: pointer;
+  min-width: 140px;
+  box-shadow:
+    0 6px 0 #c97e20,
+    0 10px 25px rgba(0, 0, 0, 0.4);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s,
+    background 0.15s;
+}
+
+.btn-mode:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 9px 0 #c97e20,
+    0 14px 30px rgba(0, 0, 0, 0.5);
+  background: var(--accent-hover);
+}
+
+.btn-mode:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 3px 0 #c97e20,
+    0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Flag Emoji (flags mode) ───────────────────────── */
+.flag-emoji {
+  font-size: clamp(3rem, 10vw, 5rem);
+  line-height: 1;
+}
+
+/* ── Secondary Button ──────────────────────────────── */
+.btn-secondary {
+  font-family: var(--font-body);
+  font-size: clamp(0.85rem, 2vw, 1rem);
+  font-weight: 600;
+  color: rgba(240, 240, 240, 0.7);
+  background: transparent;
+  border: 1px solid rgba(240, 240, 240, 0.3);
+  border-radius: 30px;
+  padding: 10px 28px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.btn-secondary:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}

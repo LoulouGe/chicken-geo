@@ -1,179 +1,67 @@
-// ── Country data (id must match GeoJSON feature.properties.name) ─
-const COUNTRY_LIST = [
-  // ── Afrique ──
-  { id: "Algeria", nameFr: "Algérie" },
-  { id: "Angola", nameFr: "Angola" },
-  { id: "Benin", nameFr: "Bénin" },
-  { id: "Botswana", nameFr: "Botswana" },
-  { id: "Burkina Faso", nameFr: "Burkina Faso" },
-  { id: "Burundi", nameFr: "Burundi" },
-  { id: "Cameroon", nameFr: "Cameroun" },
-  { id: "Central African Republic", nameFr: "Centrafrique" },
-  { id: "Chad", nameFr: "Tchad" },
-  { id: "Democratic Republic of the Congo", nameFr: "Rép. dém. du Congo" },
-  { id: "Republic of the Congo", nameFr: "Rép. du Congo" },
-  { id: "Djibouti", nameFr: "Djibouti" },
-  { id: "Egypt", nameFr: "Égypte" },
-  { id: "Equatorial Guinea", nameFr: "Guinée équatoriale" },
-  { id: "Eritrea", nameFr: "Érythrée" },
-  { id: "Ethiopia", nameFr: "Éthiopie" },
-  { id: "Gabon", nameFr: "Gabon" },
-  { id: "Gambia", nameFr: "Gambie" },
-  { id: "Ghana", nameFr: "Ghana" },
-  { id: "Guinea", nameFr: "Guinée" },
-  { id: "Guinea Bissau", nameFr: "Guinée-Bissau" },
-  { id: "Ivory Coast", nameFr: "Côte d'Ivoire" },
-  { id: "Kenya", nameFr: "Kenya" },
-  { id: "Lesotho", nameFr: "Lesotho" },
-  { id: "Liberia", nameFr: "Libéria" },
-  { id: "Libya", nameFr: "Libye" },
-  { id: "Madagascar", nameFr: "Madagascar" },
-  { id: "Malawi", nameFr: "Malawi" },
-  { id: "Mali", nameFr: "Mali" },
-  { id: "Mauritania", nameFr: "Mauritanie" },
-  { id: "Morocco", nameFr: "Maroc" },
-  { id: "Mozambique", nameFr: "Mozambique" },
-  { id: "Namibia", nameFr: "Namibie" },
-  { id: "Niger", nameFr: "Niger" },
-  { id: "Nigeria", nameFr: "Nigéria" },
-  { id: "Rwanda", nameFr: "Rwanda" },
-  { id: "Senegal", nameFr: "Sénégal" },
-  { id: "Sierra Leone", nameFr: "Sierra Leone" },
-  { id: "Somalia", nameFr: "Somalie" },
-  { id: "South Africa", nameFr: "Afrique du Sud" },
-  { id: "South Sudan", nameFr: "Soudan du Sud" },
-  { id: "Sudan", nameFr: "Soudan" },
-  { id: "Swaziland", nameFr: "Eswatini" },
-  { id: "Togo", nameFr: "Togo" },
-  { id: "Tunisia", nameFr: "Tunisie" },
-  { id: "Uganda", nameFr: "Ouganda" },
-  { id: "United Republic of Tanzania", nameFr: "Tanzanie" },
-  { id: "Zambia", nameFr: "Zambie" },
-  { id: "Zimbabwe", nameFr: "Zimbabwe" },
-  // ── Amérique du Nord & Centrale ──
-  { id: "USA", nameFr: "États-Unis" },
-  { id: "Canada", nameFr: "Canada" },
-  { id: "Mexico", nameFr: "Mexique" },
-  { id: "Guatemala", nameFr: "Guatemala" },
-  { id: "Belize", nameFr: "Belize" },
-  { id: "Honduras", nameFr: "Honduras" },
-  { id: "El Salvador", nameFr: "Salvador" },
-  { id: "Nicaragua", nameFr: "Nicaragua" },
-  { id: "Costa Rica", nameFr: "Costa Rica" },
-  { id: "Panama", nameFr: "Panama" },
-  { id: "Cuba", nameFr: "Cuba" },
-  { id: "Jamaica", nameFr: "Jamaïque" },
-  { id: "Haiti", nameFr: "Haïti" },
-  { id: "Dominican Republic", nameFr: "Rép. dominicaine" },
-  { id: "The Bahamas", nameFr: "Bahamas" },
-  { id: "Trinidad and Tobago", nameFr: "Trinité-et-Tobago" },
-  // ── Amérique du Sud ──
-  { id: "Brazil", nameFr: "Brésil" },
-  { id: "Argentina", nameFr: "Argentine" },
-  { id: "Chile", nameFr: "Chili" },
-  { id: "Colombia", nameFr: "Colombie" },
-  { id: "Peru", nameFr: "Pérou" },
-  { id: "Venezuela", nameFr: "Venezuela" },
-  { id: "Ecuador", nameFr: "Équateur" },
-  { id: "Bolivia", nameFr: "Bolivie" },
-  { id: "Paraguay", nameFr: "Paraguay" },
-  { id: "Uruguay", nameFr: "Uruguay" },
-  { id: "Guyana", nameFr: "Guyana" },
-  { id: "Suriname", nameFr: "Suriname" },
-  // ── Europe ──
-  { id: "France", nameFr: "France" },
-  { id: "Germany", nameFr: "Allemagne" },
-  { id: "England", nameFr: "Royaume-Uni" },
-  { id: "Italy", nameFr: "Italie" },
-  { id: "Spain", nameFr: "Espagne" },
-  { id: "Portugal", nameFr: "Portugal" },
-  { id: "Greece", nameFr: "Grèce" },
-  { id: "Turkey", nameFr: "Turquie" },
-  { id: "Poland", nameFr: "Pologne" },
-  { id: "Ukraine", nameFr: "Ukraine" },
-  { id: "Romania", nameFr: "Roumanie" },
-  { id: "Netherlands", nameFr: "Pays-Bas" },
-  { id: "Belgium", nameFr: "Belgique" },
-  { id: "Czech Republic", nameFr: "République tchèque" },
-  { id: "Hungary", nameFr: "Hongrie" },
-  { id: "Austria", nameFr: "Autriche" },
-  { id: "Switzerland", nameFr: "Suisse" },
-  { id: "Sweden", nameFr: "Suède" },
-  { id: "Norway", nameFr: "Norvège" },
-  { id: "Finland", nameFr: "Finlande" },
-  { id: "Denmark", nameFr: "Danemark" },
-  { id: "Ireland", nameFr: "Irlande" },
-  { id: "Iceland", nameFr: "Islande" },
-  { id: "Croatia", nameFr: "Croatie" },
-  { id: "Bosnia and Herzegovina", nameFr: "Bosnie-Herzégovine" },
-  { id: "Republic of Serbia", nameFr: "Serbie" },
-  { id: "Montenegro", nameFr: "Monténégro" },
-  { id: "Albania", nameFr: "Albanie" },
-  { id: "Macedonia", nameFr: "Macédoine du Nord" },
-  { id: "Bulgaria", nameFr: "Bulgarie" },
-  { id: "Slovakia", nameFr: "Slovaquie" },
-  { id: "Slovenia", nameFr: "Slovénie" },
-  { id: "Moldova", nameFr: "Moldavie" },
-  { id: "Belarus", nameFr: "Biélorussie" },
-  { id: "Lithuania", nameFr: "Lituanie" },
-  { id: "Latvia", nameFr: "Lettonie" },
-  { id: "Estonia", nameFr: "Estonie" },
-  { id: "Luxembourg", nameFr: "Luxembourg" },
-  { id: "Cyprus", nameFr: "Chypre" },
-  { id: "Kosovo", nameFr: "Kosovo" },
-  // ── Asie ──
-  { id: "Russia", nameFr: "Russie" },
-  { id: "China", nameFr: "Chine" },
-  { id: "India", nameFr: "Inde" },
-  { id: "Japan", nameFr: "Japon" },
-  { id: "South Korea", nameFr: "Corée du Sud" },
-  { id: "North Korea", nameFr: "Corée du Nord" },
-  { id: "Mongolia", nameFr: "Mongolie" },
-  { id: "Indonesia", nameFr: "Indonésie" },
-  { id: "Thailand", nameFr: "Thaïlande" },
-  { id: "Vietnam", nameFr: "Viêt Nam" },
-  { id: "Myanmar", nameFr: "Myanmar" },
-  { id: "Malaysia", nameFr: "Malaisie" },
-  { id: "Philippines", nameFr: "Philippines" },
-  { id: "Cambodia", nameFr: "Cambodge" },
-  { id: "Laos", nameFr: "Laos" },
-  { id: "Bangladesh", nameFr: "Bangladesh" },
-  { id: "Pakistan", nameFr: "Pakistan" },
-  { id: "Afghanistan", nameFr: "Afghanistan" },
-  { id: "Iran", nameFr: "Iran" },
-  { id: "Iraq", nameFr: "Irak" },
-  { id: "Saudi Arabia", nameFr: "Arabie saoudite" },
-  { id: "Yemen", nameFr: "Yémen" },
-  { id: "Oman", nameFr: "Oman" },
-  { id: "United Arab Emirates", nameFr: "Émirats arabes unis" },
-  { id: "Qatar", nameFr: "Qatar" },
-  { id: "Kuwait", nameFr: "Koweït" },
-  { id: "Jordan", nameFr: "Jordanie" },
-  { id: "Israel", nameFr: "Israël" },
-  { id: "Lebanon", nameFr: "Liban" },
-  { id: "Syria", nameFr: "Syrie" },
-  { id: "Georgia", nameFr: "Géorgie" },
-  { id: "Armenia", nameFr: "Arménie" },
-  { id: "Azerbaijan", nameFr: "Azerbaïdjan" },
-  { id: "Kazakhstan", nameFr: "Kazakhstan" },
-  { id: "Uzbekistan", nameFr: "Ouzbékistan" },
-  { id: "Turkmenistan", nameFr: "Turkménistan" },
-  { id: "Tajikistan", nameFr: "Tadjikistan" },
-  { id: "Kyrgyzstan", nameFr: "Kirghizistan" },
-  { id: "Nepal", nameFr: "Népal" },
-  { id: "Bhutan", nameFr: "Bhoutan" },
-  { id: "Sri Lanka", nameFr: "Sri Lanka" },
-  { id: "Taiwan", nameFr: "Taïwan" },
-  { id: "Brunei", nameFr: "Brunei" },
-  { id: "East Timor", nameFr: "Timor oriental" },
-  // ── Océanie ──
-  { id: "Australia", nameFr: "Australie" },
-  { id: "New Zealand", nameFr: "Nouvelle-Zélande" },
-  { id: "Papua New Guinea", nameFr: "Papouasie-Nouvelle-Guinée" },
-  { id: "Fiji", nameFr: "Fidji" },
-  { id: "Solomon Islands", nameFr: "Îles Salomon" },
-  { id: "Vanuatu", nameFr: "Vanuatu" },
-];
+// ── UI Strings (multilanguage) ───────────────────────────────
+const UI_STRINGS = {
+  fr: {
+    mode_countries: "Pays",
+    mode_flags: "Drapeaux",
+    mode_capitals: "Capitales",
+    subtitle_countries: "Fais atterrir la poule sur le bon pays !",
+    subtitle_flags: "Quel pays a ce drapeau ?",
+    subtitle_capitals: "Trouve le pays de cette capitale !",
+    question: "Question",
+    accelerate: "Accélérer !",
+    end_title: "Partie terminée !",
+    replay: "Rejouer",
+    back_menu: "Retour au menu",
+    score_amazing: "Incroyable ! ",
+    score_good: "Bien joué ! ",
+    score_try: "Continue de t\u2019entraîner ! ",
+    load_error_btn: "Erreur de chargement",
+    load_error_msg:
+      "Impossible de charger la carte. Vérifie ta connexion et recharge la page.",
+  },
+  en: {
+    mode_countries: "Countries",
+    mode_flags: "Flags",
+    mode_capitals: "Capitals",
+    subtitle_countries: "Land the chicken on the right country!",
+    subtitle_flags: "Which country has this flag?",
+    subtitle_capitals: "Find the country of this capital!",
+    question: "Question",
+    accelerate: "Speed up!",
+    end_title: "Game over!",
+    replay: "Play again",
+    back_menu: "Back to menu",
+    score_amazing: "Amazing! ",
+    score_good: "Well done! ",
+    score_try: "Keep practising! ",
+    load_error_btn: "Loading error",
+    load_error_msg:
+      "Could not load the map. Check your connection and reload the page.",
+  },
+  es: {
+    mode_countries: "Países",
+    mode_flags: "Banderas",
+    mode_capitals: "Capitales",
+    subtitle_countries: "¡Haz aterrizar la gallina en el país correcto!",
+    subtitle_flags: "¿Qué país tiene esta bandera?",
+    subtitle_capitals: "¡Encuentra el país de esta capital!",
+    question: "Pregunta",
+    accelerate: "¡Acelerar!",
+    end_title: "¡Partida terminada!",
+    replay: "Volver a jugar",
+    back_menu: "Volver al menú",
+    score_amazing: "¡Increíble! ",
+    score_good: "¡Bien jugado! ",
+    score_try: "¡Sigue practicando! ",
+    load_error_btn: "Error de carga",
+    load_error_msg:
+      "No se pudo cargar el mapa. Comprueba tu conexión y recarga la página.",
+  },
+};
+
+function t(key) {
+  return UI_STRINGS[currentLang][key];
+}
 
 // ── Constants ───────────────────────────────────────────────
 const MAX_ROUNDS = 5;
@@ -184,6 +72,10 @@ const CAM_START_Z = 3.5;
 const CAM_END_Z = 1.8;
 
 // ── State ───────────────────────────────────────────────────
+let currentLang = "fr";
+let currentMode = "countries";
+let countriesData = []; // loaded from countries.json
+
 let geoData = null;
 let countryFeatures = [];
 let score = 0;
@@ -202,11 +94,12 @@ let dragging = false;
 let dragPrev = { x: 0, y: 0 };
 
 // Globe orientation as lon/lat/roll (keeps north up naturally)
-let globeLon = 0;       // Y-axis rotation (longitude)
-let globeLat = 0.35;    // X-axis rotation (latitude, initial tilt)
-let globeRoll = 0;      // Z-axis rotation (two-finger only)
+let globeLon = 0; // Y-axis rotation (longitude)
+let globeLat = 0.35; // X-axis rotation (latitude, initial tilt)
+let globeRoll = 0; // Z-axis rotation (two-finger only)
 let globeQuat = new THREE.Quaternion();
-let velocityLon = 0, velocityLat = 0; // inertia (rad/frame)
+let velocityLon = 0,
+  velocityLat = 0; // inertia (rad/frame)
 const _globeEuler = new THREE.Euler();
 const LAT_LIMIT = Math.PI / 2 - 0.01;
 
@@ -239,9 +132,22 @@ let particles = [];
 
 // Country pastel colors
 const PASTEL_COLORS = [
-  "#a8d8b9", "#f7c59f", "#b5d2f0", "#f0b7c4", "#d4c5f9",
-  "#fbe29a", "#a0e7e5", "#f9c2d0", "#c5e1a5", "#ffe0b2",
-  "#b3c7e6", "#f8bbd0", "#c8e6c9", "#ffe082", "#b2dfdb", "#d1c4e9",
+  "#a8d8b9",
+  "#f7c59f",
+  "#b5d2f0",
+  "#f0b7c4",
+  "#d4c5f9",
+  "#fbe29a",
+  "#a0e7e5",
+  "#f9c2d0",
+  "#c5e1a5",
+  "#ffe0b2",
+  "#b3c7e6",
+  "#f8bbd0",
+  "#c8e6c9",
+  "#ffe082",
+  "#b2dfdb",
+  "#d1c4e9",
 ];
 
 // Reusable raycaster & screen-center vector
@@ -262,9 +168,8 @@ async function boot() {
 
   window.addEventListener("resize", onResize);
   setupInput();
-
-  document.getElementById("btn-play").addEventListener("click", startGame);
-  document.getElementById("btn-replay").addEventListener("click", startGame);
+  setupMenuEvents();
+  updateUIText();
 
   // Accelerate button (pointer events work for both mouse and touch)
   const btnAccel = document.getElementById("btn-accelerate");
@@ -283,27 +188,80 @@ async function boot() {
   });
 
   try {
-    const res = await fetch(
-      "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson",
-    );
-    geoData = await res.json();
+    const [geoRes, countriesRes] = await Promise.all([
+      fetch(
+        "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson",
+      ),
+      fetch("countries.json"),
+    ]);
+    geoData = await geoRes.json();
+    countriesData = await countriesRes.json();
     indexCountries();
     buildBaseTexture();
     buildGlobeTexture();
   } catch (e) {
-    console.error("Failed to load GeoJSON:", e);
-    const btn = document.getElementById("btn-play");
-    btn.disabled = true;
-    btn.textContent = "Erreur de chargement";
+    console.error("Failed to load data:", e);
+    document
+      .querySelectorAll(".btn-mode")
+      .forEach((b) => (b.disabled = true));
     const err = document.createElement("p");
-    err.textContent =
-      "Impossible de charger la carte. Vérifie ta connexion et recharge la page.";
+    err.textContent = t("load_error_msg");
     err.style.color = "#ff6b6b";
     err.style.marginTop = "1rem";
-    btn.parentElement.appendChild(err);
+    document.querySelector(".mode-buttons").appendChild(err);
   }
 
   requestAnimationFrame(renderLoop);
+}
+
+// ── Menu Events ─────────────────────────────────────────────
+function setupMenuEvents() {
+  // Language buttons
+  document.querySelectorAll(".btn-lang").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      currentLang = btn.dataset.lang;
+      document
+        .querySelectorAll(".btn-lang")
+        .forEach((b) => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      updateUIText();
+    });
+  });
+
+  // Mode buttons
+  document.querySelectorAll(".btn-mode").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      currentMode = btn.dataset.mode;
+      startGame();
+    });
+  });
+
+  // Replay button
+  document
+    .getElementById("btn-replay")
+    .addEventListener("click", startGame);
+
+  // Back to menu
+  document
+    .getElementById("btn-back-menu")
+    .addEventListener("click", () => showScreen("start-screen"));
+}
+
+function updateUIText() {
+  // Mode buttons
+  document.getElementById("btn-mode-countries").textContent =
+    t("mode_countries");
+  document.getElementById("btn-mode-flags").textContent = t("mode_flags");
+  document.getElementById("btn-mode-capitals").textContent =
+    t("mode_capitals");
+
+  // Accelerate button
+  document.getElementById("btn-accelerate").textContent = t("accelerate");
+
+  // End screen
+  document.getElementById("end-title").textContent = t("end_title");
+  document.getElementById("btn-replay").textContent = t("replay");
+  document.getElementById("btn-back-menu").textContent = t("back_menu");
 }
 
 // ── Three.js Setup ──────────────────────────────────────────
@@ -425,7 +383,7 @@ function drawFeature(ctx, feature, w, h, color, glow) {
   }
 }
 
-// Build the cached base texture (ocean + grid + all countries in default colors).
+// Build the cached base texture (ocean + grid + all countries).
 // Called once after GeoJSON loads.
 function buildBaseTexture() {
   if (!geoData) return;
@@ -462,7 +420,14 @@ function buildBaseTexture() {
   // Draw all countries in default pastel colors
   let featureIdx = 0;
   for (const feature of geoData.features) {
-    drawFeature(ctx, feature, w, h, PASTEL_COLORS[featureIdx % PASTEL_COLORS.length], false);
+    drawFeature(
+      ctx,
+      feature,
+      w,
+      h,
+      PASTEL_COLORS[featureIdx % PASTEL_COLORS.length],
+      false,
+    );
     featureIdx++;
   }
 }
@@ -495,11 +460,11 @@ function buildGlobeTexture(highlightId, correctAnswerId) {
 
 // ── Index Countries ─────────────────────────────────────────
 function indexCountries() {
-  if (!geoData) return;
-  const nameMap = new Map(COUNTRY_LIST.map((c) => [c.id, c]));
+  if (!geoData || !countriesData.length) return;
+  const geoMap = new Map(countriesData.map((c) => [c.geoId, c]));
   countryFeatures = [];
   for (const feature of geoData.features) {
-    const entry = nameMap.get(feature.properties.name);
+    const entry = geoMap.get(feature.properties.name);
     if (entry) {
       countryFeatures.push({ ...entry, feature });
     }
@@ -510,8 +475,10 @@ function indexCountries() {
 function pointInPoly(poly, lon, lat) {
   let inside = false;
   for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const xi = poly[i][0], yi = poly[i][1];
-    const xj = poly[j][0], yj = poly[j][1];
+    const xi = poly[i][0],
+      yi = poly[i][1];
+    const xj = poly[j][0],
+      yj = poly[j][1];
     // Skip edges that cross the antimeridian (|Δlon| > 180)
     if (Math.abs(xi - xj) > 180) continue;
     const intersect =
@@ -566,10 +533,14 @@ function ringSignedArea(ring) {
 
 // Centroid of a polygon ring using signed-area-weighted formula
 function ringCentroid(ring) {
-  let area = 0, cx = 0, cy = 0;
+  let area = 0,
+    cx = 0,
+    cy = 0;
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const x0 = ring[j][0], y0 = ring[j][1];
-    const x1 = ring[i][0], y1 = ring[i][1];
+    const x0 = ring[j][0],
+      y0 = ring[j][1];
+    const x1 = ring[i][0],
+      y1 = ring[i][1];
     const cross = x0 * y1 - x1 * y0;
     area += cross;
     cx += (x0 + x1) * cross;
@@ -578,8 +549,12 @@ function ringCentroid(ring) {
   area /= 2;
   if (Math.abs(area) < 1e-10) {
     // Degenerate polygon: fall back to simple average
-    let sx = 0, sy = 0;
-    for (const c of ring) { sx += c[0]; sy += c[1]; }
+    let sx = 0,
+      sy = 0;
+    for (const c of ring) {
+      sx += c[0];
+      sy += c[1];
+    }
     return { lon: sx / ring.length, lat: sy / ring.length };
   }
   return { lon: cx / (6 * area), lat: cy / (6 * area) };
@@ -664,7 +639,7 @@ function initSpeedParticles() {
   geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
 
   const mat = new THREE.PointsMaterial({
-    color: 0xcceeFF,
+    color: 0xcceeff,
     size: 0.04,
     transparent: true,
     opacity: 0.6,
@@ -739,7 +714,9 @@ function updateSpeedParticles() {
 
 // ── Screens ─────────────────────────────────────────────────
 function showScreen(id) {
-  document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
+  document
+    .querySelectorAll(".screen")
+    .forEach((s) => s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
 
@@ -779,9 +756,23 @@ function nextRound() {
   currentTarget =
     countryFeatures[Math.floor(Math.random() * countryFeatures.length)];
 
-  document.getElementById("country-name").textContent = currentTarget.nameFr;
+  // Display question based on mode
+  const nameEl = document.getElementById("country-name");
+  const subtitleEl = document.getElementById("game-subtitle");
+
+  if (currentMode === "flags") {
+    nameEl.innerHTML = '<span class="flag-emoji">' + currentTarget.flag + "</span>";
+    subtitleEl.textContent = t("subtitle_flags");
+  } else if (currentMode === "capitals") {
+    nameEl.textContent = currentTarget[currentLang].capital;
+    subtitleEl.textContent = t("subtitle_capitals");
+  } else {
+    nameEl.textContent = currentTarget[currentLang].name;
+    subtitleEl.textContent = t("subtitle_countries");
+  }
+
   document.getElementById("score-display").textContent =
-    "Question " + round + " / " + MAX_ROUNDS;
+    t("question") + " " + round + " / " + MAX_ROUNDS;
 
   // Reset timer
   timerStart = performance.now();
@@ -801,13 +792,19 @@ let lastHighlightId = null;
 function endGame() {
   roundActive = false;
   accelerating = false;
-  document.getElementById("btn-accelerate").classList.remove("visible", "pressing");
+  document
+    .getElementById("btn-accelerate")
+    .classList.remove("visible", "pressing");
   showScreen("end-screen");
 
+  document.getElementById("end-title").textContent = t("end_title");
+  document.getElementById("btn-replay").textContent = t("replay");
+  document.getElementById("btn-back-menu").textContent = t("back_menu");
+
   let msg;
-  if (score >= 4) msg = "Incroyable ! ";
-  else if (score >= 3) msg = "Bien joué ! ";
-  else msg = "Continue de t\u2019entraîner ! ";
+  if (score >= 4) msg = t("score_amazing");
+  else if (score >= 3) msg = t("score_good");
+  else msg = t("score_try");
 
   document.getElementById("final-score").textContent =
     msg + score + " / " + MAX_ROUNDS;
@@ -871,7 +868,10 @@ function setupInput() {
         velocityRoll = 0;
       } else if (e.touches.length === 1 && twoFingerAngle === null) {
         dragging = true;
-        dragPrev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        dragPrev = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+        };
         velocityLon = 0;
         velocityLat = 0;
       }
@@ -879,15 +879,19 @@ function setupInput() {
     { passive: true },
   );
 
-  window.addEventListener("touchend", (e) => {
-    if (e.touches.length < 2) {
-      twoFingerAngle = null;
-    }
-    if (e.touches.length === 0) {
-      dragging = false;
-      killInertiaIfPaused();
-    }
-  }, { passive: true });
+  window.addEventListener(
+    "touchend",
+    (e) => {
+      if (e.touches.length < 2) {
+        twoFingerAngle = null;
+      }
+      if (e.touches.length === 0) {
+        dragging = false;
+        killInertiaIfPaused();
+      }
+    },
+    { passive: true },
+  );
 
   window.addEventListener(
     "touchmove",
@@ -903,7 +907,10 @@ function setupInput() {
         const dx = e.touches[0].clientX - dragPrev.x;
         const dy = e.touches[0].clientY - dragPrev.y;
         applyDragDelta(dx, dy);
-        dragPrev = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        dragPrev = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+        };
       }
     },
     { passive: true },
@@ -934,11 +941,14 @@ function applyInertia() {
 // constraint relaxes to allow free rotation.
 function correctNorthUp() {
   if (recenterAnim) return;
-  if (Math.abs(globeRoll) < 0.0001) { globeRoll = 0; return; }
+  if (Math.abs(globeRoll) < 0.0001) {
+    globeRoll = 0;
+    return;
+  }
 
   const absLatAngle = Math.abs(globeLat);
   const POLE_START = 58 * DEG; // begin relaxing
-  const POLE_END   = 82 * DEG; // fully relaxed
+  const POLE_END = 82 * DEG; // fully relaxed
 
   let strength;
   if (absLatAngle < POLE_START) {
@@ -967,8 +977,8 @@ function updateTimer() {
   const frac = remaining / ROUND_TIME;
 
   // Ease-in quadratic: t² — earth approaches progressively
-  const t = 1 - frac;
-  chickenY = t * t;
+  const tt = 1 - frac;
+  chickenY = tt * tt;
 
   const bar = document.getElementById("timer-bar");
   bar.style.width = frac * 100 + "%";
@@ -987,10 +997,13 @@ function updateTimer() {
 function resolveRound() {
   roundActive = false;
   accelerating = false;
-  document.getElementById("btn-accelerate").classList.remove("visible", "pressing");
+  document
+    .getElementById("btn-accelerate")
+    .classList.remove("visible", "pressing");
 
   const hoveredCountry = getCountryAtCenter();
-  const correct = hoveredCountry && hoveredCountry.id === currentTarget.id;
+  const correct =
+    hoveredCountry && hoveredCountry.geoId === currentTarget.geoId;
 
   // Start chicken dive-into-globe animation
   diveAnim = {
@@ -1027,7 +1040,7 @@ function showFeedback(correct) {
     const container = document.getElementById("scene-container");
     container.classList.add("shake");
     setTimeout(() => container.classList.remove("shake"), 400);
-    buildGlobeTexture(null, currentTarget.id);
+    buildGlobeTexture(null, currentTarget.geoId);
 
     // Recenter globe on correct country + zoom in
     startRecenterAnimation(currentTarget);
@@ -1035,8 +1048,8 @@ function showFeedback(correct) {
     // Pointing chicken next to the correct country
     const imgH = Math.min(window.innerWidth * 0.4, 220) * 0.8;
     fbChicken.src = "chicken-point.png";
-    fbChicken.style.left = (window.innerWidth / 2 + 60) + "px";
-    fbChicken.style.top = (window.innerHeight / 2 - imgH / 2) + "px";
+    fbChicken.style.left = window.innerWidth / 2 + 60 + "px";
+    fbChicken.style.top = window.innerHeight / 2 - imgH / 2 + "px";
     fbChicken.style.bottom = "auto";
     fbChicken.style.transform = "scale(0)";
   }
@@ -1172,16 +1185,23 @@ function renderLoop() {
   // Recenter animation (on wrong answer: interpolate lon/lat/roll)
   if (recenterAnim) {
     const elapsed = performance.now() - recenterAnim.startTime;
-    const t = Math.min(1, elapsed / recenterAnim.duration);
+    const rt = Math.min(1, elapsed / recenterAnim.duration);
     // Ease-in-out cubic
-    const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const e =
+      rt < 0.5 ? 4 * rt * rt * rt : 1 - Math.pow(-2 * rt + 2, 3) / 2;
 
-    globeLon = recenterAnim.fromLon + (recenterAnim.toLon - recenterAnim.fromLon) * e;
-    globeLat = recenterAnim.fromLat + (recenterAnim.toLat - recenterAnim.fromLat) * e;
+    globeLon =
+      recenterAnim.fromLon +
+      (recenterAnim.toLon - recenterAnim.fromLon) * e;
+    globeLat =
+      recenterAnim.fromLat +
+      (recenterAnim.toLat - recenterAnim.fromLat) * e;
     globeRoll = recenterAnim.fromRoll * (1 - e);
-    camera.position.z = recenterAnim.fromCamZ + (recenterAnim.toCamZ - recenterAnim.fromCamZ) * e;
+    camera.position.z =
+      recenterAnim.fromCamZ +
+      (recenterAnim.toCamZ - recenterAnim.fromCamZ) * e;
 
-    if (t >= 1) {
+    if (rt >= 1) {
       recenterAnim = null;
     }
   }
@@ -1206,7 +1226,8 @@ function renderLoop() {
       chickenGroup.renderOrder = 999;
 
       // Slight bobbing
-      const bob = Math.sin(performance.now() * 0.005) * 0.02 * (1 - chickenY);
+      const bob =
+        Math.sin(performance.now() * 0.005) * 0.02 * (1 - chickenY);
       chickenGroup.position.y += bob;
 
       // Scale: shrinks slightly during dive
@@ -1224,14 +1245,15 @@ function renderLoop() {
     } else if (diveAnim) {
       // Chicken shrinks and rises toward crosshair, simulating a dive
       const elapsed = performance.now() - diveAnim.startTime;
-      const t = Math.min(1, elapsed / diveAnim.duration);
-      const e = t * t; // ease-in (accelerating)
+      const dt = Math.min(1, elapsed / diveAnim.duration);
+      const e = dt * dt; // ease-in (accelerating)
 
       // Stay at same z (depthTest off ensures visibility), move toward crosshair
       chickenGroup.position.z = diveAnim.startZ;
       chickenGroup.position.x = 0;
       const targetY = -0.02;
-      chickenGroup.position.y = diveAnim.startY + (targetY - diveAnim.startY) * e;
+      chickenGroup.position.y =
+        diveAnim.startY + (targetY - diveAnim.startY) * e;
       chickenGroup.renderOrder = 999;
 
       // Shrink uniformly to tiny
@@ -1242,7 +1264,7 @@ function renderLoop() {
         1,
       );
 
-      if (t >= 1) {
+      if (dt >= 1) {
         diveAnim = null;
       }
     }
@@ -1254,7 +1276,7 @@ function renderLoop() {
   // Highlight country at center
   if (roundActive && geoData) {
     const hovered = getCountryAtCenter();
-    const hoveredId = hovered ? hovered.id : null;
+    const hoveredId = hovered ? hovered.geoId : null;
     if (hoveredId !== lastHighlightId) {
       lastHighlightId = hoveredId;
       buildGlobeTexture(hoveredId);
