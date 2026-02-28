@@ -85,6 +85,7 @@ let timerStart = 0;
 let roundActive = false;
 let chickenY = 0; // 0 = far, 1 = landed
 let accelerating = false;
+let accelHoldTime = 0; // how long the button has been held (seconds)
 let timerAccum = 0; // accumulated virtual time (seconds)
 let lastTimerTick = 0; // real timestamp of last timer update
 let diveAnim = null; // chicken dive-into-globe animation
@@ -737,6 +738,7 @@ function nextRound() {
   roundActive = true;
   chickenY = 0;
   accelerating = false;
+  accelHoldTime = 0;
   timerAccum = 0;
   lastTimerTick = performance.now();
 
@@ -970,8 +972,17 @@ function updateTimer() {
   const now = performance.now();
   const realDelta = (now - lastTimerTick) / 1000;
   lastTimerTick = now;
-  const speed = accelerating ? 3 : 1;
-  timerAccum += realDelta * speed;
+
+  // Progressive acceleration: starts at 2x, ramps up to 8x over ~3 seconds
+  if (accelerating) {
+    accelHoldTime += realDelta;
+    const ramp = Math.min(accelHoldTime / 3, 1); // 0→1 over 3 seconds
+    const speed = 2 + ramp * 6; // 2x → 8x
+    timerAccum += realDelta * speed;
+  } else {
+    accelHoldTime = 0;
+    timerAccum += realDelta;
+  }
 
   const remaining = Math.max(0, ROUND_TIME - timerAccum);
   const frac = remaining / ROUND_TIME;

@@ -22,11 +22,12 @@ Deployed automatically via GitHub Pages from `main` branch — no build step nee
 
 ## Architecture
 
-Single-page app with three files at the root:
+Single-page app with four files at the root:
 
 - **index.html** — Page structure
-- **script.js** — Game logic, globe rendering, chicken animation, country data
+- **script.js** — Game logic, globe rendering, chicken animation, UI strings (i18n)
 - **style.css** — Styling and CSS animations
+- **countries.json** — 167 countries with geoId, flag emoji, and localized names/capitals (fr/en/es)
 
 External libraries loaded via CDN (no npm/build):
 
@@ -38,9 +39,23 @@ The globe orientation uses a **lon/lat/roll** model (not free quaternion) to kee
 
 Drag inertia is cancelled when the user pauses before releasing (>60 ms since last move), so careful positioning stops the globe immediately while flicks keep their momentum.
 
+### Multilanguage & Game Modes
+
+The game supports 3 languages (FR/EN/ES) and 3 modes:
+
+- **Pays / Countries** — a country name is shown, find it on the globe
+- **Drapeaux / Flags** — a flag emoji is shown, find the country
+- **Capitales / Capitals** — a capital name is shown, find the country
+
+UI strings are defined in the `UI_STRINGS` object in `script.js`. Country data (names, capitals) is localized per language in `countries.json`.
+
 ### Game Flow
 
-A country name is displayed as a question → the player rotates the globe → the chicken dives down (shrinking toward the crosshair) → feedback on whether the chicken landed on the correct country.
+A question is displayed (country name, flag, or capital depending on mode) → the player rotates the globe → the chicken dives down (shrinking toward the crosshair) → feedback on whether the chicken landed on the correct country. 5 rounds per game.
+
+### Acceleration
+
+The "Accelerate" button uses **progressive acceleration**: speed starts at 2× when pressed and ramps up to 8× over ~3 seconds of continuous hold. Releasing resets the ramp.
 
 ## Code Conventions
 
