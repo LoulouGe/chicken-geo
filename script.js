@@ -1009,7 +1009,6 @@ function resolveRound() {
 function showFeedback(correct) {
   const overlay = document.getElementById("feedback-overlay");
   const fbChicken = document.getElementById("feedback-chicken");
-  const fbPoint = document.getElementById("feedback-chicken-point");
 
   if (correct) {
     score++;
@@ -1033,21 +1032,13 @@ function showFeedback(correct) {
     // Recenter globe on correct country + zoom in
     startRecenterAnimation(currentTarget);
 
-    // Sad chicken center bottom
-    fbChicken.src = "chicken-sad.png";
-    fbChicken.style.left = "50%";
-    fbChicken.style.top = "auto";
-    fbChicken.style.bottom = "5%";
-    fbChicken.style.transform = "translateX(-50%) scale(0)";
-
     // Pointing chicken next to the correct country
     const imgH = Math.min(window.innerWidth * 0.4, 220) * 0.8;
-    fbPoint.src = "chicken-point.png";
-    fbPoint.style.left = (window.innerWidth / 2 + 60) + "px";
-    fbPoint.style.top = (window.innerHeight / 2 - imgH / 2) + "px";
-    fbPoint.style.bottom = "auto";
-    fbPoint.style.transform = "scale(0)";
-    fbPoint.classList.add("show");
+    fbChicken.src = "chicken-point.png";
+    fbChicken.style.left = (window.innerWidth / 2 + 60) + "px";
+    fbChicken.style.top = (window.innerHeight / 2 - imgH / 2) + "px";
+    fbChicken.style.bottom = "auto";
+    fbChicken.style.transform = "scale(0)";
   }
 
   // Show feedback chicken with bounce-in
@@ -1057,7 +1048,6 @@ function showFeedback(correct) {
   setTimeout(() => {
     overlay.className = "";
     fbChicken.classList.remove("show");
-    fbPoint.classList.remove("show");
     recenterAnim = null;
     nextRound();
   }, feedbackDuration);
