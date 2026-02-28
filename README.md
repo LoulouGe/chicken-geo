@@ -2,6 +2,8 @@
 
 Un jeu pour apprendre la géographie en s'amusant ! Une poule vole vers un globe que tu peux faire tourner pour qu'elle atterrisse sur le bon pays.
 
+Jouer en ligne : https://loulouge.github.io/chicken-geo/
+
 ## Comment jouer
 
 1. Un nom de pays s'affiche à l'écran
