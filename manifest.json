@@ -1,8 +1,8 @@
 {
-  "name": "Chicken géo",
-  "short_name": "Chicken géo",
-  "description": "Jeu éducatif de grammaire française",
-  "start_url": "/grammar/",
+  "name": "Chicken geo",
+  "short_name": "Chicken geo",
+  "description": "Jeu éducatif de géo",
+  "start_url": "/chicken-geo/",
   "display": "standalone",
   "orientation": "landscape",
   "background_color": "#1e0f08",
@@ -11,12 +11,12 @@
     {
       "src": "assets/IMG_3721.jpg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/jpg"
     },
     {
       "src": "assets/IMG_3721.jpg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/jpg"
     }
   ]
 }

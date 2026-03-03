@@ -160,6 +160,13 @@ const _screenCenter = new THREE.Vector2(0, 0);
 document.addEventListener("DOMContentLoaded", boot);
 
 async function boot() {
+  // Register service worker for PWA functionality
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js').catch(err => {
+      console.log('Service Worker registration failed:', err);
+    });
+  }
+
   particlesCanvas = document.getElementById("particles-canvas");
   particlesCtx = particlesCanvas.getContext("2d");
   sizeParticlesCanvas();
