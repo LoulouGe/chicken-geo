@@ -1,0 +1,22 @@
+{
+  "name": "Chicken géo",
+  "short_name": "Chicken géo",
+  "description": "Jeu éducatif de grammaire française",
+  "start_url": "/grammar/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#1e0f08",
+  "theme_color": "#1e0f08",
+  "icons": [
+    {
+      "src": "assets/IMG_3721.jpg",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/IMG_3721.jpg",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
