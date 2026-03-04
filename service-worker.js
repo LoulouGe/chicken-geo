@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chicken-geo-v2';
+const CACHE_NAME = 'chicken-geo-v3';
 const URLS_TO_CACHE = [
   '/',
   '/chicken-geo/',
