@@ -1,35 +1,73 @@
 // ── UI Strings (multilanguage) ───────────────────────────────
 const UI_STRINGS = {
   fr: {
+    board_globe: "Globe 3D",
+    board_map: "Carte",
+    choose_mode: "Choisis un mode de jeu",
+    mode_continent: "Continent et Océans",
     mode_countries: "Pays",
-    mode_flags: "Drapeaux",
     mode_capitals: "Capitales",
-    subtitle_countries: "Fais atterrir la poule sur le bon pays !",
-    subtitle_flags: "Quel pays a ce drapeau ?",
-    subtitle_capitals: "Trouve le pays de cette capitale !",
+    choose_scope: "Choisis une zone",
+    scope_world: "Monde",
+    continent_europe: "Europe",
+    continent_asie: "Asie",
+    continent_afrique: "Afrique",
+    continent_amerique_nord: "Amérique du Nord",
+    continent_amerique_sud: "Amérique du Sud",
+    continent_oceanie: "Océanie",
+    ocean_pacifique: "Océan Pacifique",
+    ocean_atlantique: "Océan Atlantique",
+    ocean_indien: "Océan Indien",
+    ocean_arctique: "Océan Arctique",
+    ocean_austral: "Océan Austral",
+    back: "Retour",
+    subtitle_continent: "Clique sur le continent ou l'océan !",
+    subtitle_countries: "Clique sur le bon pays !",
+    subtitle_capitals: "Clique sur le pays de cette capitale !",
     question: "Question",
-    accelerate: "Accélérer !",
+    correct_answer_was: "La bonne réponse : ",
+    you_clicked: "Tu as cliqué : ",
     end_title: "Partie terminée !",
     replay: "Rejouer",
+    btn_retry_mistakes: "Rejoue tes erreurs",
     back_menu: "Retour au menu",
     score_amazing: "Incroyable ! ",
     score_good: "Bien joué ! ",
-    score_try: "Continue de t\u2019entraîner ! ",
+    score_try: "Continue de t’entraîner ! ",
     load_error_btn: "Erreur de chargement",
     load_error_msg:
       "Impossible de charger la carte. Vérifie ta connexion et recharge la page.",
   },
   en: {
+    board_globe: "3D Globe",
+    board_map: "Map",
+    choose_mode: "Choose a game mode",
+    mode_continent: "Continent & Oceans",
     mode_countries: "Countries",
-    mode_flags: "Flags",
     mode_capitals: "Capitals",
-    subtitle_countries: "Land the chicken on the right country!",
-    subtitle_flags: "Which country has this flag?",
-    subtitle_capitals: "Find the country of this capital!",
+    choose_scope: "Choose an area",
+    scope_world: "World",
+    continent_europe: "Europe",
+    continent_asie: "Asia",
+    continent_afrique: "Africa",
+    continent_amerique_nord: "North America",
+    continent_amerique_sud: "South America",
+    continent_oceanie: "Oceania",
+    ocean_pacifique: "Pacific Ocean",
+    ocean_atlantique: "Atlantic Ocean",
+    ocean_indien: "Indian Ocean",
+    ocean_arctique: "Arctic Ocean",
+    ocean_austral: "Southern Ocean",
+    back: "Back",
+    subtitle_continent: "Click on the continent or ocean!",
+    subtitle_countries: "Click on the right country!",
+    subtitle_capitals: "Click on the country of this capital!",
     question: "Question",
-    accelerate: "Speed up!",
+    correct_answer_was: "Correct answer: ",
+    you_clicked: "You clicked: ",
     end_title: "Game over!",
     replay: "Play again",
+    btn_retry_mistakes: "Retry my mistakes",
     back_menu: "Back to menu",
     score_amazing: "Amazing! ",
     score_good: "Well done! ",
@@ -39,16 +77,35 @@ const UI_STRINGS = {
       "Could not load the map. Check your connection and reload the page.",
   },
   es: {
+    board_globe: "Globo 3D",
+    board_map: "Mapa",
+    choose_mode: "Elige un modo de juego",
+    mode_continent: "Continente y Océanos",
     mode_countries: "Países",
-    mode_flags: "Banderas",
     mode_capitals: "Capitales",
-    subtitle_countries: "¡Haz aterrizar la gallina en el país correcto!",
-    subtitle_flags: "¿Qué país tiene esta bandera?",
-    subtitle_capitals: "¡Encuentra el país de esta capital!",
+    choose_scope: "Elige una zona",
+    scope_world: "Mundo",
+    continent_europe: "Europa",
+    continent_asie: "Asia",
+    continent_afrique: "África",
+    continent_amerique_nord: "América del Norte",
+    continent_amerique_sud: "América del Sur",
+    continent_oceanie: "Oceanía",
+    ocean_pacifique: "Océano Pacífico",
+    ocean_atlantique: "Océano Atlántico",
+    ocean_indien: "Océano Índico",
+    ocean_arctique: "Océano Ártico",
+    ocean_austral: "Océano Austral",
+    back: "Atrás",
+    subtitle_continent: "¡Haz clic en el continente o el océano!",
+    subtitle_countries: "¡Haz clic en el país correcto!",
+    subtitle_capitals: "¡Haz clic en el país de esta capital!",
     question: "Pregunta",
-    accelerate: "¡Acelerar!",
+    correct_answer_was: "Respuesta correcta: ",
+    you_clicked: "Has hecho clic en: ",
     end_title: "¡Partida terminada!",
     replay: "Volver a jugar",
+    btn_retry_mistakes: "Repite tus errores",
     back_menu: "Volver al menú",
     score_amazing: "¡Increíble! ",
     score_good: "¡Bien jugado! ",
@@ -63,33 +120,107 @@ function t(key) {
   return UI_STRINGS[currentLang][key];
 }
 
+// A country's name with its flag next to it (never used for capitals, which
+// would give away the answer before the round is resolved).
+function formatCountryLabel(cf) {
+  return cf.flag ? cf.flag + " " + cf[currentLang].name : cf[currentLang].name;
+}
+
+// The current target's display name: a continent/ocean has no flag, a
+// country/capital target is shown with its flag.
+function formatTargetLabel(target) {
+  if (currentMode === "continent") {
+    return OCEANS.includes(target) ? t("ocean_" + target) : t("continent_" + target);
+  }
+  return formatCountryLabel(target);
+}
+
+// A clicked answer can be a country object (Pays/Capitales, or a country
+// clicked in Continent mode) or a plain ocean slug string (water clicked in
+// Continent mode).
+function formatClickedLabel(clicked) {
+  if (typeof clicked === "string") return t("ocean_" + clicked);
+  return formatCountryLabel(clicked);
+}
+
 // ── Constants ───────────────────────────────────────────────
 const MAX_ROUNDS = 5;
-const ROUND_TIME = 18; // seconds
+const ROUND_TIME = 18; // seconds — pacing only, resolution is click-driven
 const DEG = Math.PI / 180;
 
-const CAM_START_Z = 3.5;
-const CAM_END_Z = 1.8;
+const CAM_Z = 2.2; // fixed camera distance — the globe stays already zoomed in, no animated dolly
+
+const CONTINENT_COLORS = {
+  europe: "#7fd8be",
+  asie: "#ffb74d",
+  afrique: "#ffe066",
+  amerique_nord: "#8bd17c",
+  amerique_sud: "#ff8fa3",
+  oceanie: "#b39ddb",
+};
+const CONTINENTS = Object.keys(CONTINENT_COLORS);
+
+const OCEAN_COLORS = {
+  pacifique: "#4fc3f7",
+  atlantique: "#29b6f6",
+  indien: "#26c6da",
+  arctique: "#81d4fa",
+  austral: "#4dd0e1",
+};
+const OCEANS = Object.keys(OCEAN_COLORS);
+
+// Ocean regions defined by simple lon/lat rectangles (no polygon data
+// exists for oceans) — the Pacific wraps the antimeridian, so it's split
+// into two rectangles sharing the same slug.
+const OCEAN_REGIONS = [
+  { slug: "arctique", minLon: -180, maxLon: 180, minLat: 66, maxLat: 90 },
+  { slug: "austral", minLon: -180, maxLon: 180, minLat: -90, maxLat: -60 },
+  { slug: "atlantique", minLon: -70, maxLon: 20, minLat: -60, maxLat: 66 },
+  { slug: "indien", minLon: 20, maxLon: 145, minLat: -60, maxLat: 66 },
+  { slug: "pacifique", minLon: 145, maxLon: 180, minLat: -60, maxLat: 66 },
+  { slug: "pacifique", minLon: -180, maxLon: -70, minLat: -60, maxLat: 66 },
+];
+
+// A representative lon/lat used to recenter the globe on an ocean answer.
+const OCEAN_CENTERS = {
+  pacifique: { lon: 180, lat: 0 },
+  atlantique: { lon: -25, lat: 10 },
+  indien: { lon: 75, lat: -10 },
+  arctique: { lon: 0, lat: 80 },
+  austral: { lon: 0, lat: -75 },
+};
+
+function oceanAtLonLat(lon, lat) {
+  for (const r of OCEAN_REGIONS) {
+    if (lon >= r.minLon && lon <= r.maxLon && lat >= r.minLat && lat <= r.maxLat) {
+      return r.slug;
+    }
+  }
+  return "pacifique";
+}
 
 // ── State ───────────────────────────────────────────────────
 let currentLang = "fr";
-let currentMode = "countries";
+let currentBoard = "globe"; // "globe" | "map"
+let currentMode = "countries"; // "continent" | "countries" | "capitals"
+let currentScope = "world"; // "world" | continent slug
 let countriesData = []; // loaded from countries.json
 
 let geoData = null;
 let countryFeatures = [];
+let countryFeatureByName = new Map();
+
 let score = 0;
 let round = 0;
-let currentTarget = null;
+let roundsThisGame = MAX_ROUNDS;
+let currentTarget = null; // country/capital: a countryFeature; continent: a continent slug string
 let previousTarget = null;
-let timerStart = 0;
+let missedTargets = []; // targets missed this game
+let retryPool = null; // when set, nextRound draws sequentially from this instead of random
+
 let roundActive = false;
-let chickenY = 0; // 0 = far, 1 = landed
-let accelerating = false;
-let accelHoldTime = 0; // how long the button has been held (seconds)
 let timerAccum = 0; // accumulated virtual time (seconds)
 let lastTimerTick = 0; // real timestamp of last timer update
-let diveAnim = null; // chicken dive-into-globe animation
 
 // Drag / rotation state
 let dragging = false;
@@ -114,56 +245,62 @@ function updateGlobeQuat() {
 let twoFingerAngle = null;
 let velocityRoll = 0;
 
-// Recenter animation state (used on wrong answer)
+// Recenter animation state (used on wrong answer, globe only)
 let recenterAnim = null;
 
 // Three.js objects
 let scene, camera, renderer;
 let globeMesh, globeTexCanvas, globeTexCtx, globeTexture;
 let baseTexCanvas, baseTexCtx;
-let chickenGroup;
 
-// 3D speed particles
-const SPEED_PARTICLE_COUNT = 120;
-let speedPoints, speedPosAttr;
-let speedParticleData = [];
-
-// Particles overlay (2D confetti)
+// Particles overlay (2D confetti, shared by both boards)
 let particlesCanvas, particlesCtx;
 let particles = [];
 
-// Country pastel colors
+// Flat 2D map (canvas, equirectangular)
+let mapCanvas, mapCtx;
+let mapProjection = { minLon: -180, maxLon: 180, minLat: -85, maxLat: 85 };
+
+const CONTINENT_BOUNDS = {
+  europe: { minLon: -25, maxLon: 45, minLat: 34, maxLat: 72 },
+  asie: { minLon: 25, maxLon: 180, minLat: -12, maxLat: 78 },
+  afrique: { minLon: -20, maxLon: 52, minLat: -36, maxLat: 38 },
+  amerique_nord: { minLon: -170, maxLon: -50, minLat: 5, maxLat: 75 },
+  amerique_sud: { minLon: -82, maxLon: -33, minLat: -56, maxLat: 14 },
+  oceanie: { minLon: 110, maxLon: 180, minLat: -50, maxLat: 0 },
+};
+
+// Country candy colors (bright, cartoon-style palette)
 const PASTEL_COLORS = [
-  "#a8d8b9",
-  "#f7c59f",
-  "#b5d2f0",
-  "#f0b7c4",
-  "#d4c5f9",
-  "#fbe29a",
-  "#a0e7e5",
-  "#f9c2d0",
-  "#c5e1a5",
-  "#ffe0b2",
-  "#b3c7e6",
-  "#f8bbd0",
-  "#c8e6c9",
-  "#ffe082",
-  "#b2dfdb",
-  "#d1c4e9",
+  "#7fd8be",
+  "#ffb74d",
+  "#90caf9",
+  "#ff8fa3",
+  "#b39ddb",
+  "#ffe066",
+  "#80deea",
+  "#f48fb1",
+  "#aed581",
+  "#ffcc80",
+  "#81a4e0",
+  "#f06292",
+  "#a5d6a7",
+  "#ffd54f",
+  "#4dd0e1",
+  "#ce93d8",
 ];
 
-// Reusable raycaster & screen-center vector
+// Reusable raycaster
 const _raycaster = new THREE.Raycaster();
-const _screenCenter = new THREE.Vector2(0, 0);
 
 // ── Boot ────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", boot);
 
 async function boot() {
   // Register service worker for PWA functionality
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js').catch(err => {
-      console.log('Service Worker registration failed:', err);
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js").catch((err) => {
+      console.log("Service Worker registration failed:", err);
     });
   }
 
@@ -172,29 +309,13 @@ async function boot() {
   sizeParticlesCanvas();
 
   initThree();
-  buildChicken();
-  initSpeedParticles();
+  initMapCanvas();
+  setupMapInput();
 
   window.addEventListener("resize", onResize);
   setupInput();
   setupMenuEvents();
   updateUIText();
-
-  // Accelerate button (pointer events work for both mouse and touch)
-  const btnAccel = document.getElementById("btn-accelerate");
-  btnAccel.addEventListener("pointerdown", (e) => {
-    e.preventDefault();
-    accelerating = true;
-    btnAccel.classList.add("pressing");
-  });
-  window.addEventListener("pointerup", () => {
-    accelerating = false;
-    btnAccel.classList.remove("pressing");
-  });
-  window.addEventListener("pointercancel", () => {
-    accelerating = false;
-    btnAccel.classList.remove("pressing");
-  });
 
   try {
     const [geoRes, countriesRes] = await Promise.all([
@@ -206,7 +327,7 @@ async function boot() {
     geoData = await geoRes.json();
     countriesData = await countriesRes.json();
     indexCountries();
-    buildBaseTexture();
+    buildBaseTexture(currentMode);
     buildGlobeTexture();
   } catch (e) {
     console.error("Failed to load data:", e);
@@ -237,39 +358,90 @@ function setupMenuEvents() {
     });
   });
 
-  // Mode buttons
-  document.querySelectorAll(".btn-mode").forEach((btn) => {
+  // Board buttons (start screen): Globe 3D vs Carte
+  document.querySelectorAll(".btn-board").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      currentBoard = btn.dataset.board;
+      showScreen("mode-screen");
+    });
+  });
+
+  // Mode buttons: Continent / Pays / Capitale
+  document.querySelectorAll(".btn-mode-choice").forEach((btn) => {
     btn.addEventListener("click", () => {
       currentMode = btn.dataset.mode;
+      if (currentMode === "continent") {
+        currentScope = "world";
+        startGame();
+      } else {
+        showScreen("scope-screen");
+      }
+    });
+  });
+
+  // Scope buttons: Monde or a specific continent
+  document.querySelectorAll(".btn-scope-choice").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      currentScope = btn.dataset.scope;
       startGame();
     });
   });
 
-  // Replay button
+  // Back buttons
   document
-    .getElementById("btn-replay")
-    .addEventListener("click", startGame);
+    .getElementById("btn-mode-back")
+    .addEventListener("click", () => showScreen("start-screen"));
+  document
+    .getElementById("btn-scope-back")
+    .addEventListener("click", () => showScreen("mode-screen"));
 
-  // Back to menu
+  // Replay / retry-mistakes / back-to-menu
+  document.getElementById("btn-replay").addEventListener("click", startGame);
+  document
+    .getElementById("btn-retry-mistakes")
+    .addEventListener("click", startRetryGame);
   document
     .getElementById("btn-back-menu")
     .addEventListener("click", () => showScreen("start-screen"));
+
+  // Home button (visible during the game)
+  document.getElementById("btn-home").addEventListener("click", () => {
+    roundActive = false;
+    recenterAnim = null;
+    hoveredCf = null;
+    pressedCf = null;
+    showScreen("start-screen");
+  });
 }
 
 function updateUIText() {
-  // Mode buttons
+  document.getElementById("btn-board-globe").textContent = t("board_globe");
+  document.getElementById("btn-board-map").textContent = t("board_map");
+
+  document.getElementById("choose-mode-title").textContent = t("choose_mode");
+  document.getElementById("btn-mode-continent").textContent =
+    t("mode_continent");
   document.getElementById("btn-mode-countries").textContent =
     t("mode_countries");
-  document.getElementById("btn-mode-flags").textContent = t("mode_flags");
   document.getElementById("btn-mode-capitals").textContent =
     t("mode_capitals");
+  document.getElementById("btn-mode-back").textContent = t("back");
 
-  // Accelerate button
-  document.getElementById("btn-accelerate").textContent = t("accelerate");
+  document.getElementById("choose-scope-title").textContent =
+    t("choose_scope");
+  document.getElementById("btn-scope-world").textContent = t("scope_world");
+  CONTINENTS.forEach((slug) => {
+    document.getElementById("btn-scope-" + slug).textContent = t(
+      "continent_" + slug,
+    );
+  });
+  document.getElementById("btn-scope-back").textContent = t("back");
 
-  // End screen
   document.getElementById("end-title").textContent = t("end_title");
   document.getElementById("btn-replay").textContent = t("replay");
+  document.getElementById("btn-retry-mistakes").textContent = t(
+    "btn_retry_mistakes",
+  );
   document.getElementById("btn-back-menu").textContent = t("back_menu");
 }
 
@@ -282,7 +454,7 @@ function initThree() {
   scene = new THREE.Scene();
 
   camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 100);
-  camera.position.set(0, 0, CAM_START_Z);
+  camera.position.set(0, 0, CAM_Z);
 
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(w, h);
@@ -337,6 +509,10 @@ function onResize() {
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
   sizeParticlesCanvas();
+  sizeMapCanvas();
+  if (currentBoard === "map" && geoData) {
+    drawMapBase();
+  }
 }
 
 function sizeParticlesCanvas() {
@@ -350,10 +526,20 @@ function sizeParticlesCanvas() {
   particlesCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
-// ── Globe Texture (equirectangular) ─────────────────────────
+// ── Shared Feature Rendering (globe texture + flat map) ─────
 
-// Render a single feature's polygons onto a context
-function drawFeature(ctx, feature, w, h, color, glow) {
+// Default equirectangular projection spanning the full world (used by the globe texture)
+function defaultProj(lon, lat, w, h) {
+  return [((lon + 180) / 360) * w, ((90 - lat) / 180) * h];
+}
+
+// Render a single feature's polygons onto a context. projFn defaults to the
+// full-world equirectangular projection; the flat map passes a scoped one.
+// glowColor, when set, draws a colored glow/outline in that color instead of
+// the default thin border (used to reveal the correct answer in green / the
+// wrong answer in red).
+function drawFeature(ctx, feature, w, h, color, glowColor, noStroke, projFn) {
+  const proj = projFn || defaultProj;
   const geom = feature.geometry;
   const polys =
     geom.type === "Polygon"
@@ -366,47 +552,146 @@ function drawFeature(ctx, feature, w, h, color, glow) {
     const ring = polygon[0];
     ctx.beginPath();
     for (let i = 0; i < ring.length; i++) {
-      const lon = ring[i][0];
-      const lat = ring[i][1];
-      const x = ((lon + 180) / 360) * w;
-      const y = ((90 - lat) / 180) * h;
+      const [x, y] = proj(ring[i][0], ring[i][1], w, h);
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     }
     ctx.closePath();
     ctx.fillStyle = color;
     ctx.fill();
-    if (glow) {
+    if (glowColor) {
       ctx.save();
-      ctx.shadowColor = "rgba(255,60,60,0.8)";
+      ctx.shadowColor = glowColor;
       ctx.shadowBlur = 30;
-      ctx.strokeStyle = "rgba(255,60,60,0.9)";
+      ctx.strokeStyle = glowColor;
       ctx.lineWidth = 4;
       ctx.stroke();
       ctx.restore();
-    } else {
-      ctx.strokeStyle = "rgba(0,0,0,0.6)";
-      ctx.lineWidth = 1.5;
+    } else if (!noStroke) {
+      ctx.strokeStyle = "rgba(43,33,64,0.85)";
+      ctx.lineWidth = 2;
       ctx.stroke();
     }
   }
 }
 
+const CORRECT_FILL = "rgba(40,180,99,0.9)";
+const CORRECT_GLOW = "rgba(80,230,140,0.9)";
+const WRONG_FILL = "rgba(220,40,40,0.9)";
+const WRONG_GLOW = "rgba(255,60,60,0.9)";
+
+// Pixel rect (in the current projection) covered by an ocean region.
+function oceanRegionPixelRect(region, w, h, projFn) {
+  const [x1, y1] = projFn(region.minLon, region.maxLat, w, h);
+  const [x2, y2] = projFn(region.maxLon, region.minLat, w, h);
+  return {
+    left: Math.min(x1, x2),
+    top: Math.min(y1, y2),
+    width: Math.abs(x2 - x1),
+    height: Math.abs(y2 - y1),
+  };
+}
+
+// Fill + outline each ocean region in its own color (Continent mode only —
+// countries/capitals modes just use a single flat ocean color/gradient).
+function fillOceanRegions(ctx, w, h, projFn) {
+  for (const region of OCEAN_REGIONS) {
+    const r = oceanRegionPixelRect(region, w, h, projFn);
+    ctx.fillStyle = OCEAN_COLORS[region.slug];
+    ctx.fillRect(r.left, r.top, r.width, r.height);
+  }
+  ctx.strokeStyle = "rgba(43,33,64,0.85)";
+  ctx.lineWidth = 2;
+  for (const region of OCEAN_REGIONS) {
+    const r = oceanRegionPixelRect(region, w, h, projFn);
+    ctx.strokeRect(r.left, r.top, r.width, r.height);
+  }
+}
+
+// Highlight (green/red reveal) every rect belonging to an ocean slug.
+function highlightOceanRegion(ctx, w, h, slug, fillColor, glowColor, projFn) {
+  for (const region of OCEAN_REGIONS) {
+    if (region.slug !== slug) continue;
+    const r = oceanRegionPixelRect(region, w, h, projFn);
+    ctx.save();
+    ctx.shadowColor = glowColor;
+    ctx.shadowBlur = 30;
+    ctx.fillStyle = fillColor;
+    ctx.fillRect(r.left, r.top, r.width, r.height);
+    ctx.strokeStyle = glowColor;
+    ctx.lineWidth = 4;
+    ctx.strokeRect(r.left, r.top, r.width, r.height);
+    ctx.restore();
+  }
+}
+
+// A single cartoon wave doodle centered at (x, y).
+function drawWaveMark(ctx, x, y, halfWidth) {
+  ctx.beginPath();
+  ctx.moveTo(x - halfWidth, y);
+  ctx.quadraticCurveTo(x - halfWidth * 0.5, y - halfWidth * 0.45, x, y);
+  ctx.quadraticCurveTo(x + halfWidth * 0.5, y + halfWidth * 0.45, x + halfWidth, y);
+  ctx.strokeStyle = "rgba(255,255,255,0.4)";
+  ctx.lineWidth = Math.max(1, halfWidth * 0.22);
+  ctx.lineCap = "round";
+  ctx.stroke();
+}
+
+// Scatter wave doodles across the ocean (skipping land) within lon/lat
+// bounds — the full world for the globe, or the map's current scope.
+function drawWaves(ctx, w, h, projFn, waveSize, bounds) {
+  const b = bounds || { minLon: -180, maxLon: 180, minLat: -85, maxLat: 85 };
+  const lonStep = 16;
+  const latStep = 13;
+  for (let lat = b.minLat + latStep / 2; lat < b.maxLat; lat += latStep) {
+    for (let lon = b.minLon + lonStep / 2; lon < b.maxLon; lon += lonStep) {
+      if (findCountryAtLonLat(lon, lat)) continue;
+      const [x, y] = projFn(lon, lat, w, h);
+      drawWaveMark(ctx, x, y, waveSize);
+    }
+  }
+}
+
+// Draw every country in its normal (non-highlighted) color. Used to build
+// the base layer, and to restore land that an ocean rectangle's bounding
+// box would otherwise cover (ocean regions are plain lon/lat rects, not
+// real coastline polygons, so they must never stay drawn on top of land).
+function drawAllCountries(ctx, w, h, projFn) {
+  const continentMode = currentMode === "continent";
+  let featureIdx = 0;
+  for (const feature of geoData.features) {
+    const cf = countryFeatureByName.get(feature.properties.name);
+    let color;
+    if (cf) {
+      color = cf.baseColor;
+    } else {
+      color = continentMode ? "#7a8a99" : PASTEL_COLORS[featureIdx % PASTEL_COLORS.length];
+    }
+    drawFeature(ctx, feature, w, h, color, null, false, projFn);
+    featureIdx++;
+  }
+}
+
 // Build the cached base texture (ocean + grid + all countries).
-// Called once after GeoJSON loads.
-function buildBaseTexture() {
+// Called once per game start (palette depends on mode).
+function buildBaseTexture(mode) {
   if (!geoData) return;
   const ctx = baseTexCtx;
   const w = baseTexCanvas.width;
   const h = baseTexCanvas.height;
+  const continentMode = mode === "continent";
 
-  // Ocean
-  const oceanGrad = ctx.createLinearGradient(0, 0, 0, h);
-  oceanGrad.addColorStop(0, "#0e4a75");
-  oceanGrad.addColorStop(0.5, "#1a6daa");
-  oceanGrad.addColorStop(1, "#0e4a75");
-  ctx.fillStyle = oceanGrad;
-  ctx.fillRect(0, 0, w, h);
+  // Ocean: one region per ocean in Continent mode, a flat gradient otherwise
+  if (continentMode) {
+    fillOceanRegions(ctx, w, h, defaultProj);
+  } else {
+    const oceanGrad = ctx.createLinearGradient(0, 0, 0, h);
+    oceanGrad.addColorStop(0, "#4fc3f7");
+    oceanGrad.addColorStop(0.5, "#29b6f6");
+    oceanGrad.addColorStop(1, "#0288d1");
+    ctx.fillStyle = oceanGrad;
+    ctx.fillRect(0, 0, w, h);
+  }
 
   // Grid lines
   ctx.strokeStyle = "rgba(255,255,255,0.08)";
@@ -426,42 +711,126 @@ function buildBaseTexture() {
     ctx.stroke();
   }
 
-  // Draw all countries in default pastel colors
+  // Cartoon wave doodles scattered across the ocean (skips land)
+  drawWaves(ctx, w, h, defaultProj, 26);
+
+  // Assign + cache each clickable country's base color once per game start,
+  // reused later for hover/press button-style highlighting and by the map.
+  countryFeatures.forEach((cf, idx) => {
+    cf.baseColor = continentMode
+      ? CONTINENT_COLORS[cf.continent]
+      : PASTEL_COLORS[idx % PASTEL_COLORS.length];
+  });
+
+  // Draw all countries: pastel per-country, or shared continent color in
+  // Continent mode. A fine border is always drawn — in Continent mode this
+  // also traces each continent's outer silhouette.
   let featureIdx = 0;
   for (const feature of geoData.features) {
-    drawFeature(
-      ctx,
-      feature,
-      w,
-      h,
-      PASTEL_COLORS[featureIdx % PASTEL_COLORS.length],
-      false,
-    );
+    const cf = countryFeatureByName.get(feature.properties.name);
+    let color;
+    if (cf) {
+      color = cf.baseColor;
+    } else {
+      color = continentMode ? "#7a8a99" : PASTEL_COLORS[featureIdx % PASTEL_COLORS.length];
+    }
+    drawFeature(ctx, feature, w, h, color, null, false);
     featureIdx++;
   }
 }
 
-// Build the visible globe texture. Blits the cached base then overdraws
-// only the 1-2 highlighted / correct-answer features.
-function buildGlobeTexture(highlightId, correctAnswerId) {
+// Group a country with its continent-mates when in Continent mode (so
+// hover/press/reveal highlight the whole continent block, not one country).
+function getHighlightGroup(cf) {
+  if (!cf) return [];
+  if (currentMode === "continent") {
+    return countryFeatures.filter((c) => c.continent === cf.continent);
+  }
+  return [cf];
+}
+
+// Lighten (amt > 0) or darken (amt < 0) a "#rrggbb" color.
+function adjustColor(hex, amt) {
+  const num = parseInt(hex.slice(1), 16);
+  const channels = [(num >> 16) & 0xff, (num >> 8) & 0xff, num & 0xff].map(
+    (c) =>
+      Math.max(
+        0,
+        Math.min(255, Math.round(c + (amt > 0 ? (255 - c) * amt : c * amt))),
+      ),
+  );
+  return `rgb(${channels.join(",")})`;
+}
+
+const HOVER_GLOW = "rgba(255,255,255,0.55)";
+const PRESS_GLOW = "rgba(0,0,0,0.45)";
+const HOVER_LIGHTEN = 0.22;
+const PRESS_DARKEN = -0.28;
+
+// Build the visible globe texture. Blits the cached base then overdraws the
+// correct answer in green (a single country, or every country in a
+// continent) and, on a miss, the player's wrong answer in red.
+function buildGlobeTexture(correctAnswer, wrongAnswer) {
   if (!geoData) return;
   const ctx = globeTexCtx;
   const w = globeTexCanvas.width;
   const h = globeTexCanvas.height;
 
-  // Blit cached base
   ctx.drawImage(baseTexCanvas, 0, 0);
 
-  // Overdraw highlighted / correct features only
-  if (highlightId || correctAnswerId) {
-    for (const feature of geoData.features) {
-      const name = feature.properties.name;
-      if (name === correctAnswerId) {
-        drawFeature(ctx, feature, w, h, "rgba(220,40,40,0.9)", true);
-      } else if (name === highlightId) {
-        drawFeature(ctx, feature, w, h, "rgba(93,211,158,0.9)", false);
-      }
+  const correctIsOcean = correctAnswer && OCEANS.includes(correctAnswer);
+  const wrongIsOcean = wrongAnswer && OCEANS.includes(wrongAnswer);
+  if (correctIsOcean) {
+    highlightOceanRegion(ctx, w, h, correctAnswer, CORRECT_FILL, CORRECT_GLOW, defaultProj);
+  }
+  if (wrongIsOcean) {
+    highlightOceanRegion(ctx, w, h, wrongAnswer, WRONG_FILL, WRONG_GLOW, defaultProj);
+  }
+  if (correctIsOcean || wrongIsOcean) {
+    // Ocean regions are plain lon/lat rectangles, not real coastlines —
+    // restore any land that fell inside the highlighted rectangle(s).
+    drawAllCountries(ctx, w, h, defaultProj);
+  }
+
+  for (const cf of countryFeatures) {
+    const isCorrect =
+      correctAnswer &&
+      !OCEANS.includes(correctAnswer) &&
+      (currentMode === "continent"
+        ? cf.continent === correctAnswer
+        : cf.geoId === correctAnswer);
+    const isWrong =
+      wrongAnswer &&
+      !OCEANS.includes(wrongAnswer) &&
+      (currentMode === "continent"
+        ? cf.continent === wrongAnswer
+        : cf.geoId === wrongAnswer);
+    if (isCorrect) {
+      drawFeature(ctx, cf.feature, w, h, CORRECT_FILL, CORRECT_GLOW);
+    } else if (isWrong) {
+      drawFeature(ctx, cf.feature, w, h, WRONG_FILL, WRONG_GLOW);
     }
+  }
+
+  globeTexture.needsUpdate = true;
+}
+
+// Redraw the globe with a hover highlight (lighter, "raised") and/or a press
+// highlight (darker, "sunken") — purely cosmetic button-style feedback while
+// the round is still active (before the round resolves).
+function applyGlobeHoverPress(hoverCf, pressCf) {
+  if (!geoData) return;
+  const ctx = globeTexCtx;
+  const w = globeTexCanvas.width;
+  const h = globeTexCanvas.height;
+
+  ctx.drawImage(baseTexCanvas, 0, 0);
+
+  for (const cf of getHighlightGroup(hoverCf)) {
+    drawFeature(ctx, cf.feature, w, h, adjustColor(cf.baseColor, HOVER_LIGHTEN), HOVER_GLOW);
+  }
+  for (const cf of getHighlightGroup(pressCf)) {
+    drawFeature(ctx, cf.feature, w, h, adjustColor(cf.baseColor, PRESS_DARKEN), PRESS_GLOW);
   }
 
   globeTexture.needsUpdate = true;
@@ -472,12 +841,65 @@ function indexCountries() {
   if (!geoData || !countriesData.length) return;
   const geoMap = new Map(countriesData.map((c) => [c.geoId, c]));
   countryFeatures = [];
+  countryFeatureByName = new Map();
   for (const feature of geoData.features) {
     const entry = geoMap.get(feature.properties.name);
     if (entry) {
-      countryFeatures.push({ ...entry, feature });
+      const cf = { ...entry, feature };
+      countryFeatures.push(cf);
+      countryFeatureByName.set(feature.properties.name, cf);
     }
   }
+}
+
+function getFilteredCountryFeatures() {
+  if (currentScope === "world") return countryFeatures;
+  return countryFeatures.filter((cf) => cf.continent === currentScope);
+}
+
+function pickCountryInContinent(slug) {
+  const pool = countryFeatures.filter((cf) => cf.continent === slug);
+  return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+}
+
+function pickRandomTarget() {
+  if (retryPool && retryPool.length > 0) {
+    return retryPool[round - 1];
+  }
+  if (currentMode === "continent") {
+    const pool = [...CONTINENTS, ...OCEANS];
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+  const pool = getFilteredCountryFeatures();
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// Get a representative lon/lat centroid for any target: a country/capital
+// target (a countryFeature), or — in Continent mode — a continent (via one
+// of its countries) or an ocean (a fixed representative point).
+function getCentroidForTarget(target) {
+  if (!target) return null;
+  if (currentMode === "continent") {
+    if (OCEANS.includes(target)) return OCEAN_CENTERS[target] || null;
+    const cf = pickCountryInContinent(target);
+    return cf ? getCountryCentroid(cf) : null;
+  }
+  return getCountryCentroid(target);
+}
+
+// Resolve a click: a country if it landed on land; in Continent mode, an
+// ocean slug (plain string) if it landed on water instead.
+function resolveClickAtLonLat(lon, lat) {
+  const cf = findCountryAtLonLat(lon, lat);
+  if (cf) return cf;
+  if (currentMode === "continent") return oceanAtLonLat(lon, lat);
+  return null;
+}
+
+function isContinentModeCorrect(clicked, target) {
+  if (!clicked) return false;
+  if (typeof clicked === "string") return clicked === target; // clicked an ocean
+  return clicked.continent === target; // clicked a country
 }
 
 // ── Point-in-polygon ────────────────────────────────────────
@@ -498,24 +920,7 @@ function pointInPoly(poly, lon, lat) {
   return inside;
 }
 
-function getCountryAtCenter() {
-  if (!geoData) return null;
-  // Raycast from camera center to globe
-  _raycaster.setFromCamera(_screenCenter, camera);
-  const hits = _raycaster.intersectObject(globeMesh);
-  if (hits.length === 0) return null;
-
-  // Use 3D intersection point for precision
-  const p = hits[0].point.clone();
-  globeMesh.worldToLocal(p);
-  p.normalize();
-
-  const phi = Math.atan2(p.z, -p.x);
-  let u = phi / (2 * Math.PI);
-  if (u < 0) u += 1;
-  const lon = u * 360 - 180;
-  const lat = Math.asin(p.y) / DEG;
-
+function findCountryAtLonLat(lon, lat) {
   for (const cf of countryFeatures) {
     const geom = cf.feature.geometry;
     if (geom.type === "Polygon") {
@@ -527,6 +932,55 @@ function getCountryAtCenter() {
     }
   }
   return null;
+}
+
+// Raycast from an arbitrary NDC point (screen click) into the globe and
+// resolve which country lies underneath.
+function getCountryAtNDC(ndc) {
+  if (!geoData) return null;
+  _raycaster.setFromCamera(ndc, camera);
+  const hits = _raycaster.intersectObject(globeMesh);
+  if (hits.length === 0) return null;
+
+  const p = hits[0].point.clone();
+  globeMesh.worldToLocal(p);
+  p.normalize();
+
+  const phi = Math.atan2(p.z, -p.x);
+  let u = phi / (2 * Math.PI);
+  if (u < 0) u += 1;
+  const lon = u * 360 - 180;
+  const lat = Math.asin(p.y) / DEG;
+
+  return resolveClickAtLonLat(lon, lat);
+}
+
+function countryAtScreenPoint(x, y) {
+  const ndc = new THREE.Vector2(
+    (x / window.innerWidth) * 2 - 1,
+    -(y / window.innerHeight) * 2 + 1,
+  );
+  return getCountryAtNDC(ndc);
+}
+
+// ── Hover / press button-style feedback (globe + map) ────────
+let hoveredCf = null;
+let pressedCf = null;
+
+function setHoverPress(newHover, newPress) {
+  if (newHover === hoveredCf && newPress === pressedCf) return;
+  hoveredCf = newHover;
+  pressedCf = newPress;
+  redrawBoardHighlight();
+}
+
+function redrawBoardHighlight() {
+  if (!roundActive) return; // don't stomp on the correct/wrong reveal
+  if (currentBoard === "globe") {
+    applyGlobeHoverPress(hoveredCf, pressedCf);
+  } else {
+    applyMapHoverPress(hoveredCf, pressedCf);
+  }
 }
 
 // ── Country centroid + recenter animation ────────────────────
@@ -594,8 +1048,7 @@ function getCountryCentroid(cf) {
   return ringCentroid(bestRing);
 }
 
-function startRecenterAnimation(cf) {
-  const centroid = getCountryCentroid(cf);
+function startRecenterAnimation(centroid) {
   if (!centroid) return;
 
   const targetLon = -(centroid.lon + 90) * DEG;
@@ -614,8 +1067,6 @@ function startRecenterAnimation(cf) {
     fromLat: globeLat,
     toLat: targetLat,
     fromRoll: globeRoll,
-    fromCamZ: camera.position.z,
-    toCamZ: 2.2,
   };
 
   // Stop any inertia
@@ -624,101 +1075,199 @@ function startRecenterAnimation(cf) {
   velocityRoll = 0;
 }
 
-// ── Chicken Sprite (PNG) ─────────────────────────────────────
-function buildChicken() {
-  const loader = new THREE.TextureLoader();
-  loader.load("chicken.png", (tex) => {
-    tex.encoding = THREE.sRGBEncoding;
-    const mat = new THREE.SpriteMaterial({
-      map: tex,
-      transparent: true,
-      depthWrite: false,
-      depthTest: false,
-    });
-    chickenGroup = new THREE.Sprite(mat);
-    chickenGroup.scale.set(0.7, 0.55, 1);
-    scene.add(chickenGroup);
-  });
+// ── Flat Map (2D canvas, equirectangular) ───────────────────
+function initMapCanvas() {
+  mapCanvas = document.getElementById("map-canvas");
+  mapCtx = mapCanvas.getContext("2d");
+  sizeMapCanvas();
 }
 
-// ── 3D Speed Particles ──────────────────────────────────────
-function initSpeedParticles() {
-  const positions = new Float32Array(SPEED_PARTICLE_COUNT * 3);
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-
-  const mat = new THREE.PointsMaterial({
-    color: 0xcceeff,
-    size: 0.04,
-    transparent: true,
-    opacity: 0.6,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-  });
-
-  speedPoints = new THREE.Points(geo, mat);
-  scene.add(speedPoints);
-  speedPosAttr = geo.attributes.position;
-
-  for (let i = 0; i < SPEED_PARTICLE_COUNT; i++) {
-    speedParticleData.push({
-      life: 0,
-      vy: 0,
-      vz: 0,
-      vx: 0,
-    });
-    // Position offscreen
-    positions[i * 3] = 0;
-    positions[i * 3 + 1] = -100;
-    positions[i * 3 + 2] = 0;
-  }
+function sizeMapCanvas() {
+  if (!mapCanvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  mapCanvas.width = w * dpr;
+  mapCanvas.height = h * dpr;
+  mapCanvas.style.width = w + "px";
+  mapCanvas.style.height = h + "px";
+  mapCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
-function updateSpeedParticles() {
-  if (!chickenGroup || !roundActive) {
-    if (speedPoints) speedPoints.visible = false;
-    return;
+function updateMapProjection() {
+  mapProjection =
+    currentScope === "world"
+      ? { minLon: -180, maxLon: 180, minLat: -85, maxLat: 85 }
+      : { ...CONTINENT_BOUNDS[currentScope] };
+}
+
+// Fit the lon/lat bounds into a w×h canvas at a single uniform scale
+// (letterboxed/pillarboxed rather than stretched), so continents keep their
+// true proportions instead of being squashed to fill the window.
+function getMapFit(w, h) {
+  const boundsW = mapProjection.maxLon - mapProjection.minLon;
+  const boundsH = mapProjection.maxLat - mapProjection.minLat;
+  const scale = Math.min(w / boundsW, h / boundsH);
+  return {
+    scale,
+    offsetX: (w - boundsW * scale) / 2,
+    offsetY: (h - boundsH * scale) / 2,
+  };
+}
+
+function mapProjFn(lon, lat, w, h) {
+  const fit = getMapFit(w, h);
+  const x = fit.offsetX + (lon - mapProjection.minLon) * fit.scale;
+  const y = fit.offsetY + (mapProjection.maxLat - lat) * fit.scale;
+  return [x, y];
+}
+
+function drawMapBase() {
+  if (!geoData || !mapCtx) return;
+  updateMapProjection();
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const ctx = mapCtx;
+
+  ctx.clearRect(0, 0, w, h);
+  const continentMode = currentMode === "continent";
+
+  if (continentMode) {
+    fillOceanRegions(ctx, w, h, mapProjFn);
+  } else {
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, "#4fc3f7");
+    grad.addColorStop(0.5, "#29b6f6");
+    grad.addColorStop(1, "#0288d1");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
   }
-  speedPoints.visible = true;
 
-  const intensity = chickenY * chickenY;
-  const spawnChance = intensity * 0.4; // per particle per frame
-  const cPos = chickenGroup.position;
-  const arr = speedPosAttr.array;
+  drawWaves(ctx, w, h, mapProjFn, 8, mapProjection);
 
-  for (let i = 0; i < SPEED_PARTICLE_COUNT; i++) {
-    const d = speedParticleData[i];
-
-    if (d.life <= 0) {
-      // Maybe respawn
-      if (Math.random() < spawnChance) {
-        const angle = Math.random() * Math.PI * 2;
-        const radius = 0.08 + Math.random() * 0.2;
-        arr[i * 3] = cPos.x + Math.cos(angle) * radius;
-        arr[i * 3 + 1] = cPos.y + (Math.random() - 0.3) * 0.15;
-        arr[i * 3 + 2] = cPos.z + Math.sin(angle) * radius * 0.4;
-
-        d.vx = (Math.random() - 0.5) * 0.003;
-        d.vy = 0.025 + Math.random() * 0.04; // upward (opposite to dive)
-        d.vz = 0.008 + Math.random() * 0.015; // toward camera
-        d.life = 0.4 + Math.random() * 0.6;
-      }
+  let featureIdx = 0;
+  for (const feature of geoData.features) {
+    const cf = countryFeatureByName.get(feature.properties.name);
+    let color;
+    if (cf) {
+      color = cf.baseColor;
     } else {
-      arr[i * 3] += d.vx;
-      arr[i * 3 + 1] += d.vy;
-      arr[i * 3 + 2] += d.vz;
-      d.life -= 0.025;
+      color = continentMode ? "#7a8a99" : PASTEL_COLORS[featureIdx % PASTEL_COLORS.length];
+    }
+    drawFeature(ctx, feature, w, h, color, null, false, mapProjFn);
+    featureIdx++;
+  }
+}
 
-      // Fade out: move offscreen when dead
-      if (d.life <= 0) {
-        arr[i * 3 + 1] = -100;
-      }
+function drawMapOverlay(correctAnswer, wrongAnswer) {
+  if (!geoData || !mapCtx) return;
+  drawMapBase();
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+
+  const correctIsOcean = correctAnswer && OCEANS.includes(correctAnswer);
+  const wrongIsOcean = wrongAnswer && OCEANS.includes(wrongAnswer);
+  if (correctIsOcean) {
+    highlightOceanRegion(mapCtx, w, h, correctAnswer, CORRECT_FILL, CORRECT_GLOW, mapProjFn);
+  }
+  if (wrongIsOcean) {
+    highlightOceanRegion(mapCtx, w, h, wrongAnswer, WRONG_FILL, WRONG_GLOW, mapProjFn);
+  }
+  if (correctIsOcean || wrongIsOcean) {
+    drawAllCountries(mapCtx, w, h, mapProjFn);
+  }
+
+  for (const cf of countryFeatures) {
+    const isCorrect =
+      correctAnswer &&
+      !OCEANS.includes(correctAnswer) &&
+      (currentMode === "continent"
+        ? cf.continent === correctAnswer
+        : cf.geoId === correctAnswer);
+    const isWrong =
+      wrongAnswer &&
+      !OCEANS.includes(wrongAnswer) &&
+      (currentMode === "continent"
+        ? cf.continent === wrongAnswer
+        : cf.geoId === wrongAnswer);
+    if (isCorrect) {
+      drawFeature(mapCtx, cf.feature, w, h, CORRECT_FILL, CORRECT_GLOW, false, mapProjFn);
+    } else if (isWrong) {
+      drawFeature(mapCtx, cf.feature, w, h, WRONG_FILL, WRONG_GLOW, false, mapProjFn);
     }
   }
+}
 
-  speedPosAttr.needsUpdate = true;
-  // Adjust opacity based on intensity
-  speedPoints.material.opacity = Math.min(0.7, intensity * 1.2);
+// Redraw the map with a hover highlight (lighter) and/or a press highlight
+// (darker) — the map equivalent of applyGlobeHoverPress.
+function applyMapHoverPress(hoverCf, pressCf) {
+  if (!geoData || !mapCtx) return;
+  drawMapBase();
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  for (const cf of getHighlightGroup(hoverCf)) {
+    drawFeature(mapCtx, cf.feature, w, h, adjustColor(cf.baseColor, HOVER_LIGHTEN), HOVER_GLOW, false, mapProjFn);
+  }
+  for (const cf of getHighlightGroup(pressCf)) {
+    drawFeature(mapCtx, cf.feature, w, h, adjustColor(cf.baseColor, PRESS_DARKEN), PRESS_GLOW, false, mapProjFn);
+  }
+}
+
+function getCountryAtMapXY(px, py) {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const fit = getMapFit(w, h);
+  const lon = mapProjection.minLon + (px - fit.offsetX) / fit.scale;
+  const lat = mapProjection.maxLat - (py - fit.offsetY) / fit.scale;
+  return resolveClickAtLonLat(lon, lat);
+}
+
+let isMapPressed = false;
+
+function setupMapInput() {
+  mapCanvas.addEventListener("mousemove", (e) => {
+    if (currentBoard !== "map" || !roundActive) return;
+    const rect = mapCanvas.getBoundingClientRect();
+    const cf = getCountryAtMapXY(e.clientX - rect.left, e.clientY - rect.top);
+    setHoverPress(cf, isMapPressed ? cf : null);
+  });
+
+  mapCanvas.addEventListener("mousedown", (e) => {
+    if (currentBoard !== "map" || !roundActive) return;
+    isMapPressed = true;
+    const rect = mapCanvas.getBoundingClientRect();
+    const cf = getCountryAtMapXY(e.clientX - rect.left, e.clientY - rect.top);
+    setHoverPress(cf, cf);
+  });
+
+  window.addEventListener("mouseup", () => {
+    isMapPressed = false;
+  });
+
+  mapCanvas.addEventListener("mouseleave", () => {
+    if (!isMapPressed) setHoverPress(null, null);
+  });
+
+  mapCanvas.addEventListener("touchstart", (e) => {
+    if (currentBoard !== "map" || !roundActive) return;
+    const t = e.touches[0];
+    const rect = mapCanvas.getBoundingClientRect();
+    const cf = getCountryAtMapXY(t.clientX - rect.left, t.clientY - rect.top);
+    setHoverPress(cf, cf);
+  }, { passive: true });
+
+  mapCanvas.addEventListener("touchend", () => {
+    setHoverPress(null, null);
+  }, { passive: true });
+
+  mapCanvas.addEventListener("click", (e) => {
+    if (currentBoard !== "map" || !roundActive) return;
+    const rect = mapCanvas.getBoundingClientRect();
+    const px = e.clientX - rect.left;
+    const py = e.clientY - rect.top;
+    handleAnswerClick(getCountryAtMapXY(px, py));
+    setHoverPress(null, null);
+  });
 }
 
 // ── Screens ─────────────────────────────────────────────────
@@ -732,37 +1281,61 @@ function showScreen(id) {
 function startGame() {
   score = 0;
   round = 0;
+  missedTargets = [];
+  roundsThisGame = MAX_ROUNDS;
+  retryPool = null;
+  enterGameScreen();
+}
+
+function startRetryGame() {
+  if (missedTargets.length === 0) return;
+  retryPool = missedTargets.slice();
+  roundsThisGame = retryPool.length;
+  score = 0;
+  round = 0;
+  missedTargets = [];
+  enterGameScreen();
+}
+
+function enterGameScreen() {
+  document
+    .getElementById("scene-container")
+    .classList.toggle("hidden", currentBoard !== "globe");
+  document
+    .getElementById("map-container")
+    .classList.toggle("hidden", currentBoard !== "map");
+
+  buildBaseTexture(currentMode);
+
   showScreen("game-screen");
   nextRound();
 }
 
 function nextRound() {
-  if (round >= MAX_ROUNDS) {
+  if (round >= roundsThisGame) {
     endGame();
     return;
   }
 
   round++;
   roundActive = true;
-  chickenY = 0;
-  accelerating = false;
-  accelHoldTime = 0;
   timerAccum = 0;
   lastTimerTick = performance.now();
+  hoveredCf = null;
+  pressedCf = null;
 
-  // Show accelerate button
-  document.getElementById("btn-accelerate").classList.add("visible");
+  currentTarget = pickRandomTarget();
 
-  // Pick random country
-  currentTarget =
-    countryFeatures[Math.floor(Math.random() * countryFeatures.length)];
-
-  // Center globe on previous answer (or random country for round 1)
-  const startCountry =
-    round === 1
-      ? countryFeatures[Math.floor(Math.random() * countryFeatures.length)]
-      : previousTarget;
-  const centroid = startCountry ? getCountryCentroid(startCountry) : null;
+  // Center the globe on the previous answer (or a random country for round 1),
+  // without revealing the upcoming target.
+  let centroid;
+  if (round === 1) {
+    const pool = getFilteredCountryFeatures();
+    const startCountry = pool[Math.floor(Math.random() * pool.length)];
+    centroid = startCountry ? getCountryCentroid(startCountry) : null;
+  } else {
+    centroid = getCentroidForTarget(previousTarget);
+  }
   if (centroid) {
     globeLon = -(centroid.lon + 90) * DEG;
     globeLat = centroid.lat * DEG;
@@ -774,60 +1347,64 @@ function nextRound() {
   velocityLon = 0;
   velocityLat = 0;
   velocityRoll = 0;
-  camera.position.set(0, 0, CAM_START_Z);
+  camera.position.set(0, 0, CAM_Z);
 
   // Display question based on mode
   const nameEl = document.getElementById("country-name");
   const subtitleEl = document.getElementById("game-subtitle");
 
-  if (currentMode === "flags") {
-    nameEl.innerHTML = '<span class="flag-emoji">' + currentTarget.flag + "</span>";
-    subtitleEl.textContent = t("subtitle_flags");
+  if (currentMode === "continent") {
+    nameEl.textContent = t("continent_" + currentTarget);
+    subtitleEl.textContent = t("subtitle_continent");
   } else if (currentMode === "capitals") {
+    // No flag here: the capital doesn't reveal the country, that's the point
     nameEl.textContent = currentTarget[currentLang].capital;
     subtitleEl.textContent = t("subtitle_capitals");
   } else {
-    nameEl.textContent = currentTarget[currentLang].name;
+    nameEl.textContent = formatCountryLabel(currentTarget);
     subtitleEl.textContent = t("subtitle_countries");
   }
 
   document.getElementById("score-display").textContent =
-    t("question") + " " + round + " / " + MAX_ROUNDS;
+    t("question") + " " + round + " / " + roundsThisGame;
+
+  const labelEl = document.getElementById("feedback-label");
+  labelEl.classList.remove("show");
+  labelEl.textContent = "";
 
   // Reset timer
-  timerStart = performance.now();
   const bar = document.getElementById("timer-bar");
   bar.style.width = "100%";
   bar.classList.remove("warning");
 
-  // Reset highlight
-  lastHighlightId = null;
-
-  // Reset globe texture (no highlight)
-  buildGlobeTexture();
+  // Reset board to plain (no highlight)
+  if (currentBoard === "globe") {
+    buildGlobeTexture();
+  } else {
+    drawMapBase();
+  }
 }
-
-let lastHighlightId = null;
 
 function endGame() {
   roundActive = false;
-  accelerating = false;
-  document
-    .getElementById("btn-accelerate")
-    .classList.remove("visible", "pressing");
   showScreen("end-screen");
 
   document.getElementById("end-title").textContent = t("end_title");
   document.getElementById("btn-replay").textContent = t("replay");
   document.getElementById("btn-back-menu").textContent = t("back_menu");
 
+  const pct = Math.round((score / roundsThisGame) * 100);
   let msg;
-  if (score >= 4) msg = t("score_amazing");
-  else if (score >= 3) msg = t("score_good");
+  if (pct >= 80) msg = t("score_amazing");
+  else if (pct >= 60) msg = t("score_good");
   else msg = t("score_try");
 
   document.getElementById("final-score").textContent =
-    msg + score + " / " + MAX_ROUNDS;
+    msg + score + " / " + roundsThisGame + " — " + pct + "%";
+
+  const retryBtn = document.getElementById("btn-retry-mistakes");
+  retryBtn.textContent = t("btn_retry_mistakes");
+  retryBtn.classList.toggle("hidden", missedTargets.length === 0);
 }
 
 // ── Input Handling ──────────────────────────────────────────
@@ -835,6 +1412,9 @@ function setupInput() {
   const container = document.getElementById("scene-container");
 
   let lastMoveTime = 0; // timestamp of last drag move event
+  let downX = 0,
+    downY = 0,
+    downTime = 0; // for click-vs-drag detection
 
   function applyDragDelta(dx, dy) {
     const sensitivity = 0.005;
@@ -854,24 +1434,58 @@ function setupInput() {
     }
   }
 
+  // A "clean" release (little movement, not held too long) resolves the
+  // round by hit-testing the globe at that screen position. A drag just
+  // rotates the globe and does not answer.
+  function maybeResolveClick(x, y) {
+    if (currentBoard !== "globe" || !roundActive || recenterAnim) return;
+    const dist = Math.hypot(x - downX, y - downY);
+    const elapsed = performance.now() - downTime;
+    if (dist < 6 && elapsed < 500) {
+      const ndc = new THREE.Vector2(
+        (x / window.innerWidth) * 2 - 1,
+        -(y / window.innerHeight) * 2 + 1,
+      );
+      handleAnswerClick(getCountryAtNDC(ndc));
+    }
+  }
+
   container.addEventListener("mousedown", (e) => {
     dragging = true;
     dragPrev = { x: e.clientX, y: e.clientY };
+    downX = e.clientX;
+    downY = e.clientY;
+    downTime = performance.now();
     velocityLon = 0;
     velocityLat = 0;
+    if (currentBoard === "globe" && roundActive && !recenterAnim) {
+      const cf = countryAtScreenPoint(e.clientX, e.clientY);
+      setHoverPress(cf, cf);
+    }
   });
 
-  window.addEventListener("mouseup", () => {
+  window.addEventListener("mouseup", (e) => {
     dragging = false;
     killInertiaIfPaused();
+    maybeResolveClick(e.clientX, e.clientY);
+    setHoverPress(null, null);
   });
 
   window.addEventListener("mousemove", (e) => {
-    if (!dragging || recenterAnim) return;
-    const dx = e.clientX - dragPrev.x;
-    const dy = e.clientY - dragPrev.y;
-    applyDragDelta(dx, dy);
-    dragPrev = { x: e.clientX, y: e.clientY };
+    if (dragging && !recenterAnim) {
+      const dx = e.clientX - dragPrev.x;
+      const dy = e.clientY - dragPrev.y;
+      applyDragDelta(dx, dy);
+      dragPrev = { x: e.clientX, y: e.clientY };
+    }
+    if (currentBoard !== "globe" || !roundActive || recenterAnim) return;
+    const cf = countryAtScreenPoint(e.clientX, e.clientY);
+    if (dragging) {
+      const dist = Math.hypot(e.clientX - downX, e.clientY - downY);
+      setHoverPress(cf, dist < 6 ? cf : null);
+    } else {
+      setHoverPress(cf, null);
+    }
   });
 
   function getTwoFingerAngle(t0, t1) {
@@ -892,8 +1506,15 @@ function setupInput() {
           x: e.touches[0].clientX,
           y: e.touches[0].clientY,
         };
+        downX = e.touches[0].clientX;
+        downY = e.touches[0].clientY;
+        downTime = performance.now();
         velocityLon = 0;
         velocityLat = 0;
+        if (currentBoard === "globe" && roundActive && !recenterAnim) {
+          const cf = countryAtScreenPoint(downX, downY);
+          setHoverPress(cf, cf);
+        }
       }
     },
     { passive: true },
@@ -908,6 +1529,9 @@ function setupInput() {
       if (e.touches.length === 0) {
         dragging = false;
         killInertiaIfPaused();
+        const tt = e.changedTouches[0];
+        if (tt) maybeResolveClick(tt.clientX, tt.clientY);
+        setHoverPress(null, null);
       }
     },
     { passive: true },
@@ -931,6 +1555,15 @@ function setupInput() {
           x: e.touches[0].clientX,
           y: e.touches[0].clientY,
         };
+        if (currentBoard === "globe" && roundActive) {
+          const dist = Math.hypot(
+            e.touches[0].clientX - downX,
+            e.touches[0].clientY - downY,
+          );
+          const cf =
+            dist < 6 ? countryAtScreenPoint(downX, downY) : null;
+          setHoverPress(cf, cf);
+        }
       }
     },
     { passive: true },
@@ -976,14 +1609,14 @@ function correctNorthUp() {
   } else if (absLatAngle > POLE_END) {
     strength = 0.0;
   } else {
-    const t = (absLatAngle - POLE_START) / (POLE_END - POLE_START);
-    strength = 1.0 - t * t * (3 - 2 * t); // smoothstep
+    const tt = (absLatAngle - POLE_START) / (POLE_END - POLE_START);
+    strength = 1.0 - tt * tt * (3 - 2 * tt); // smoothstep
   }
 
   globeRoll *= 1 - strength * 0.12;
 }
 
-// ── Timer & Round ───────────────────────────────────────────
+// ── Timer (pacing only) & Answer Resolution ─────────────────
 function updateTimer() {
   if (!roundActive) return;
 
@@ -991,106 +1624,94 @@ function updateTimer() {
   const realDelta = (now - lastTimerTick) / 1000;
   lastTimerTick = now;
 
-  // Progressive acceleration: starts at 2x, ramps up to 8x over ~3 seconds
-  if (accelerating) {
-    accelHoldTime += realDelta;
-    const ramp = Math.min(accelHoldTime / 3, 1); // 0→1 over 3 seconds
-    const speed = 2 + ramp * 6; // 2x → 8x
-    timerAccum += realDelta * speed;
-  } else {
-    accelHoldTime = 0;
-    timerAccum += realDelta;
-  }
+  timerAccum += realDelta;
 
   const remaining = Math.max(0, ROUND_TIME - timerAccum);
   const frac = remaining / ROUND_TIME;
 
-  // Ease-in quadratic: t² — earth approaches progressively
-  const tt = 1 - frac;
-  chickenY = tt * tt;
-
   const bar = document.getElementById("timer-bar");
   bar.style.width = frac * 100 + "%";
-
-  if (frac < 0.4) {
-    bar.classList.add("warning");
-  } else {
-    bar.classList.remove("warning");
-  }
+  bar.classList.toggle("warning", frac < 0.4);
 
   if (remaining <= 0) {
-    resolveRound();
+    resolveRound(null);
   }
 }
 
-function resolveRound() {
-  previousTarget = currentTarget;
-  roundActive = false;
-  accelerating = false;
-  document
-    .getElementById("btn-accelerate")
-    .classList.remove("visible", "pressing");
-
-  const hoveredCountry = getCountryAtCenter();
-  const correct =
-    hoveredCountry && hoveredCountry.geoId === currentTarget.geoId;
-
-  // Start chicken dive-into-globe animation
-  diveAnim = {
-    startTime: performance.now(),
-    duration: 500,
-    startZ: chickenGroup ? chickenGroup.position.z : camera.position.z - 1.2,
-    startY: chickenGroup ? chickenGroup.position.y : -0.1,
-    startScaleW: chickenGroup ? chickenGroup.scale.x : 0.32,
-    startScaleH: chickenGroup ? chickenGroup.scale.y : 0.25,
-  };
-
-  // Show feedback after dive completes
-  setTimeout(() => showFeedback(correct), 520);
+// Entry point for both boards' click handlers.
+function handleAnswerClick(clickedCountry) {
+  if (!roundActive) return;
+  if (!clickedCountry) return; // water click outside Continent mode: ignored, round continues
+  resolveRound(clickedCountry);
 }
 
-function showFeedback(correct) {
+function resolveRound(clickedCountry) {
+  previousTarget = currentTarget;
+  roundActive = false;
+
+  const correct =
+    currentMode === "continent"
+      ? isContinentModeCorrect(clickedCountry, currentTarget)
+      : !!clickedCountry && clickedCountry.geoId === currentTarget.geoId;
+
+  if (!correct) missedTargets.push(currentTarget);
+
+  showFeedback(correct, clickedCountry);
+}
+
+function showFeedback(correct, clickedCountry) {
   const overlay = document.getElementById("feedback-overlay");
-  const fbChicken = document.getElementById("feedback-chicken");
+
+  const labelEl = document.getElementById("feedback-label");
 
   if (correct) {
     score++;
     overlay.className = "correct";
-    const cx = window.innerWidth / 2;
-    const cy = window.innerHeight / 2;
-    spawnConfetti(cx, cy);
-    fbChicken.src = "chicken-happy.png";
-    // Center bottom
-    fbChicken.style.left = "50%";
-    fbChicken.style.top = "auto";
-    fbChicken.style.bottom = "5%";
-    fbChicken.style.transform = "translateX(-50%) scale(0)";
+    spawnConfetti(window.innerWidth / 2, window.innerHeight / 2);
+    labelEl.textContent = "✅ " + formatTargetLabel(currentTarget);
   } else {
     overlay.className = "incorrect";
-    const container = document.getElementById("scene-container");
-    container.classList.add("shake");
-    setTimeout(() => container.classList.remove("shake"), 400);
-    buildGlobeTexture(null, currentTarget.geoId);
+    const shakeTarget =
+      currentBoard === "globe"
+        ? document.getElementById("scene-container")
+        : document.getElementById("map-container");
+    shakeTarget.classList.add("shake");
+    setTimeout(() => shakeTarget.classList.remove("shake"), 400);
 
-    // Recenter globe on correct country + zoom in
-    startRecenterAnimation(currentTarget);
+    let text = t("correct_answer_was") + formatTargetLabel(currentTarget);
+    if (clickedCountry) {
+      text += "\n" + t("you_clicked") + formatClickedLabel(clickedCountry);
+    }
+    labelEl.textContent = text;
+  }
+  labelEl.classList.add("show");
 
-    // Pointing chicken next to the correct country
-    const imgH = Math.min(window.innerWidth * 0.4, 220) * 0.8;
-    fbChicken.src = "chicken-point.png";
-    fbChicken.style.left = window.innerWidth / 2 + 60 + "px";
-    fbChicken.style.top = window.innerHeight / 2 - imgH / 2 + "px";
-    fbChicken.style.bottom = "auto";
-    fbChicken.style.transform = "scale(0)";
+  // Always reveal the correct answer in green; on a miss, also show the
+  // player's wrong answer in red.
+  const correctAnswer =
+    currentMode === "continent" ? currentTarget : currentTarget.geoId;
+  const wrongAnswer =
+    !correct && clickedCountry
+      ? currentMode === "continent"
+        ? typeof clickedCountry === "string"
+          ? clickedCountry
+          : clickedCountry.continent
+        : clickedCountry.geoId
+      : null;
+
+  if (currentBoard === "globe") {
+    buildGlobeTexture(correctAnswer, wrongAnswer);
+    if (!correct) {
+      const recenterCentroid = getCentroidForTarget(currentTarget);
+      if (recenterCentroid) startRecenterAnimation(recenterCentroid);
+    }
+  } else {
+    drawMapOverlay(correctAnswer, wrongAnswer);
   }
 
-  // Show feedback chicken with bounce-in
-  fbChicken.classList.add("show");
-
-  const feedbackDuration = correct ? 2000 : 4000;
+  const feedbackDuration = correct ? 1200 : 2800;
   setTimeout(() => {
     overlay.className = "";
-    fbChicken.classList.remove("show");
     recenterAnim = null;
     nextRound();
   }, feedbackDuration);
@@ -1123,15 +1744,6 @@ function updateAndDrawParticles() {
   const h = window.innerHeight;
   ctx.clearRect(0, 0, w, h);
 
-  // Draw crosshair on 2D overlay when round is active
-  if (roundActive) {
-    drawCrosshair(ctx, w / 2, h / 2);
-    // 2D speed lines around chicken
-    if (chickenY > 0.03) {
-      drawSpeedLines(ctx, w / 2, h / 2);
-    }
-  }
-
   particles = particles.filter((p) => p.life > 0);
 
   for (const p of particles) {
@@ -1153,167 +1765,42 @@ function updateAndDrawParticles() {
   ctx.globalAlpha = 1;
 }
 
-function drawSpeedLines(ctx, cx, cy) {
-  const intensity = Math.pow(chickenY, 1.8);
-  const maxLines = 60;
-  const numLines = Math.floor(intensity * maxLines);
-
-  ctx.save();
-  const chickenScreenY = cy + 30;
-
-  for (let i = 0; i < numLines; i++) {
-    const angle = (i * 137.508 * DEG) % (Math.PI * 2);
-    const offset = ((i * 73 + 17) % 50) / 50;
-    const innerR = 40 + offset * 20;
-    const lineLen = 20 + intensity * 100 + offset * 40;
-
-    const x1 = cx + Math.cos(angle) * innerR;
-    const y1 = chickenScreenY + Math.sin(angle) * innerR * 0.6;
-    const x2 = cx + Math.cos(angle) * (innerR + lineLen);
-    const y2 = chickenScreenY + Math.sin(angle) * (innerR + lineLen) * 0.6;
-
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.strokeStyle = `rgba(200,230,255,${intensity * 0.15 + offset * 0.1})`;
-    ctx.lineWidth = 1 + offset * 2.5;
-    ctx.stroke();
-  }
-  ctx.restore();
-}
-
-function drawCrosshair(ctx, cx, cy) {
-  const size = 10;
-  const gap = 3;
-  ctx.strokeStyle = "rgba(220,40,40,0.9)";
-  ctx.lineWidth = 2;
-  ctx.lineCap = "round";
-
-  // Horizontal
-  ctx.beginPath();
-  ctx.moveTo(cx - size, cy);
-  ctx.lineTo(cx - gap, cy);
-  ctx.moveTo(cx + gap, cy);
-  ctx.lineTo(cx + size, cy);
-  ctx.stroke();
-
-  // Vertical
-  ctx.beginPath();
-  ctx.moveTo(cx, cy - size);
-  ctx.lineTo(cx, cy - gap);
-  ctx.moveTo(cx, cy + gap);
-  ctx.lineTo(cx, cy + size);
-  ctx.stroke();
-}
-
 // ── Render Loop ─────────────────────────────────────────────
 function renderLoop() {
-  applyInertia();
-  correctNorthUp();
   updateTimer();
 
-  // Recenter animation (on wrong answer: interpolate lon/lat/roll)
-  if (recenterAnim) {
-    const elapsed = performance.now() - recenterAnim.startTime;
-    const rt = Math.min(1, elapsed / recenterAnim.duration);
-    // Ease-in-out cubic
-    const e =
-      rt < 0.5 ? 4 * rt * rt * rt : 1 - Math.pow(-2 * rt + 2, 3) / 2;
+  if (currentBoard === "globe") {
+    applyInertia();
+    correctNorthUp();
 
-    globeLon =
-      recenterAnim.fromLon +
-      (recenterAnim.toLon - recenterAnim.fromLon) * e;
-    globeLat =
-      recenterAnim.fromLat +
-      (recenterAnim.toLat - recenterAnim.fromLat) * e;
-    globeRoll = recenterAnim.fromRoll * (1 - e);
-    camera.position.z =
-      recenterAnim.fromCamZ +
-      (recenterAnim.toCamZ - recenterAnim.fromCamZ) * e;
+    // Recenter animation (on wrong answer: interpolate lon/lat/roll)
+    if (recenterAnim) {
+      const elapsed = performance.now() - recenterAnim.startTime;
+      const rt = Math.min(1, elapsed / recenterAnim.duration);
+      // Ease-in-out cubic
+      const e =
+        rt < 0.5 ? 4 * rt * rt * rt : 1 - Math.pow(-2 * rt + 2, 3) / 2;
 
-    if (rt >= 1) {
-      recenterAnim = null;
-    }
-  }
+      globeLon =
+        recenterAnim.fromLon +
+        (recenterAnim.toLon - recenterAnim.fromLon) * e;
+      globeLat =
+        recenterAnim.fromLat +
+        (recenterAnim.toLat - recenterAnim.fromLat) * e;
+      globeRoll = recenterAnim.fromRoll * (1 - e);
 
-  // Build quaternion from lon/lat/roll and apply to globe mesh
-  updateGlobeQuat();
-  globeMesh.quaternion.copy(globeQuat);
-
-  // Camera dive animation
-  if (roundActive) {
-    const z = CAM_START_Z - (CAM_START_Z - CAM_END_Z) * chickenY;
-    camera.position.z = z;
-  }
-
-  // Position chicken sprite between camera and globe
-  if (chickenGroup) {
-    chickenGroup.visible = roundActive || diveAnim !== null;
-
-    if (roundActive) {
-      const chickenZ = camera.position.z - 1.2;
-      chickenGroup.position.set(0, -0.1, chickenZ);
-      chickenGroup.renderOrder = 999;
-
-      // Slight bobbing
-      const bob =
-        Math.sin(performance.now() * 0.005) * 0.02 * (1 - chickenY);
-      chickenGroup.position.y += bob;
-
-      // Scale: shrinks slightly during dive
-      const baseW = 0.32;
-      const baseH = 0.25;
-      const s = 1.0 - chickenY * 0.15;
-      chickenGroup.scale.set(baseW * s, baseH * s, 1);
-
-      // Slight vibration at high speed
-      if (chickenY > 0.5) {
-        const shake = (chickenY - 0.5) * 0.01;
-        chickenGroup.position.x += (Math.random() - 0.5) * shake;
-        chickenGroup.position.y += (Math.random() - 0.5) * shake;
-      }
-    } else if (diveAnim) {
-      // Chicken shrinks and rises toward crosshair, simulating a dive
-      const elapsed = performance.now() - diveAnim.startTime;
-      const dt = Math.min(1, elapsed / diveAnim.duration);
-      const e = dt * dt; // ease-in (accelerating)
-
-      // Stay at same z (depthTest off ensures visibility), move toward crosshair
-      chickenGroup.position.z = diveAnim.startZ;
-      chickenGroup.position.x = 0;
-      const targetY = -0.02;
-      chickenGroup.position.y =
-        diveAnim.startY + (targetY - diveAnim.startY) * e;
-      chickenGroup.renderOrder = 999;
-
-      // Shrink uniformly to tiny
-      const shrink = 1 - e * 0.95;
-      chickenGroup.scale.set(
-        diveAnim.startScaleW * shrink,
-        diveAnim.startScaleH * shrink,
-        1,
-      );
-
-      if (dt >= 1) {
-        diveAnim = null;
+      if (rt >= 1) {
+        recenterAnim = null;
       }
     }
+
+    // Build quaternion from lon/lat/roll and apply to globe mesh
+    updateGlobeQuat();
+    globeMesh.quaternion.copy(globeQuat);
+
+    renderer.render(scene, camera);
   }
 
-  // Update 3D speed particles
-  updateSpeedParticles();
-
-  // Highlight country at center
-  if (roundActive && geoData) {
-    const hovered = getCountryAtCenter();
-    const hoveredId = hovered ? hovered.geoId : null;
-    if (hoveredId !== lastHighlightId) {
-      lastHighlightId = hoveredId;
-      buildGlobeTexture(hoveredId);
-    }
-  }
-
-  renderer.render(scene, camera);
   updateAndDrawParticles();
 
   requestAnimationFrame(renderLoop);
