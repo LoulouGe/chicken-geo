@@ -17,7 +17,6 @@ const UI_STRINGS = {
     continent_amerique_sud: "Amérique du Sud",
     continent_oceanie: "Océanie",
     back: "Retour",
-    click_on: "Clique sur",
     end_title: "Partie terminée !",
     replay: "Rejouer",
     btn_retry_mistakes: "Rejoue tes erreurs",
@@ -42,7 +41,6 @@ const UI_STRINGS = {
     continent_amerique_sud: "South America",
     continent_oceanie: "Oceania",
     back: "Back",
-    click_on: "Click on",
     end_title: "Game over!",
     replay: "Play again",
     btn_retry_mistakes: "Retry my mistakes",
@@ -67,7 +65,6 @@ const UI_STRINGS = {
     continent_amerique_sud: "América del Sur",
     continent_oceanie: "Oceanía",
     back: "Atrás",
-    click_on: "Haz clic en",
     end_title: "¡Partida terminada!",
     replay: "Volver a jugar",
     btn_retry_mistakes: "Repite tus errores",
@@ -563,23 +560,25 @@ function getLabelAnchor(answerId) {
   return cf ? getCountryCentroid(cf) : null;
 }
 
+// No flag here — just the name, so it stays small and centered on the
+// country shape instead of the flag pushing it off to one side.
 function labelTextForAnswerId(answerId) {
   if (currentMode === "continent") return formatTargetLabel(answerId);
   const cf = countryFeatureByName.get(answerId);
-  return cf ? formatTargetLabel(cf) : answerId;
+  return cf ? cf[currentLang].name : answerId;
 }
 
 function drawAnswerLabel(ctx, answerId, w, h, projFn) {
   const anchor = getLabelAnchor(answerId);
   if (!anchor) return;
   const [x, y] = projFn(anchor.lon, anchor.lat, w, h);
-  const fontSize = Math.round(h * 0.022);
+  const fontSize = Math.round(h * 0.01);
   const text = labelTextForAnswerId(answerId);
   ctx.save();
   ctx.font = "700 " + fontSize + "px Poppins, sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.lineWidth = Math.max(2, fontSize * 0.18);
+  ctx.lineWidth = Math.max(1, fontSize * 0.15);
   ctx.strokeStyle = "rgba(255,255,255,0.9)";
   ctx.strokeText(text, x, y);
   ctx.fillStyle = "#12213f";
@@ -1072,7 +1071,6 @@ function nextQuizItem() {
   wrongAttempts = 0;
   forcedReveal = false;
   stopForcedRevealBlink();
-  hideHint();
   hideWrongLabel();
 
   currentTarget = quizOrder[quizIndex];
@@ -1131,18 +1129,6 @@ function computeScorePct() {
 
 function updateHudScore() {
   document.getElementById("hud-score").textContent = computeScorePct() + "%";
-}
-
-function showHint() {
-  const el = document.getElementById("hud-hint");
-  el.innerHTML = t("click_on") + " <b>" + formatTargetLabel(currentTarget) + "</b>";
-  el.classList.add("show");
-}
-
-function hideHint() {
-  const el = document.getElementById("hud-hint");
-  el.classList.remove("show");
-  el.textContent = "";
 }
 
 let wrongLabelTimeout = null;
@@ -1473,8 +1459,6 @@ function handleWrong(clicked) {
     return;
   }
 
-  showHint();
-
   const wrongAnswer = clickedAsAnswerId(clicked);
   if (currentBoard === "globe") {
     buildGlobeTexture(null, wrongAnswer);
@@ -1497,7 +1481,6 @@ function handleWrong(clicked) {
 // reveal color) until the player clicks specifically on it.
 function triggerForcedReveal() {
   forcedReveal = true;
-  hideHint();
   const correctAnswer = targetAsAnswerId();
   let on = false;
   stopForcedRevealBlink();
@@ -1544,7 +1527,6 @@ function handleSkip() {
   recordOutcome(4);
   updateHudScore();
   missedTargets.push(currentTarget);
-  hideHint();
   hideWrongLabel();
 
   const correctAnswer = targetAsAnswerId();

@@ -235,32 +235,6 @@ body {
   background: rgba(255, 255, 255, 0.18);
 }
 
-.hud-hint {
-  position: absolute;
-  top: 62px;
-  left: 16px;
-  z-index: 10;
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--ink);
-  font-size: clamp(0.8rem, 2vw, 0.95rem);
-  font-weight: 600;
-  padding: 8px 14px;
-  border-radius: 8px;
-  opacity: 0;
-  transform: translateY(-6px);
-  transition: opacity 0.2s, transform 0.2s;
-  pointer-events: none;
-}
-
-.hud-hint.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.hud-hint b {
-  font-weight: 700;
-}
-
 /* Names whatever the player just clicked on a wrong guess, briefly. */
 .hud-wrong-label {
   position: absolute;
