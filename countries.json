@@ -2854,5 +2854,22 @@
    "capital": "Harare"
   },
   "flag": "🇿🇼"
+ },
+ {
+  "geoId": "Greenland",
+  "continent": "europe",
+  "fr": {
+   "name": "Groenland",
+   "capital": "Nuuk"
+  },
+  "en": {
+   "name": "Greenland",
+   "capital": "Nuuk"
+  },
+  "es": {
+   "name": "Groenlandia",
+   "capital": "Nuuk"
+  },
+  "flag": "🇬🇱"
  }
 ]

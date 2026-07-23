@@ -456,8 +456,13 @@ function defaultProj(lon, lat, w, h) {
 // Render a single feature's polygons onto a context. projFn defaults to the
 // full-world equirectangular projection; the flat map passes a scoped one.
 // glowColor, when set, draws a colored glow/outline in that color instead of
-// the default thin border (used to reveal the correct/wrong answer).
-function drawFeature(ctx, feature, w, h, color, glowColor, projFn) {
+// the default thin border (used to reveal the correct/wrong answer). noBorder
+// skips the border entirely — used in Continent mode so same-colored
+// neighboring countries blend into one solid block instead of showing every
+// internal country line (there's no real polygon-merge, but since every
+// country shares the exact same fill color, an invisible seam is all that's
+// needed for it to read as a single continent-shaped blob).
+function drawFeature(ctx, feature, w, h, color, glowColor, projFn, noBorder) {
   const proj = projFn || defaultProj;
   const geom = feature.geometry;
   const polys =
@@ -486,7 +491,7 @@ function drawFeature(ctx, feature, w, h, color, glowColor, projFn) {
       ctx.lineWidth = 3;
       ctx.stroke();
       ctx.restore();
-    } else {
+    } else if (!noBorder) {
       ctx.strokeStyle = BORDER_COLOR;
       ctx.lineWidth = 1;
       ctx.stroke();
@@ -497,10 +502,12 @@ function drawFeature(ctx, feature, w, h, color, glowColor, projFn) {
 // Draw every country in its normal (uniform) land color. Used to build the
 // base layer, and to restore land after an ocean highlight (ocean regions
 // are simple lon/lat shapes, not real coastlines, so they must never stay
-// drawn on top of land).
+// drawn on top of land). In Continent mode, borders are skipped so each
+// continent reads as a single block rather than a patchwork of countries.
 function drawAllCountries(ctx, w, h, projFn) {
+  const noBorder = currentMode === "continent";
   for (const feature of geoData.features) {
-    drawFeature(ctx, feature, w, h, LAND_COLOR, null, projFn);
+    drawFeature(ctx, feature, w, h, LAND_COLOR, null, projFn, noBorder);
   }
 }
 
@@ -538,11 +545,12 @@ function buildGlobeTexture(correctAnswer, wrongAnswer) {
 // the quiz — a running "result map" like Seterra's own end-of-quiz review,
 // built up live instead of only shown at the end.
 function drawPersistentOutcomes(ctx, w, h, projFn) {
+  const noBorder = currentMode === "continent";
   for (const [answerId, tier] of targetOutcomes) {
     const color = TIER_COLORS[tier];
     for (const cf of countryFeatures) {
       if (cf.geoId === answerId || cf.continent === answerId) {
-        drawFeature(ctx, cf.feature, w, h, color, null, projFn);
+        drawFeature(ctx, cf.feature, w, h, color, null, projFn, noBorder);
       }
     }
   }
@@ -602,6 +610,23 @@ function drawAnswerHighlights(ctx, w, h, correctAnswer, wrongAnswer, projFn) {
   }
 }
 
+// In Continent mode, hovering highlights every country in that continent
+// (not just the one under the cursor) — otherwise a single lit-up country
+// would still visibly outline itself against its same-colored neighbors,
+// giving away the country breakdown the solid-block look is meant to hide.
+function drawHoverHighlight(ctx, w, h, hoverCf, projFn) {
+  if (!hoverCf) return;
+  if (currentMode === "continent") {
+    for (const cf of countryFeatures) {
+      if (cf.continent === hoverCf.continent) {
+        drawFeature(ctx, cf.feature, w, h, LAND_HOVER, null, projFn, true);
+      }
+    }
+  } else {
+    drawFeature(ctx, hoverCf.feature, w, h, LAND_HOVER, null, projFn);
+  }
+}
+
 // Redraw the globe with just a hover highlight (lighter) — cosmetic-only
 // feedback while the round is still active (before it resolves).
 function applyGlobeHover(hoverCf) {
@@ -612,9 +637,7 @@ function applyGlobeHover(hoverCf) {
 
   ctx.drawImage(baseTexCanvas, 0, 0);
   drawPersistentOutcomes(ctx, w, h, defaultProj);
-  if (hoverCf) {
-    drawFeature(ctx, hoverCf.feature, w, h, LAND_HOVER, null);
-  }
+  drawHoverHighlight(ctx, w, h, hoverCf, defaultProj);
   globeTexture.needsUpdate = true;
 }
 
@@ -754,33 +777,23 @@ function ringSignedArea(ring) {
   return area / 2;
 }
 
-// Centroid of a polygon ring using signed-area-weighted formula
-function ringCentroid(ring) {
-  let area = 0,
-    cx = 0,
-    cy = 0;
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const x0 = ring[j][0],
-      y0 = ring[j][1];
-    const x1 = ring[i][0],
-      y1 = ring[i][1];
-    const cross = x0 * y1 - x1 * y0;
-    area += cross;
-    cx += (x0 + x1) * cross;
-    cy += (y0 + y1) * cross;
+// Bounding-box center of a polygon ring. Used instead of an area-weighted
+// mass centroid: for long/thin or irregularly-bulged shapes (Chile, Norway,
+// Italy's boot), the mass centroid gets pulled toward whichever part has the
+// most area, landing visibly off-center from the shape as a whole — the
+// midpoint of its lon/lat extent reads as "centered" much more reliably.
+function ringBoundingBoxCenter(ring) {
+  let minLon = Infinity,
+    maxLon = -Infinity,
+    minLat = Infinity,
+    maxLat = -Infinity;
+  for (const [lon, lat] of ring) {
+    if (lon < minLon) minLon = lon;
+    if (lon > maxLon) maxLon = lon;
+    if (lat < minLat) minLat = lat;
+    if (lat > maxLat) maxLat = lat;
   }
-  area /= 2;
-  if (Math.abs(area) < 1e-10) {
-    // Degenerate polygon: fall back to simple average
-    let sx = 0,
-      sy = 0;
-    for (const c of ring) {
-      sx += c[0];
-      sy += c[1];
-    }
-    return { lon: sx / ring.length, lat: sy / ring.length };
-  }
-  return { lon: cx / (6 * area), lat: cy / (6 * area) };
+  return { lon: (minLon + maxLon) / 2, lat: (minLat + maxLat) / 2 };
 }
 
 function getCountryCentroid(cf) {
@@ -805,7 +818,7 @@ function getCountryCentroid(cf) {
     }
   }
   if (!bestRing) return null;
-  return ringCentroid(bestRing);
+  return ringBoundingBoxCenter(bestRing);
 }
 
 function startRecenterAnimation(centroid) {
@@ -885,14 +898,20 @@ function mercatorYInv(y) {
 // the screen edge to edge.
 const MAP_ZOOM_OUT = 0.85;
 
-// Fit the lon/lat bounds to fully cover the w×h canvas at a single uniform
-// scale (no distortion, unlike stretching each axis independently) — like a
-// CSS `background-size: cover`, so the shorter axis may crop slightly at the
-// edges rather than leaving blank letterbox bars.
+// World scope uses "cover" (like CSS `background-size: cover`): the shorter
+// axis may crop slightly rather than leaving blank letterbox bars, since the
+// world's bounds are already close to most screens' aspect ratio. A specific
+// continent's bounding box can be a very different shape (e.g. South America
+// is tall and narrow) — forcing "cover" there would crop whole countries off
+// the top/bottom, so continent scopes use "contain" instead: the full
+// bounding box always stays visible, accepting letterbox bars if needed.
 function getMapFit(w, h) {
   const boundsW = (mapProjection.maxLon - mapProjection.minLon) * DEG;
   const boundsH = mercatorY(mapProjection.maxLat) - mercatorY(mapProjection.minLat);
-  const scale = Math.max(w / boundsW, h / boundsH) * MAP_ZOOM_OUT;
+  const scale =
+    currentScope === "world"
+      ? Math.max(w / boundsW, h / boundsH) * MAP_ZOOM_OUT
+      : Math.min(w / boundsW, h / boundsH) * MAP_ZOOM_OUT;
   return {
     scale,
     offsetX: (w - boundsW * scale) / 2,
@@ -948,7 +967,7 @@ function applyMapHover(hoverCf) {
   if (!hoverCf) return;
   const w = window.innerWidth;
   const h = window.innerHeight;
-  drawFeature(mapCtx, hoverCf.feature, w, h, LAND_HOVER, null, mapProjFn);
+  drawHoverHighlight(mapCtx, w, h, hoverCf, mapProjFn);
 }
 
 function getCountryAtMapXY(px, py) {
