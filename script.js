@@ -954,18 +954,14 @@ function mercatorYInv(y) {
   return (2 * Math.atan(Math.exp(y)) - Math.PI / 2) / DEG;
 }
 
-// Fit the lon/lat bounds into a w×h canvas at a single uniform scale
-// (letterboxed/pillarboxed rather than stretched). Both axes are expressed
-// in the same radian-based unit (lon in radians, lat via mercatorY) so the
-// scale is uniform in both directions, keeping the projection conformal.
+// Fit the lon/lat bounds to fill the w×h canvas exactly (stretched, like
+// Seterra's own flat map, not letterboxed) — independent X/Y scale factors.
 function getMapFit(w, h) {
   const boundsW = (mapProjection.maxLon - mapProjection.minLon) * DEG;
   const boundsH = mercatorY(mapProjection.maxLat) - mercatorY(mapProjection.minLat);
-  const scale = Math.min(w / boundsW, h / boundsH);
   return {
-    scale,
-    offsetX: (w - boundsW * scale) / 2,
-    offsetY: (h - boundsH * scale) / 2,
+    scaleX: w / boundsW,
+    scaleY: h / boundsH,
   };
 }
 
@@ -973,13 +969,17 @@ function getMapFit(w, h) {
 // horizontal parallels — no curved/pinched poles like a sinusoidal
 // projection. The globe's texture (defaultProj) stays plain equirectangular
 // — that one wraps onto an actual sphere, which needs no flat-map correction.
+// Latitude is clamped to the visible range before projecting: shapes that
+// reach the actual pole (90°, e.g. the polar ocean caps) would otherwise
+// hit mercatorY's ±Infinity asymptote and render as a broken/joined shape.
 function mapProjFn(lon, lat, w, h) {
   const fit = getMapFit(w, h);
   const centerLonRad = ((mapProjection.minLon + mapProjection.maxLon) / 2) * DEG;
   const boundsW = (mapProjection.maxLon - mapProjection.minLon) * DEG;
+  const clampedLat = Math.min(mapProjection.maxLat, Math.max(mapProjection.minLat, lat));
   const sx = lon * DEG - centerLonRad;
-  const x = fit.offsetX + (sx + boundsW / 2) * fit.scale;
-  const y = fit.offsetY + (mercatorY(mapProjection.maxLat) - mercatorY(lat)) * fit.scale;
+  const x = (sx + boundsW / 2) * fit.scaleX;
+  const y = (mercatorY(mapProjection.maxLat) - mercatorY(clampedLat)) * fit.scaleY;
   return [x, y];
 }
 
@@ -1021,9 +1021,9 @@ function getCountryAtMapXY(px, py) {
   const fit = getMapFit(w, h);
   const centerLonRad = ((mapProjection.minLon + mapProjection.maxLon) / 2) * DEG;
   const boundsW = (mapProjection.maxLon - mapProjection.minLon) * DEG;
-  const yMerc = mercatorY(mapProjection.maxLat) - (py - fit.offsetY) / fit.scale;
+  const yMerc = mercatorY(mapProjection.maxLat) - py / fit.scaleY;
   const lat = mercatorYInv(yMerc);
-  const lonRad = (px - fit.offsetX) / fit.scale - boundsW / 2 + centerLonRad;
+  const lonRad = px / fit.scaleX - boundsW / 2 + centerLonRad;
   const lon = lonRad / DEG;
   return resolveClickAtLonLat(lon, lat);
 }
