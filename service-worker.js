@@ -1,18 +1,4 @@
-const CACHE_NAME = 'chicken-geo-v3';
-const URLS_TO_CACHE = [
-  '/',
-  '/chicken-geo/',
-  '/index.html',
-  '/style.css',
-  '/script.js',
-  '/countries.json',
-  '/manifest.json',
-  'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js',
-  'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;600;700&display=swap',
-  'https://fonts.gstatic.com/s/playfairdisplay/v30/nuFvD-vgNJwUr3WG8tNUf_BvLIIVN8dLRnWtL8F1eKvXwEZpd8SkCg.0.woff2',
-  'https://fonts.gstatic.com/s/playfairdisplay/v30/nuFvD-vgNJwUr3WG8tNUf_BvLIIVN8dLRnWtL8F1eKvXwEZpd8SkCg.900.woff2#async',
-  'https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLFj_Z1xlFd2JQEl1qsFd_E8XW98.woff2',
-];
+const CACHE_NAME = 'chicken-geo-v9';
 
 // Install event - cache app shell
 self.addEventListener('install', event => {
@@ -23,8 +9,8 @@ self.addEventListener('install', event => {
         '/',
         '/chicken-geo/',
         '/index.html',
-        '/style.css',
-        '/script.js',
+        '/style.css?v=9',
+        '/script.js?v=9',
         '/countries.json',
         '/manifest.json',
       ];
