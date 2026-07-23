@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chicken-geo-v6';
+const CACHE_NAME = 'chicken-geo-v9';
 
 // Install event - cache app shell
 self.addEventListener('install', event => {
@@ -9,11 +9,10 @@ self.addEventListener('install', event => {
         '/',
         '/chicken-geo/',
         '/index.html',
-        '/style.css',
-        '/script.js',
+        '/style.css?v=9',
+        '/script.js?v=9',
         '/countries.json',
         '/manifest.json',
-        '/acceuil.png',
       ];
       return cache.addAll(localAssets).catch(() => {
         // If any fail, continue anyway

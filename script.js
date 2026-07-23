@@ -3,8 +3,9 @@ const UI_STRINGS = {
   fr: {
     board_globe: "Globe 3D",
     board_map: "Carte",
+    choose_board: "Choisis un plateau de jeu",
     choose_mode: "Choisis un mode de jeu",
-    mode_continent: "Continent et Océans",
+    mode_continent: "Continent",
     mode_countries: "Pays",
     mode_capitals: "Capitales",
     choose_scope: "Choisis une zone",
@@ -21,28 +22,20 @@ const UI_STRINGS = {
     ocean_arctique: "Océan Arctique",
     ocean_austral: "Océan Austral",
     back: "Retour",
-    subtitle_continent: "Clique sur le continent ou l'océan !",
-    subtitle_countries: "Clique sur le bon pays !",
-    subtitle_capitals: "Clique sur le pays de cette capitale !",
-    question: "Question",
-    correct_answer_was: "La bonne réponse : ",
-    you_clicked: "Tu as cliqué : ",
+    click_on: "Clique sur",
     end_title: "Partie terminée !",
     replay: "Rejouer",
     btn_retry_mistakes: "Rejoue tes erreurs",
     back_menu: "Retour au menu",
-    score_amazing: "Incroyable ! ",
-    score_good: "Bien joué ! ",
-    score_try: "Continue de t’entraîner ! ",
-    load_error_btn: "Erreur de chargement",
     load_error_msg:
       "Impossible de charger la carte. Vérifie ta connexion et recharge la page.",
   },
   en: {
     board_globe: "3D Globe",
     board_map: "Map",
+    choose_board: "Choose a game board",
     choose_mode: "Choose a game mode",
-    mode_continent: "Continent & Oceans",
+    mode_continent: "Continent",
     mode_countries: "Countries",
     mode_capitals: "Capitals",
     choose_scope: "Choose an area",
@@ -59,28 +52,20 @@ const UI_STRINGS = {
     ocean_arctique: "Arctic Ocean",
     ocean_austral: "Southern Ocean",
     back: "Back",
-    subtitle_continent: "Click on the continent or ocean!",
-    subtitle_countries: "Click on the right country!",
-    subtitle_capitals: "Click on the country of this capital!",
-    question: "Question",
-    correct_answer_was: "Correct answer: ",
-    you_clicked: "You clicked: ",
+    click_on: "Click on",
     end_title: "Game over!",
     replay: "Play again",
     btn_retry_mistakes: "Retry my mistakes",
     back_menu: "Back to menu",
-    score_amazing: "Amazing! ",
-    score_good: "Well done! ",
-    score_try: "Keep practising! ",
-    load_error_btn: "Loading error",
     load_error_msg:
       "Could not load the map. Check your connection and reload the page.",
   },
   es: {
     board_globe: "Globo 3D",
     board_map: "Mapa",
+    choose_board: "Elige un tablero de juego",
     choose_mode: "Elige un modo de juego",
-    mode_continent: "Continente y Océanos",
+    mode_continent: "Continente",
     mode_countries: "Países",
     mode_capitals: "Capitales",
     choose_scope: "Elige una zona",
@@ -97,20 +82,11 @@ const UI_STRINGS = {
     ocean_arctique: "Océano Ártico",
     ocean_austral: "Océano Austral",
     back: "Atrás",
-    subtitle_continent: "¡Haz clic en el continente o el océano!",
-    subtitle_countries: "¡Haz clic en el país correcto!",
-    subtitle_capitals: "¡Haz clic en el país de esta capital!",
-    question: "Pregunta",
-    correct_answer_was: "Respuesta correcta: ",
-    you_clicked: "Has hecho clic en: ",
+    click_on: "Haz clic en",
     end_title: "¡Partida terminada!",
     replay: "Volver a jugar",
     btn_retry_mistakes: "Repite tus errores",
     back_menu: "Volver al menú",
-    score_amazing: "¡Increíble! ",
-    score_good: "¡Bien jugado! ",
-    score_try: "¡Sigue practicando! ",
-    load_error_btn: "Error de carga",
     load_error_msg:
       "No se pudo cargar el mapa. Comprueba tu conexión y recarga la página.",
   },
@@ -144,42 +120,70 @@ function formatClickedLabel(clicked) {
 }
 
 // ── Constants ───────────────────────────────────────────────
-const MAX_ROUNDS = 5;
-const ROUND_TIME = 18; // seconds — pacing only, resolution is click-driven
 const DEG = Math.PI / 180;
-
 const CAM_Z = 2.2; // fixed camera distance — the globe stays already zoomed in, no animated dolly
 
-const CONTINENT_COLORS = {
-  europe: "#7fd8be",
-  asie: "#ffb74d",
-  afrique: "#ffe066",
-  amerique_nord: "#8bd17c",
-  amerique_sud: "#ff8fa3",
-  oceanie: "#b39ddb",
-};
-const CONTINENTS = Object.keys(CONTINENT_COLORS);
-
-const OCEAN_COLORS = {
-  pacifique: "#4fc3f7",
-  atlantique: "#29b6f6",
-  indien: "#26c6da",
-  arctique: "#81d4fa",
-  austral: "#4dd0e1",
-};
-const OCEANS = Object.keys(OCEAN_COLORS);
-
-// Ocean regions defined by simple lon/lat rectangles (no polygon data
-// exists for oceans) — the Pacific wraps the antimeridian, so it's split
-// into two rectangles sharing the same slug.
-const OCEAN_REGIONS = [
-  { slug: "arctique", minLon: -180, maxLon: 180, minLat: 66, maxLat: 90 },
-  { slug: "austral", minLon: -180, maxLon: 180, minLat: -90, maxLat: -60 },
-  { slug: "atlantique", minLon: -70, maxLon: 20, minLat: -60, maxLat: 66 },
-  { slug: "indien", minLon: 20, maxLon: 145, minLat: -60, maxLat: 66 },
-  { slug: "pacifique", minLon: 145, maxLon: 180, minLat: -60, maxLat: 66 },
-  { slug: "pacifique", minLon: -180, maxLon: -70, minLat: -60, maxLat: 66 },
+const CONTINENTS = [
+  "europe",
+  "asie",
+  "afrique",
+  "amerique_nord",
+  "amerique_sud",
+  "oceanie",
 ];
+const OCEANS = ["pacifique", "atlantique", "indien", "arctique", "austral"];
+
+// Flat single-color palette (matches Seterra: land is one uniform color,
+// not colored per country/continent — the player must know borders/regions).
+const LAND_COLOR = "#1e8346";
+const LAND_HOVER = "#379050";
+const OCEAN_COLOR = "#a9cdd6";
+const BORDER_COLOR = "rgba(255,255,255,0.55)";
+
+const CORRECT_FILL = "rgba(46,158,91,0.9)";
+const CORRECT_GLOW = "rgba(80,230,140,0.9)";
+const WRONG_FILL = "rgba(217,83,79,0.9)";
+const WRONG_GLOW = "rgba(255,90,86,0.9)";
+
+// Ocean regions are hand-drawn shapes (no real marine-boundary data exists),
+// bent at major capes/straits (Panama, Cape Horn, Cape of Good Hope,
+// Indonesia) instead of straight lon/lat lines. The Pacific wraps the
+// antimeridian, so it's split into two ring entries sharing the same slug.
+const OCEAN_REGIONS = [
+  {
+    slug: "atlantique",
+    ring: [
+      [-75, 75], [-72, 40], [-80, 9], [-77, 0], [-70, -20], [-68, -56],
+      [-40, -68], [20, -68], [20, -35], [10, 5], [-6, 35], [-10, 60],
+    ],
+  },
+  {
+    slug: "indien",
+    ring: [
+      [20, -35], [20, -68], [110, -68], [113, -35], [105, -5],
+      [100, 8], [80, 15], [60, 25], [43, 12], [35, -10],
+    ],
+  },
+  {
+    slug: "pacifique",
+    ring: [[145, 75], [145, -35], [113, -35], [105, -5], [100, 8], [130, 25], [145, 55]],
+  },
+  {
+    slug: "pacifique",
+    ring: [
+      [-180, 75], [-180, -68], [-40, -68], [-68, -56], [-70, -20],
+      [-77, 0], [-80, 9], [-130, 30], [-165, 60],
+    ],
+  },
+];
+
+// Polar caps use a wavy latitude threshold (not a polygon — a ring
+// enclosing a pole needs special handling) so their edge isn't a flat line.
+function waveLat(lon, base, amp, freq, phase) {
+  return base + amp * Math.sin(lon * freq * DEG + phase);
+}
+const ARCTIC_WAVE = { base: 66, amp: 5, freq: 2.5, phase: 0.6 };
+const AUSTRAL_WAVE = { base: -60, amp: 5, freq: 2.2, phase: 1.3 };
 
 // A representative lon/lat used to recenter the globe on an ocean answer.
 const OCEAN_CENTERS = {
@@ -191,12 +195,34 @@ const OCEAN_CENTERS = {
 };
 
 function oceanAtLonLat(lon, lat) {
-  for (const r of OCEAN_REGIONS) {
-    if (lon >= r.minLon && lon <= r.maxLon && lat >= r.minLat && lat <= r.maxLat) {
-      return r.slug;
-    }
+  if (lat >= waveLat(lon, ARCTIC_WAVE.base, ARCTIC_WAVE.amp, ARCTIC_WAVE.freq, ARCTIC_WAVE.phase)) {
+    return "arctique";
+  }
+  if (lat <= waveLat(lon, AUSTRAL_WAVE.base, AUSTRAL_WAVE.amp, AUSTRAL_WAVE.freq, AUSTRAL_WAVE.phase)) {
+    return "austral";
+  }
+  for (const region of OCEAN_REGIONS) {
+    if (pointInPoly(region.ring, lon, lat)) return region.slug;
   }
   return "pacifique";
+}
+
+// Build a renderable ring for a polar cap: the wavy boundary latitude
+// across all longitudes, closed off across the pole itself.
+function polarCapRing(wave, poleLat) {
+  const ring = [];
+  for (let lon = -180; lon <= 180; lon += 10) {
+    ring.push([lon, waveLat(lon, wave.base, wave.amp, wave.freq, wave.phase)]);
+  }
+  ring.push([180, poleLat]);
+  ring.push([-180, poleLat]);
+  return ring;
+}
+
+function getOceanRings(slug) {
+  if (slug === "arctique") return [polarCapRing(ARCTIC_WAVE, 90)];
+  if (slug === "austral") return [polarCapRing(AUSTRAL_WAVE, -90)];
+  return OCEAN_REGIONS.filter((r) => r.slug === slug).map((r) => r.ring);
 }
 
 // ── State ───────────────────────────────────────────────────
@@ -210,17 +236,17 @@ let geoData = null;
 let countryFeatures = [];
 let countryFeatureByName = new Map();
 
-let score = 0;
-let round = 0;
-let roundsThisGame = MAX_ROUNDS;
-let currentTarget = null; // country/capital: a countryFeature; continent: a continent slug string
+// Quiz session: one pass through every target in the scope (shuffled),
+// staying on each question until answered correctly or skipped.
+let quizOrder = [];
+let quizIndex = 0;
+let correctCount = 0;
+let missedTargets = [];
+let currentTarget = null; // country/capital: a countryFeature; continent mode: a continent/ocean slug string
 let previousTarget = null;
-let missedTargets = []; // targets missed this game
-let retryPool = null; // when set, nextRound draws sequentially from this instead of random
-
 let roundActive = false;
-let timerAccum = 0; // accumulated virtual time (seconds)
-let lastTimerTick = 0; // real timestamp of last timer update
+let quizActive = false;
+let quizStartTime = 0;
 
 // Drag / rotation state
 let dragging = false;
@@ -245,7 +271,7 @@ function updateGlobeQuat() {
 let twoFingerAngle = null;
 let velocityRoll = 0;
 
-// Recenter animation state (used on wrong answer, globe only)
+// Recenter animation state (used when skipping, globe only)
 let recenterAnim = null;
 
 // Three.js objects
@@ -253,11 +279,7 @@ let scene, camera, renderer;
 let globeMesh, globeTexCanvas, globeTexCtx, globeTexture;
 let baseTexCanvas, baseTexCtx;
 
-// Particles overlay (2D confetti, shared by both boards)
-let particlesCanvas, particlesCtx;
-let particles = [];
-
-// Flat 2D map (canvas, equirectangular)
+// Flat 2D map (canvas, equirectangular/sinusoidal)
 let mapCanvas, mapCtx;
 let mapProjection = { minLon: -180, maxLon: 180, minLat: -85, maxLat: 85 };
 
@@ -269,26 +291,6 @@ const CONTINENT_BOUNDS = {
   amerique_sud: { minLon: -82, maxLon: -33, minLat: -56, maxLat: 14 },
   oceanie: { minLon: 110, maxLon: 180, minLat: -50, maxLat: 0 },
 };
-
-// Country candy colors (bright, cartoon-style palette)
-const PASTEL_COLORS = [
-  "#7fd8be",
-  "#ffb74d",
-  "#90caf9",
-  "#ff8fa3",
-  "#b39ddb",
-  "#ffe066",
-  "#80deea",
-  "#f48fb1",
-  "#aed581",
-  "#ffcc80",
-  "#81a4e0",
-  "#f06292",
-  "#a5d6a7",
-  "#ffd54f",
-  "#4dd0e1",
-  "#ce93d8",
-];
 
 // Reusable raycaster
 const _raycaster = new THREE.Raycaster();
@@ -303,10 +305,6 @@ async function boot() {
       console.log("Service Worker registration failed:", err);
     });
   }
-
-  particlesCanvas = document.getElementById("particles-canvas");
-  particlesCtx = particlesCanvas.getContext("2d");
-  sizeParticlesCanvas();
 
   initThree();
   initMapCanvas();
@@ -327,16 +325,16 @@ async function boot() {
     geoData = await geoRes.json();
     countriesData = await countriesRes.json();
     indexCountries();
-    buildBaseTexture(currentMode);
+    buildBaseTexture();
     buildGlobeTexture();
   } catch (e) {
     console.error("Failed to load data:", e);
     document
-      .querySelectorAll(".btn-mode")
+      .querySelectorAll(".btn-pill")
       .forEach((b) => (b.disabled = true));
     const err = document.createElement("p");
     err.textContent = t("load_error_msg");
-    err.style.color = "#ff6b6b";
+    err.style.color = "#d9534f";
     err.style.marginTop = "1rem";
     document.querySelector(".mode-buttons").appendChild(err);
   }
@@ -404,19 +402,23 @@ function setupMenuEvents() {
     .getElementById("btn-back-menu")
     .addEventListener("click", () => showScreen("start-screen"));
 
-  // Home button (visible during the game)
+  // Home / close button (visible during the game)
   document.getElementById("btn-home").addEventListener("click", () => {
+    quizActive = false;
     roundActive = false;
     recenterAnim = null;
-    hoveredCf = null;
-    pressedCf = null;
+    setHover(null);
     showScreen("start-screen");
   });
+
+  // Skip button
+  document.getElementById("btn-skip").addEventListener("click", handleSkip);
 }
 
 function updateUIText() {
   document.getElementById("btn-board-globe").textContent = t("board_globe");
   document.getElementById("btn-board-map").textContent = t("board_map");
+  document.getElementById("start-subtitle").textContent = t("choose_board");
 
   document.getElementById("choose-mode-title").textContent = t("choose_mode");
   document.getElementById("btn-mode-continent").textContent =
@@ -463,15 +465,11 @@ function initThree() {
   container.appendChild(renderer.domElement);
 
   // Lights
-  const ambient = new THREE.AmbientLight(0xffffff, 0.65);
+  const ambient = new THREE.AmbientLight(0xffffff, 0.75);
   scene.add(ambient);
-  const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
   dirLight.position.set(5, 3, 8);
   scene.add(dirLight);
-  // Subtle back light for rim effect
-  const backLight = new THREE.DirectionalLight(0x8888ff, 0.3);
-  backLight.position.set(-3, -2, -5);
-  scene.add(backLight);
 
   // Globe geometry
   const sphereGeo = new THREE.SphereGeometry(1, 64, 64);
@@ -482,7 +480,7 @@ function initThree() {
   globeTexCanvas.height = 2048;
   globeTexCtx = globeTexCanvas.getContext("2d");
 
-  // Offscreen canvas for cached base layer (ocean + grid + all countries)
+  // Offscreen canvas for cached base layer (ocean + all countries)
   baseTexCanvas = document.createElement("canvas");
   baseTexCanvas.width = 4096;
   baseTexCanvas.height = 2048;
@@ -494,8 +492,8 @@ function initThree() {
 
   const globeMat = new THREE.MeshPhongMaterial({
     map: globeTexture,
-    specular: 0x222222,
-    shininess: 15,
+    specular: 0x111111,
+    shininess: 8,
   });
 
   globeMesh = new THREE.Mesh(sphereGeo, globeMat);
@@ -508,22 +506,10 @@ function onResize() {
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
-  sizeParticlesCanvas();
   sizeMapCanvas();
   if (currentBoard === "map" && geoData) {
     drawMapBase();
   }
-}
-
-function sizeParticlesCanvas() {
-  const dpr = window.devicePixelRatio || 1;
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  particlesCanvas.width = w * dpr;
-  particlesCanvas.height = h * dpr;
-  particlesCanvas.style.width = w + "px";
-  particlesCanvas.style.height = h + "px";
-  particlesCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
 // ── Shared Feature Rendering (globe texture + flat map) ─────
@@ -536,9 +522,8 @@ function defaultProj(lon, lat, w, h) {
 // Render a single feature's polygons onto a context. projFn defaults to the
 // full-world equirectangular projection; the flat map passes a scoped one.
 // glowColor, when set, draws a colored glow/outline in that color instead of
-// the default thin border (used to reveal the correct answer in green / the
-// wrong answer in red).
-function drawFeature(ctx, feature, w, h, color, glowColor, noStroke, projFn) {
+// the default thin border (used to reveal the correct/wrong answer).
+function drawFeature(ctx, feature, w, h, color, glowColor, projFn) {
   const proj = projFn || defaultProj;
   const geom = feature.geometry;
   const polys =
@@ -562,214 +547,76 @@ function drawFeature(ctx, feature, w, h, color, glowColor, noStroke, projFn) {
     if (glowColor) {
       ctx.save();
       ctx.shadowColor = glowColor;
-      ctx.shadowBlur = 30;
+      ctx.shadowBlur = 20;
       ctx.strokeStyle = glowColor;
-      ctx.lineWidth = 4;
+      ctx.lineWidth = 3;
       ctx.stroke();
       ctx.restore();
-    } else if (!noStroke) {
-      ctx.strokeStyle = "rgba(43,33,64,0.85)";
-      ctx.lineWidth = 2;
+    } else {
+      ctx.strokeStyle = BORDER_COLOR;
+      ctx.lineWidth = 1;
       ctx.stroke();
     }
   }
 }
 
-const CORRECT_FILL = "rgba(40,180,99,0.9)";
-const CORRECT_GLOW = "rgba(80,230,140,0.9)";
-const WRONG_FILL = "rgba(220,40,40,0.9)";
-const WRONG_GLOW = "rgba(255,60,60,0.9)";
-
-// Pixel rect (in the current projection) covered by an ocean region.
-function oceanRegionPixelRect(region, w, h, projFn) {
-  const [x1, y1] = projFn(region.minLon, region.maxLat, w, h);
-  const [x2, y2] = projFn(region.maxLon, region.minLat, w, h);
-  return {
-    left: Math.min(x1, x2),
-    top: Math.min(y1, y2),
-    width: Math.abs(x2 - x1),
-    height: Math.abs(y2 - y1),
-  };
+// Project every vertex of a lon/lat ring through the current projection.
+function projectRing(ring, w, h, projFn) {
+  return ring.map(([lon, lat]) => projFn(lon, lat, w, h));
 }
 
-// Fill + outline each ocean region in its own color (Continent mode only —
-// countries/capitals modes just use a single flat ocean color/gradient).
-function fillOceanRegions(ctx, w, h, projFn) {
-  for (const region of OCEAN_REGIONS) {
-    const r = oceanRegionPixelRect(region, w, h, projFn);
-    ctx.fillStyle = OCEAN_COLORS[region.slug];
-    ctx.fillRect(r.left, r.top, r.width, r.height);
-  }
-  ctx.strokeStyle = "rgba(43,33,64,0.85)";
-  ctx.lineWidth = 2;
-  for (const region of OCEAN_REGIONS) {
-    const r = oceanRegionPixelRect(region, w, h, projFn);
-    ctx.strokeRect(r.left, r.top, r.width, r.height);
-  }
+function pathFromPoints(ctx, points) {
+  ctx.beginPath();
+  points.forEach(([x, y], i) => {
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.closePath();
 }
 
-// Highlight (green/red reveal) every rect belonging to an ocean slug.
+// Highlight (green/red reveal) every ring belonging to an ocean slug.
 function highlightOceanRegion(ctx, w, h, slug, fillColor, glowColor, projFn) {
-  for (const region of OCEAN_REGIONS) {
-    if (region.slug !== slug) continue;
-    const r = oceanRegionPixelRect(region, w, h, projFn);
+  for (const ring of getOceanRings(slug)) {
+    const points = projectRing(ring, w, h, projFn);
     ctx.save();
     ctx.shadowColor = glowColor;
-    ctx.shadowBlur = 30;
+    ctx.shadowBlur = 20;
     ctx.fillStyle = fillColor;
-    ctx.fillRect(r.left, r.top, r.width, r.height);
+    pathFromPoints(ctx, points);
+    ctx.fill();
     ctx.strokeStyle = glowColor;
-    ctx.lineWidth = 4;
-    ctx.strokeRect(r.left, r.top, r.width, r.height);
+    ctx.lineWidth = 3;
+    ctx.stroke();
     ctx.restore();
   }
 }
 
-// A single cartoon wave doodle centered at (x, y).
-function drawWaveMark(ctx, x, y, halfWidth) {
-  ctx.beginPath();
-  ctx.moveTo(x - halfWidth, y);
-  ctx.quadraticCurveTo(x - halfWidth * 0.5, y - halfWidth * 0.45, x, y);
-  ctx.quadraticCurveTo(x + halfWidth * 0.5, y + halfWidth * 0.45, x + halfWidth, y);
-  ctx.strokeStyle = "rgba(255,255,255,0.4)";
-  ctx.lineWidth = Math.max(1, halfWidth * 0.22);
-  ctx.lineCap = "round";
-  ctx.stroke();
-}
-
-// Scatter wave doodles across the ocean (skipping land) within lon/lat
-// bounds — the full world for the globe, or the map's current scope.
-function drawWaves(ctx, w, h, projFn, waveSize, bounds) {
-  const b = bounds || { minLon: -180, maxLon: 180, minLat: -85, maxLat: 85 };
-  const lonStep = 16;
-  const latStep = 13;
-  for (let lat = b.minLat + latStep / 2; lat < b.maxLat; lat += latStep) {
-    for (let lon = b.minLon + lonStep / 2; lon < b.maxLon; lon += lonStep) {
-      if (findCountryAtLonLat(lon, lat)) continue;
-      const [x, y] = projFn(lon, lat, w, h);
-      drawWaveMark(ctx, x, y, waveSize);
-    }
-  }
-}
-
-// Draw every country in its normal (non-highlighted) color. Used to build
-// the base layer, and to restore land that an ocean rectangle's bounding
-// box would otherwise cover (ocean regions are plain lon/lat rects, not
-// real coastline polygons, so they must never stay drawn on top of land).
+// Draw every country in its normal (uniform) land color. Used to build the
+// base layer, and to restore land after an ocean highlight (ocean regions
+// are simple lon/lat shapes, not real coastlines, so they must never stay
+// drawn on top of land).
 function drawAllCountries(ctx, w, h, projFn) {
-  const continentMode = currentMode === "continent";
-  let featureIdx = 0;
   for (const feature of geoData.features) {
-    const cf = countryFeatureByName.get(feature.properties.name);
-    let color;
-    if (cf) {
-      color = cf.baseColor;
-    } else {
-      color = continentMode ? "#7a8a99" : PASTEL_COLORS[featureIdx % PASTEL_COLORS.length];
-    }
-    drawFeature(ctx, feature, w, h, color, null, false, projFn);
-    featureIdx++;
+    drawFeature(ctx, feature, w, h, LAND_COLOR, null, projFn);
   }
 }
 
-// Build the cached base texture (ocean + grid + all countries).
-// Called once per game start (palette depends on mode).
-function buildBaseTexture(mode) {
+// Build the cached base texture (ocean + all countries), one flat color
+// each, matching Seterra's plain map style. Called once per game start.
+function buildBaseTexture() {
   if (!geoData) return;
   const ctx = baseTexCtx;
   const w = baseTexCanvas.width;
   const h = baseTexCanvas.height;
-  const continentMode = mode === "continent";
 
-  // Ocean: one region per ocean in Continent mode, a flat gradient otherwise
-  if (continentMode) {
-    fillOceanRegions(ctx, w, h, defaultProj);
-  } else {
-    const oceanGrad = ctx.createLinearGradient(0, 0, 0, h);
-    oceanGrad.addColorStop(0, "#4fc3f7");
-    oceanGrad.addColorStop(0.5, "#29b6f6");
-    oceanGrad.addColorStop(1, "#0288d1");
-    ctx.fillStyle = oceanGrad;
-    ctx.fillRect(0, 0, w, h);
-  }
+  ctx.fillStyle = OCEAN_COLOR;
+  ctx.fillRect(0, 0, w, h);
 
-  // Grid lines
-  ctx.strokeStyle = "rgba(255,255,255,0.08)";
-  ctx.lineWidth = 1.5;
-  for (let lat = -60; lat <= 60; lat += 30) {
-    const y = ((90 - lat) / 180) * h;
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(w, y);
-    ctx.stroke();
-  }
-  for (let lon = -180; lon < 180; lon += 30) {
-    const x = ((lon + 180) / 360) * w;
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, h);
-    ctx.stroke();
-  }
-
-  // Cartoon wave doodles scattered across the ocean (skips land)
-  drawWaves(ctx, w, h, defaultProj, 26);
-
-  // Assign + cache each clickable country's base color once per game start,
-  // reused later for hover/press button-style highlighting and by the map.
-  countryFeatures.forEach((cf, idx) => {
-    cf.baseColor = continentMode
-      ? CONTINENT_COLORS[cf.continent]
-      : PASTEL_COLORS[idx % PASTEL_COLORS.length];
-  });
-
-  // Draw all countries: pastel per-country, or shared continent color in
-  // Continent mode. A fine border is always drawn — in Continent mode this
-  // also traces each continent's outer silhouette.
-  let featureIdx = 0;
-  for (const feature of geoData.features) {
-    const cf = countryFeatureByName.get(feature.properties.name);
-    let color;
-    if (cf) {
-      color = cf.baseColor;
-    } else {
-      color = continentMode ? "#7a8a99" : PASTEL_COLORS[featureIdx % PASTEL_COLORS.length];
-    }
-    drawFeature(ctx, feature, w, h, color, null, false);
-    featureIdx++;
-  }
+  drawAllCountries(ctx, w, h, defaultProj);
 }
-
-// Group a country with its continent-mates when in Continent mode (so
-// hover/press/reveal highlight the whole continent block, not one country).
-function getHighlightGroup(cf) {
-  if (!cf) return [];
-  if (currentMode === "continent") {
-    return countryFeatures.filter((c) => c.continent === cf.continent);
-  }
-  return [cf];
-}
-
-// Lighten (amt > 0) or darken (amt < 0) a "#rrggbb" color.
-function adjustColor(hex, amt) {
-  const num = parseInt(hex.slice(1), 16);
-  const channels = [(num >> 16) & 0xff, (num >> 8) & 0xff, num & 0xff].map(
-    (c) =>
-      Math.max(
-        0,
-        Math.min(255, Math.round(c + (amt > 0 ? (255 - c) * amt : c * amt))),
-      ),
-  );
-  return `rgb(${channels.join(",")})`;
-}
-
-const HOVER_GLOW = "rgba(255,255,255,0.55)";
-const PRESS_GLOW = "rgba(0,0,0,0.45)";
-const HOVER_LIGHTEN = 0.22;
-const PRESS_DARKEN = -0.28;
 
 // Build the visible globe texture. Blits the cached base then overdraws the
-// correct answer in green (a single country, or every country in a
-// continent) and, on a miss, the player's wrong answer in red.
+// correct answer in green and/or the player's wrong answer in red.
 function buildGlobeTexture(correctAnswer, wrongAnswer) {
   if (!geoData) return;
   const ctx = globeTexCtx;
@@ -777,19 +624,24 @@ function buildGlobeTexture(correctAnswer, wrongAnswer) {
   const h = globeTexCanvas.height;
 
   ctx.drawImage(baseTexCanvas, 0, 0);
+  drawAnswerHighlights(ctx, w, h, correctAnswer, wrongAnswer, defaultProj);
 
+  globeTexture.needsUpdate = true;
+}
+
+// Shared by the globe and the map: paint the correct-answer / wrong-answer
+// highlight(s) (country, continent's countries, or an ocean region).
+function drawAnswerHighlights(ctx, w, h, correctAnswer, wrongAnswer, projFn) {
   const correctIsOcean = correctAnswer && OCEANS.includes(correctAnswer);
   const wrongIsOcean = wrongAnswer && OCEANS.includes(wrongAnswer);
   if (correctIsOcean) {
-    highlightOceanRegion(ctx, w, h, correctAnswer, CORRECT_FILL, CORRECT_GLOW, defaultProj);
+    highlightOceanRegion(ctx, w, h, correctAnswer, CORRECT_FILL, CORRECT_GLOW, projFn);
   }
   if (wrongIsOcean) {
-    highlightOceanRegion(ctx, w, h, wrongAnswer, WRONG_FILL, WRONG_GLOW, defaultProj);
+    highlightOceanRegion(ctx, w, h, wrongAnswer, WRONG_FILL, WRONG_GLOW, projFn);
   }
   if (correctIsOcean || wrongIsOcean) {
-    // Ocean regions are plain lon/lat rectangles, not real coastlines —
-    // restore any land that fell inside the highlighted rectangle(s).
-    drawAllCountries(ctx, w, h, defaultProj);
+    drawAllCountries(ctx, w, h, projFn);
   }
 
   for (const cf of countryFeatures) {
@@ -806,33 +658,25 @@ function buildGlobeTexture(correctAnswer, wrongAnswer) {
         ? cf.continent === wrongAnswer
         : cf.geoId === wrongAnswer);
     if (isCorrect) {
-      drawFeature(ctx, cf.feature, w, h, CORRECT_FILL, CORRECT_GLOW);
+      drawFeature(ctx, cf.feature, w, h, CORRECT_FILL, CORRECT_GLOW, projFn);
     } else if (isWrong) {
-      drawFeature(ctx, cf.feature, w, h, WRONG_FILL, WRONG_GLOW);
+      drawFeature(ctx, cf.feature, w, h, WRONG_FILL, WRONG_GLOW, projFn);
     }
   }
-
-  globeTexture.needsUpdate = true;
 }
 
-// Redraw the globe with a hover highlight (lighter, "raised") and/or a press
-// highlight (darker, "sunken") — purely cosmetic button-style feedback while
-// the round is still active (before the round resolves).
-function applyGlobeHoverPress(hoverCf, pressCf) {
+// Redraw the globe with just a hover highlight (lighter) — cosmetic-only
+// feedback while the round is still active (before it resolves).
+function applyGlobeHover(hoverCf) {
   if (!geoData) return;
   const ctx = globeTexCtx;
   const w = globeTexCanvas.width;
   const h = globeTexCanvas.height;
 
   ctx.drawImage(baseTexCanvas, 0, 0);
-
-  for (const cf of getHighlightGroup(hoverCf)) {
-    drawFeature(ctx, cf.feature, w, h, adjustColor(cf.baseColor, HOVER_LIGHTEN), HOVER_GLOW);
+  if (hoverCf) {
+    drawFeature(ctx, hoverCf.feature, w, h, LAND_HOVER, null);
   }
-  for (const cf of getHighlightGroup(pressCf)) {
-    drawFeature(ctx, cf.feature, w, h, adjustColor(cf.baseColor, PRESS_DARKEN), PRESS_GLOW);
-  }
-
   globeTexture.needsUpdate = true;
 }
 
@@ -862,16 +706,20 @@ function pickCountryInContinent(slug) {
   return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
 }
 
-function pickRandomTarget() {
-  if (retryPool && retryPool.length > 0) {
-    return retryPool[round - 1];
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
   }
+  return a;
+}
+
+function buildQuizPool() {
   if (currentMode === "continent") {
-    const pool = [...CONTINENTS, ...OCEANS];
-    return pool[Math.floor(Math.random() * pool.length)];
+    return [...CONTINENTS, ...OCEANS];
   }
-  const pool = getFilteredCountryFeatures();
-  return pool[Math.floor(Math.random() * pool.length)];
+  return getFilteredCountryFeatures();
 }
 
 // Get a representative lon/lat centroid for any target: a country/capital
@@ -963,23 +811,17 @@ function countryAtScreenPoint(x, y) {
   return getCountryAtNDC(ndc);
 }
 
-// ── Hover / press button-style feedback (globe + map) ────────
+// ── Hover feedback (globe + map) ──────────────────────────────
 let hoveredCf = null;
-let pressedCf = null;
 
-function setHoverPress(newHover, newPress) {
-  if (newHover === hoveredCf && newPress === pressedCf) return;
+function setHover(newHover) {
+  if (newHover === hoveredCf) return;
   hoveredCf = newHover;
-  pressedCf = newPress;
-  redrawBoardHighlight();
-}
-
-function redrawBoardHighlight() {
   if (!roundActive) return; // don't stomp on the correct/wrong reveal
   if (currentBoard === "globe") {
-    applyGlobeHoverPress(hoveredCf, pressedCf);
+    applyGlobeHover(hoveredCf);
   } else {
-    applyMapHoverPress(hoveredCf, pressedCf);
+    applyMapHover(hoveredCf);
   }
 }
 
@@ -1061,7 +903,7 @@ function startRecenterAnimation(centroid) {
 
   recenterAnim = {
     startTime: performance.now(),
-    duration: 2000,
+    duration: 1500,
     fromLon: globeLon,
     toLon: globeLon + dLon,
     fromLat: globeLat,
@@ -1075,7 +917,7 @@ function startRecenterAnimation(centroid) {
   velocityRoll = 0;
 }
 
-// ── Flat Map (2D canvas, equirectangular) ───────────────────
+// ── Flat Map (2D canvas, equirectangular/sinusoidal) ─────────
 function initMapCanvas() {
   mapCanvas = document.getElementById("map-canvas");
   mapCtx = mapCanvas.getContext("2d");
@@ -1101,12 +943,24 @@ function updateMapProjection() {
       : { ...CONTINENT_BOUNDS[currentScope] };
 }
 
+// Mercator y: standard conformal projection formula (radians in, radians out).
+// Latitude is clipped to ±85° (mapProjection.minLat/maxLat for world scope)
+// well short of ±90°, where Mercator's y diverges to infinity.
+function mercatorY(latDeg) {
+  return Math.log(Math.tan(Math.PI / 4 + (latDeg * DEG) / 2));
+}
+
+function mercatorYInv(y) {
+  return (2 * Math.atan(Math.exp(y)) - Math.PI / 2) / DEG;
+}
+
 // Fit the lon/lat bounds into a w×h canvas at a single uniform scale
-// (letterboxed/pillarboxed rather than stretched), so continents keep their
-// true proportions instead of being squashed to fill the window.
+// (letterboxed/pillarboxed rather than stretched). Both axes are expressed
+// in the same radian-based unit (lon in radians, lat via mercatorY) so the
+// scale is uniform in both directions, keeping the projection conformal.
 function getMapFit(w, h) {
-  const boundsW = mapProjection.maxLon - mapProjection.minLon;
-  const boundsH = mapProjection.maxLat - mapProjection.minLat;
+  const boundsW = (mapProjection.maxLon - mapProjection.minLon) * DEG;
+  const boundsH = mercatorY(mapProjection.maxLat) - mercatorY(mapProjection.minLat);
   const scale = Math.min(w / boundsW, h / boundsH);
   return {
     scale,
@@ -1115,10 +969,17 @@ function getMapFit(w, h) {
   };
 }
 
+// Standard Mercator projection: straight vertical meridians, straight
+// horizontal parallels — no curved/pinched poles like a sinusoidal
+// projection. The globe's texture (defaultProj) stays plain equirectangular
+// — that one wraps onto an actual sphere, which needs no flat-map correction.
 function mapProjFn(lon, lat, w, h) {
   const fit = getMapFit(w, h);
-  const x = fit.offsetX + (lon - mapProjection.minLon) * fit.scale;
-  const y = fit.offsetY + (mapProjection.maxLat - lat) * fit.scale;
+  const centerLonRad = ((mapProjection.minLon + mapProjection.maxLon) / 2) * DEG;
+  const boundsW = (mapProjection.maxLon - mapProjection.minLon) * DEG;
+  const sx = lon * DEG - centerLonRad;
+  const x = fit.offsetX + (sx + boundsW / 2) * fit.scale;
+  const y = fit.offsetY + (mercatorY(mapProjection.maxLat) - mercatorY(lat)) * fit.scale;
   return [x, y];
 }
 
@@ -1130,33 +991,10 @@ function drawMapBase() {
   const ctx = mapCtx;
 
   ctx.clearRect(0, 0, w, h);
-  const continentMode = currentMode === "continent";
+  ctx.fillStyle = OCEAN_COLOR;
+  ctx.fillRect(0, 0, w, h);
 
-  if (continentMode) {
-    fillOceanRegions(ctx, w, h, mapProjFn);
-  } else {
-    const grad = ctx.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, "#4fc3f7");
-    grad.addColorStop(0.5, "#29b6f6");
-    grad.addColorStop(1, "#0288d1");
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, w, h);
-  }
-
-  drawWaves(ctx, w, h, mapProjFn, 8, mapProjection);
-
-  let featureIdx = 0;
-  for (const feature of geoData.features) {
-    const cf = countryFeatureByName.get(feature.properties.name);
-    let color;
-    if (cf) {
-      color = cf.baseColor;
-    } else {
-      color = continentMode ? "#7a8a99" : PASTEL_COLORS[featureIdx % PASTEL_COLORS.length];
-    }
-    drawFeature(ctx, feature, w, h, color, null, false, mapProjFn);
-    featureIdx++;
-  }
+  drawAllCountries(ctx, w, h, mapProjFn);
 }
 
 function drawMapOverlay(correctAnswer, wrongAnswer) {
@@ -1164,61 +1002,29 @@ function drawMapOverlay(correctAnswer, wrongAnswer) {
   drawMapBase();
   const w = window.innerWidth;
   const h = window.innerHeight;
-
-  const correctIsOcean = correctAnswer && OCEANS.includes(correctAnswer);
-  const wrongIsOcean = wrongAnswer && OCEANS.includes(wrongAnswer);
-  if (correctIsOcean) {
-    highlightOceanRegion(mapCtx, w, h, correctAnswer, CORRECT_FILL, CORRECT_GLOW, mapProjFn);
-  }
-  if (wrongIsOcean) {
-    highlightOceanRegion(mapCtx, w, h, wrongAnswer, WRONG_FILL, WRONG_GLOW, mapProjFn);
-  }
-  if (correctIsOcean || wrongIsOcean) {
-    drawAllCountries(mapCtx, w, h, mapProjFn);
-  }
-
-  for (const cf of countryFeatures) {
-    const isCorrect =
-      correctAnswer &&
-      !OCEANS.includes(correctAnswer) &&
-      (currentMode === "continent"
-        ? cf.continent === correctAnswer
-        : cf.geoId === correctAnswer);
-    const isWrong =
-      wrongAnswer &&
-      !OCEANS.includes(wrongAnswer) &&
-      (currentMode === "continent"
-        ? cf.continent === wrongAnswer
-        : cf.geoId === wrongAnswer);
-    if (isCorrect) {
-      drawFeature(mapCtx, cf.feature, w, h, CORRECT_FILL, CORRECT_GLOW, false, mapProjFn);
-    } else if (isWrong) {
-      drawFeature(mapCtx, cf.feature, w, h, WRONG_FILL, WRONG_GLOW, false, mapProjFn);
-    }
-  }
+  drawAnswerHighlights(mapCtx, w, h, correctAnswer, wrongAnswer, mapProjFn);
 }
 
-// Redraw the map with a hover highlight (lighter) and/or a press highlight
-// (darker) — the map equivalent of applyGlobeHoverPress.
-function applyMapHoverPress(hoverCf, pressCf) {
+// Redraw the map with just a hover highlight (lighter).
+function applyMapHover(hoverCf) {
   if (!geoData || !mapCtx) return;
   drawMapBase();
+  if (!hoverCf) return;
   const w = window.innerWidth;
   const h = window.innerHeight;
-  for (const cf of getHighlightGroup(hoverCf)) {
-    drawFeature(mapCtx, cf.feature, w, h, adjustColor(cf.baseColor, HOVER_LIGHTEN), HOVER_GLOW, false, mapProjFn);
-  }
-  for (const cf of getHighlightGroup(pressCf)) {
-    drawFeature(mapCtx, cf.feature, w, h, adjustColor(cf.baseColor, PRESS_DARKEN), PRESS_GLOW, false, mapProjFn);
-  }
+  drawFeature(mapCtx, hoverCf.feature, w, h, LAND_HOVER, null, mapProjFn);
 }
 
 function getCountryAtMapXY(px, py) {
   const w = window.innerWidth;
   const h = window.innerHeight;
   const fit = getMapFit(w, h);
-  const lon = mapProjection.minLon + (px - fit.offsetX) / fit.scale;
-  const lat = mapProjection.maxLat - (py - fit.offsetY) / fit.scale;
+  const centerLonRad = ((mapProjection.minLon + mapProjection.maxLon) / 2) * DEG;
+  const boundsW = (mapProjection.maxLon - mapProjection.minLon) * DEG;
+  const yMerc = mercatorY(mapProjection.maxLat) - (py - fit.offsetY) / fit.scale;
+  const lat = mercatorYInv(yMerc);
+  const lonRad = (px - fit.offsetX) / fit.scale - boundsW / 2 + centerLonRad;
+  const lon = lonRad / DEG;
   return resolveClickAtLonLat(lon, lat);
 }
 
@@ -1228,16 +1034,11 @@ function setupMapInput() {
   mapCanvas.addEventListener("mousemove", (e) => {
     if (currentBoard !== "map" || !roundActive) return;
     const rect = mapCanvas.getBoundingClientRect();
-    const cf = getCountryAtMapXY(e.clientX - rect.left, e.clientY - rect.top);
-    setHoverPress(cf, isMapPressed ? cf : null);
+    setHover(getCountryAtMapXY(e.clientX - rect.left, e.clientY - rect.top));
   });
 
-  mapCanvas.addEventListener("mousedown", (e) => {
-    if (currentBoard !== "map" || !roundActive) return;
+  mapCanvas.addEventListener("mousedown", () => {
     isMapPressed = true;
-    const rect = mapCanvas.getBoundingClientRect();
-    const cf = getCountryAtMapXY(e.clientX - rect.left, e.clientY - rect.top);
-    setHoverPress(cf, cf);
   });
 
   window.addEventListener("mouseup", () => {
@@ -1245,20 +1046,27 @@ function setupMapInput() {
   });
 
   mapCanvas.addEventListener("mouseleave", () => {
-    if (!isMapPressed) setHoverPress(null, null);
+    if (!isMapPressed) setHover(null);
   });
 
-  mapCanvas.addEventListener("touchstart", (e) => {
-    if (currentBoard !== "map" || !roundActive) return;
-    const t = e.touches[0];
-    const rect = mapCanvas.getBoundingClientRect();
-    const cf = getCountryAtMapXY(t.clientX - rect.left, t.clientY - rect.top);
-    setHoverPress(cf, cf);
-  }, { passive: true });
+  mapCanvas.addEventListener(
+    "touchstart",
+    (e) => {
+      if (currentBoard !== "map" || !roundActive) return;
+      const tt = e.touches[0];
+      const rect = mapCanvas.getBoundingClientRect();
+      setHover(getCountryAtMapXY(tt.clientX - rect.left, tt.clientY - rect.top));
+    },
+    { passive: true },
+  );
 
-  mapCanvas.addEventListener("touchend", () => {
-    setHoverPress(null, null);
-  }, { passive: true });
+  mapCanvas.addEventListener(
+    "touchend",
+    () => {
+      setHover(null);
+    },
+    { passive: true },
+  );
 
   mapCanvas.addEventListener("click", (e) => {
     if (currentBoard !== "map" || !roundActive) return;
@@ -1266,7 +1074,6 @@ function setupMapInput() {
     const px = e.clientX - rect.left;
     const py = e.clientY - rect.top;
     handleAnswerClick(getCountryAtMapXY(px, py));
-    setHoverPress(null, null);
   });
 }
 
@@ -1279,21 +1086,21 @@ function showScreen(id) {
 }
 
 function startGame() {
-  score = 0;
-  round = 0;
   missedTargets = [];
-  roundsThisGame = MAX_ROUNDS;
-  retryPool = null;
+  quizOrder = shuffle(buildQuizPool());
+  quizIndex = 0;
+  correctCount = 0;
+  previousTarget = null;
   enterGameScreen();
 }
 
 function startRetryGame() {
   if (missedTargets.length === 0) return;
-  retryPool = missedTargets.slice();
-  roundsThisGame = retryPool.length;
-  score = 0;
-  round = 0;
+  quizOrder = shuffle(missedTargets.slice());
   missedTargets = [];
+  quizIndex = 0;
+  correctCount = 0;
+  previousTarget = null;
   enterGameScreen();
 }
 
@@ -1305,31 +1112,30 @@ function enterGameScreen() {
     .getElementById("map-container")
     .classList.toggle("hidden", currentBoard !== "map");
 
-  buildBaseTexture(currentMode);
+  buildBaseTexture();
+  quizActive = true;
+  quizStartTime = performance.now();
 
   showScreen("game-screen");
-  nextRound();
+  nextQuizItem();
 }
 
-function nextRound() {
-  if (round >= roundsThisGame) {
+function nextQuizItem() {
+  if (quizIndex >= quizOrder.length) {
     endGame();
     return;
   }
 
-  round++;
   roundActive = true;
-  timerAccum = 0;
-  lastTimerTick = performance.now();
   hoveredCf = null;
-  pressedCf = null;
+  hideHint();
 
-  currentTarget = pickRandomTarget();
+  currentTarget = quizOrder[quizIndex];
 
-  // Center the globe on the previous answer (or a random country for round 1),
-  // without revealing the upcoming target.
+  // Center the globe on the previous answer (or a random country for the
+  // first question), without revealing the upcoming target.
   let centroid;
-  if (round === 1) {
+  if (!previousTarget) {
     const pool = getFilteredCountryFeatures();
     const startCountry = pool[Math.floor(Math.random() * pool.length)];
     centroid = startCountry ? getCountryCentroid(startCountry) : null;
@@ -1349,35 +1155,9 @@ function nextRound() {
   velocityRoll = 0;
   camera.position.set(0, 0, CAM_Z);
 
-  // Display question based on mode
-  const nameEl = document.getElementById("country-name");
-  const subtitleEl = document.getElementById("game-subtitle");
+  updateHudQuestion();
+  updateHudScore();
 
-  if (currentMode === "continent") {
-    nameEl.textContent = t("continent_" + currentTarget);
-    subtitleEl.textContent = t("subtitle_continent");
-  } else if (currentMode === "capitals") {
-    // No flag here: the capital doesn't reveal the country, that's the point
-    nameEl.textContent = currentTarget[currentLang].capital;
-    subtitleEl.textContent = t("subtitle_capitals");
-  } else {
-    nameEl.textContent = formatCountryLabel(currentTarget);
-    subtitleEl.textContent = t("subtitle_countries");
-  }
-
-  document.getElementById("score-display").textContent =
-    t("question") + " " + round + " / " + roundsThisGame;
-
-  const labelEl = document.getElementById("feedback-label");
-  labelEl.classList.remove("show");
-  labelEl.textContent = "";
-
-  // Reset timer
-  const bar = document.getElementById("timer-bar");
-  bar.style.width = "100%";
-  bar.classList.remove("warning");
-
-  // Reset board to plain (no highlight)
   if (currentBoard === "globe") {
     buildGlobeTexture();
   } else {
@@ -1385,7 +1165,37 @@ function nextRound() {
   }
 }
 
+function updateHudQuestion() {
+  const el = document.getElementById("hud-question");
+  if (currentMode === "capitals") {
+    // No flag here: the capital doesn't reveal the country, that's the point
+    el.textContent = currentTarget[currentLang].capital;
+  } else {
+    el.textContent = formatTargetLabel(currentTarget);
+  }
+}
+
+function updateHudScore() {
+  const total = quizOrder.length;
+  const pct = total ? Math.round((correctCount / total) * 100) : 0;
+  document.getElementById("hud-score").textContent =
+    correctCount + " / " + total + "  ·  " + pct + "%";
+}
+
+function showHint() {
+  const el = document.getElementById("hud-hint");
+  el.innerHTML = t("click_on") + " <b>" + formatTargetLabel(currentTarget) + "</b>";
+  el.classList.add("show");
+}
+
+function hideHint() {
+  const el = document.getElementById("hud-hint");
+  el.classList.remove("show");
+  el.textContent = "";
+}
+
 function endGame() {
+  quizActive = false;
   roundActive = false;
   showScreen("end-screen");
 
@@ -1393,14 +1203,10 @@ function endGame() {
   document.getElementById("btn-replay").textContent = t("replay");
   document.getElementById("btn-back-menu").textContent = t("back_menu");
 
-  const pct = Math.round((score / roundsThisGame) * 100);
-  let msg;
-  if (pct >= 80) msg = t("score_amazing");
-  else if (pct >= 60) msg = t("score_good");
-  else msg = t("score_try");
-
+  const total = quizOrder.length;
+  const pct = total ? Math.round((correctCount / total) * 100) : 0;
   document.getElementById("final-score").textContent =
-    msg + score + " / " + roundsThisGame + " — " + pct + "%";
+    correctCount + " / " + total + "  (" + pct + "%)";
 
   const retryBtn = document.getElementById("btn-retry-mistakes");
   retryBtn.textContent = t("btn_retry_mistakes");
@@ -1458,17 +1264,12 @@ function setupInput() {
     downTime = performance.now();
     velocityLon = 0;
     velocityLat = 0;
-    if (currentBoard === "globe" && roundActive && !recenterAnim) {
-      const cf = countryAtScreenPoint(e.clientX, e.clientY);
-      setHoverPress(cf, cf);
-    }
   });
 
   window.addEventListener("mouseup", (e) => {
     dragging = false;
     killInertiaIfPaused();
     maybeResolveClick(e.clientX, e.clientY);
-    setHoverPress(null, null);
   });
 
   window.addEventListener("mousemove", (e) => {
@@ -1479,12 +1280,11 @@ function setupInput() {
       dragPrev = { x: e.clientX, y: e.clientY };
     }
     if (currentBoard !== "globe" || !roundActive || recenterAnim) return;
-    const cf = countryAtScreenPoint(e.clientX, e.clientY);
     if (dragging) {
       const dist = Math.hypot(e.clientX - downX, e.clientY - downY);
-      setHoverPress(cf, dist < 6 ? cf : null);
+      setHover(dist < 6 ? countryAtScreenPoint(e.clientX, e.clientY) : null);
     } else {
-      setHoverPress(cf, null);
+      setHover(countryAtScreenPoint(e.clientX, e.clientY));
     }
   });
 
@@ -1511,10 +1311,6 @@ function setupInput() {
         downTime = performance.now();
         velocityLon = 0;
         velocityLat = 0;
-        if (currentBoard === "globe" && roundActive && !recenterAnim) {
-          const cf = countryAtScreenPoint(downX, downY);
-          setHoverPress(cf, cf);
-        }
       }
     },
     { passive: true },
@@ -1531,7 +1327,7 @@ function setupInput() {
         killInertiaIfPaused();
         const tt = e.changedTouches[0];
         if (tt) maybeResolveClick(tt.clientX, tt.clientY);
-        setHoverPress(null, null);
+        setHover(null);
       }
     },
     { passive: true },
@@ -1555,15 +1351,6 @@ function setupInput() {
           x: e.touches[0].clientX,
           y: e.touches[0].clientY,
         };
-        if (currentBoard === "globe" && roundActive) {
-          const dist = Math.hypot(
-            e.touches[0].clientX - downX,
-            e.touches[0].clientY - downY,
-          );
-          const cf =
-            dist < 6 ? countryAtScreenPoint(downX, downY) : null;
-          setHoverPress(cf, cf);
-        }
       }
     },
     { passive: true },
@@ -1616,153 +1403,116 @@ function correctNorthUp() {
   globeRoll *= 1 - strength * 0.12;
 }
 
-// ── Timer (pacing only) & Answer Resolution ─────────────────
+// ── Elapsed-time stopwatch (counts up for the whole quiz) ────
 function updateTimer() {
-  if (!roundActive) return;
-
-  const now = performance.now();
-  const realDelta = (now - lastTimerTick) / 1000;
-  lastTimerTick = now;
-
-  timerAccum += realDelta;
-
-  const remaining = Math.max(0, ROUND_TIME - timerAccum);
-  const frac = remaining / ROUND_TIME;
-
-  const bar = document.getElementById("timer-bar");
-  bar.style.width = frac * 100 + "%";
-  bar.classList.toggle("warning", frac < 0.4);
-
-  if (remaining <= 0) {
-    resolveRound(null);
-  }
+  if (!quizActive) return;
+  const totalSec = Math.floor((performance.now() - quizStartTime) / 1000);
+  const mm = String(Math.floor(totalSec / 60)).padStart(2, "0");
+  const ss = String(totalSec % 60).padStart(2, "0");
+  document.getElementById("hud-timer").textContent = mm + ":" + ss;
 }
 
+// ── Answer Resolution ─────────────────────────────────────────
 // Entry point for both boards' click handlers.
-function handleAnswerClick(clickedCountry) {
+function handleAnswerClick(clicked) {
   if (!roundActive) return;
-  if (!clickedCountry) return; // water click outside Continent mode: ignored, round continues
-  resolveRound(clickedCountry);
-}
-
-function resolveRound(clickedCountry) {
-  previousTarget = currentTarget;
-  roundActive = false;
+  if (!clicked) return; // water click outside Continent mode: ignored
 
   const correct =
     currentMode === "continent"
-      ? isContinentModeCorrect(clickedCountry, currentTarget)
-      : !!clickedCountry && clickedCountry.geoId === currentTarget.geoId;
-
-  if (!correct) missedTargets.push(currentTarget);
-
-  showFeedback(correct, clickedCountry);
-}
-
-function showFeedback(correct, clickedCountry) {
-  const overlay = document.getElementById("feedback-overlay");
-
-  const labelEl = document.getElementById("feedback-label");
+      ? isContinentModeCorrect(clicked, currentTarget)
+      : clicked.geoId === currentTarget.geoId;
 
   if (correct) {
-    score++;
-    overlay.className = "correct";
-    spawnConfetti(window.innerWidth / 2, window.innerHeight / 2);
-    labelEl.textContent = "✅ " + formatTargetLabel(currentTarget);
+    handleCorrect();
   } else {
-    overlay.className = "incorrect";
-    const shakeTarget =
-      currentBoard === "globe"
-        ? document.getElementById("scene-container")
-        : document.getElementById("map-container");
-    shakeTarget.classList.add("shake");
-    setTimeout(() => shakeTarget.classList.remove("shake"), 400);
-
-    let text = t("correct_answer_was") + formatTargetLabel(currentTarget);
-    if (clickedCountry) {
-      text += "\n" + t("you_clicked") + formatClickedLabel(clickedCountry);
-    }
-    labelEl.textContent = text;
+    handleWrong(clicked);
   }
-  labelEl.classList.add("show");
+}
 
-  // Always reveal the correct answer in green; on a miss, also show the
-  // player's wrong answer in red.
-  const correctAnswer =
-    currentMode === "continent" ? currentTarget : currentTarget.geoId;
-  const wrongAnswer =
-    !correct && clickedCountry
-      ? currentMode === "continent"
-        ? typeof clickedCountry === "string"
-          ? clickedCountry
-          : clickedCountry.continent
-        : clickedCountry.geoId
-      : null;
+function targetAsAnswerId() {
+  return currentMode === "continent" ? currentTarget : currentTarget.geoId;
+}
 
+function clickedAsAnswerId(clicked) {
+  if (currentMode !== "continent") return clicked.geoId;
+  return typeof clicked === "string" ? clicked : clicked.continent;
+}
+
+function handleCorrect() {
+  roundActive = false;
+  correctCount++;
+  updateHudScore();
+
+  const overlay = document.getElementById("feedback-overlay");
+  overlay.className = "correct";
+
+  const correctAnswer = targetAsAnswerId();
   if (currentBoard === "globe") {
-    buildGlobeTexture(correctAnswer, wrongAnswer);
-    if (!correct) {
-      const recenterCentroid = getCentroidForTarget(currentTarget);
-      if (recenterCentroid) startRecenterAnimation(recenterCentroid);
-    }
+    buildGlobeTexture(correctAnswer, null);
   } else {
-    drawMapOverlay(correctAnswer, wrongAnswer);
+    drawMapOverlay(correctAnswer, null);
   }
 
-  const feedbackDuration = correct ? 1200 : 2800;
+  previousTarget = currentTarget;
   setTimeout(() => {
     overlay.className = "";
+    quizIndex++;
+    nextQuizItem();
+  }, 500);
+}
+
+function handleWrong(clicked) {
+  const overlay = document.getElementById("feedback-overlay");
+  overlay.className = "incorrect";
+  const shakeTarget =
+    currentBoard === "globe"
+      ? document.getElementById("scene-container")
+      : document.getElementById("map-container");
+  shakeTarget.classList.add("shake");
+  setTimeout(() => shakeTarget.classList.remove("shake"), 400);
+
+  showHint();
+
+  const wrongAnswer = clickedAsAnswerId(clicked);
+  if (currentBoard === "globe") {
+    buildGlobeTexture(null, wrongAnswer);
+  } else {
+    drawMapOverlay(null, wrongAnswer);
+  }
+
+  // Stay on the same question — just clear the red flash after a moment.
+  setTimeout(() => {
+    overlay.className = "";
+    if (currentBoard === "globe") {
+      buildGlobeTexture();
+    } else {
+      drawMapBase();
+    }
+  }, 500);
+}
+
+function handleSkip() {
+  if (!roundActive) return;
+  roundActive = false;
+  missedTargets.push(currentTarget);
+  hideHint();
+
+  const correctAnswer = targetAsAnswerId();
+  if (currentBoard === "globe") {
+    buildGlobeTexture(correctAnswer, null);
+    const recenterCentroid = getCentroidForTarget(currentTarget);
+    if (recenterCentroid) startRecenterAnimation(recenterCentroid);
+  } else {
+    drawMapOverlay(correctAnswer, null);
+  }
+
+  previousTarget = currentTarget;
+  setTimeout(() => {
     recenterAnim = null;
-    nextRound();
-  }, feedbackDuration);
-}
-
-// ── Confetti (2D overlay) ───────────────────────────────────
-function spawnConfetti(cx, cy) {
-  const colors = ["#5dd39e", "#ffe066", "#ff9933", "#f06292", "#64b5f6"];
-  for (let i = 0; i < 50; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const speed = 2 + Math.random() * 5;
-    particles.push({
-      x: cx,
-      y: cy,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - 3,
-      size: 3 + Math.random() * 5,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      life: 1,
-      decay: 0.015 + Math.random() * 0.01,
-      rotation: Math.random() * Math.PI * 2,
-      rotSpeed: (Math.random() - 0.5) * 0.2,
-    });
-  }
-}
-
-function updateAndDrawParticles() {
-  const ctx = particlesCtx;
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  ctx.clearRect(0, 0, w, h);
-
-  particles = particles.filter((p) => p.life > 0);
-
-  for (const p of particles) {
-    p.x += p.vx;
-    p.y += p.vy;
-    p.vy += 0.12;
-    p.life -= p.decay;
-    p.rotation += p.rotSpeed;
-
-    ctx.save();
-    ctx.translate(p.x, p.y);
-    ctx.rotate(p.rotation);
-    ctx.globalAlpha = Math.max(0, p.life);
-    ctx.fillStyle = p.color;
-    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-    ctx.restore();
-  }
-
-  ctx.globalAlpha = 1;
+    quizIndex++;
+    nextQuizItem();
+  }, 900);
 }
 
 // ── Render Loop ─────────────────────────────────────────────
@@ -1773,7 +1523,7 @@ function renderLoop() {
     applyInertia();
     correctNorthUp();
 
-    // Recenter animation (on wrong answer: interpolate lon/lat/roll)
+    // Recenter animation (on skip: interpolate lon/lat/roll to reveal answer)
     if (recenterAnim) {
       const elapsed = performance.now() - recenterAnim.startTime;
       const rt = Math.min(1, elapsed / recenterAnim.duration);
@@ -1800,8 +1550,6 @@ function renderLoop() {
 
     renderer.render(scene, camera);
   }
-
-  updateAndDrawParticles();
 
   requestAnimationFrame(renderLoop);
 }

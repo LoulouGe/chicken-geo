@@ -1,6 +1,6 @@
 {
-  "name": "Chicken geo",
-  "short_name": "Chicken geo",
+  "name": "Geo Quiz",
+  "short_name": "Geo Quiz",
   "description": "Jeu éducatif de géo",
   "start_url": "/chicken-geo/",
   "display": "standalone",

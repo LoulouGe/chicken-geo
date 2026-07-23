@@ -4,7 +4,7 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## Project Context
 
-Geography learning game built with a 12-year-old French-speaking daughter, Seterra-style. The player picks a board (3D globe or flat 2D map), a mode (Continent / Countries / Capitals), and — for Countries/Capitals — a scope (World or a specific continent), then answers each round by clicking directly on the target on the board. All user-facing text (UI, comments to the user, README) must be in French. Code identifiers and code comments can remain in English.
+"Geo Quiz" — a geography learning game built with a 12-year-old French-speaking daughter. It is a deliberate, faithful clone of Seterra (seterra.com): same visual style (navy HUD bar, flat single-color land/ocean, bold italic Poppins typography), same "stay on question until correct" mechanic, same layout — the 3D globe is the one intentional addition beyond a strict Seterra clone. The player picks a board (3D globe or flat 2D map), a mode (Continent et Océans / Pays / Capitales), and — for Pays/Capitales — a scope (Monde or a specific continent), then answers each round by clicking directly on the target on the board. All user-facing text (UI, comments to the user, README) must be in French. Code identifiers and code comments can remain in English.
 
 ## Development
 
@@ -33,7 +33,7 @@ External libraries loaded via CDN (no npm/build):
 
 - **Three.js r128** — 3D globe rendering (SphereGeometry + CanvasTexture)
 
-There is no mascot/character animation anywhere in the game (removed) — round feedback is just a colored overlay tint (green/red), confetti on a correct answer, and a shake + reveal of the correct answer on a miss.
+There is no mascot/character animation anywhere in the game (removed). Visual style is flat and Seterra-like, not cartoon: a single flat green (`LAND_COLOR`) for all land, a single pale blue-gray (`OCEAN_COLOR`) for all water, thin white country borders, no textures/gradients/decorations. Round feedback is a colored overlay tint (green/red) plus a shake on a miss; the correct/wrong answer is highlighted directly on the board (`CORRECT_FILL`/`WRONG_FILL`) rather than via a separate reveal step.
 
 The flat map is a plain 2D `<canvas>` reusing the same GeoJSON polygons and the same `pointInPoly` hit-testing as the globe — `drawFeature()` takes an optional projection function so the same rendering code draws both the full-world equirectangular globe texture and the (optionally continent-cropped) flat map. `getMapFit()` fits the current lon/lat bounds into the canvas at a single uniform scale (letterboxed/pillarboxed), so continents keep their true proportions instead of being stretched to fill the window — used identically for drawing and for click hit-testing so the two never drift apart.
 
@@ -50,23 +50,28 @@ The camera sits at a single fixed distance (`CAM_Z`) at all times — there is n
 The game supports 3 languages (FR/EN/ES), 2 boards, 3 modes, and (for two of the modes) a scope filter:
 
 - **Boards**: Globe 3D or Carte (flat 2D map)
-- **Continent et Océans** — a continent OR ocean name is shown; click any country belonging to it, or the matching ocean. Oceans have no polygon data — `OCEAN_REGIONS` defines 5 oceans as simple lon/lat rectangles (Pacific split in two across the antimeridian), and `oceanAtLonLat()`/`resolveClickAtLonLat()` classify a click by these rules when it doesn't land on a country. Because ocean "regions" are rectangles, not real coastlines, `drawAllCountries()` must be redrawn on top after any ocean highlight/reveal, or the rectangle would paint over neighboring land.
+- **Continent et Océans** — a continent OR ocean name is shown; click any country belonging to it, or the matching ocean. Oceans have no polygon data — `OCEAN_REGIONS` hand-draws 5 oceans as lon/lat polygon rings bent at major capes/straits (Panama, Cape Horn, Cape of Good Hope, Indonesia), with the Pacific split into two ring entries across the antimeridian; the polar caps (Arctique/Austral) instead use a wavy latitude threshold (`waveLat()`/`ARCTIC_WAVE`/`AUSTRAL_WAVE`) since a ring enclosing a pole needs special handling. `oceanAtLonLat()`/`resolveClickAtLonLat()` classify a click by these rules when it doesn't land on a country. Because ocean regions aren't real coastlines, `drawAllCountries()` must be redrawn on top after any ocean highlight, or it would paint over neighboring land.
 - **Pays / Countries** — a country name is shown, click it
 - **Capitales / Capitals** — a capital name is shown, click its country
-- **Scope** (Pays/Capitales only, skipped for Continent) — Monde (world) or a specific continent, filtering the target pool via `getFilteredCountryFeatures()`
+- **Scope** (Pays/Capitales only, skipped for Continent et Océans) — Monde (world) or a specific continent, filtering the target pool via `getFilteredCountryFeatures()`
 
 UI strings are defined in the `UI_STRINGS` object in `script.js`. Country data (names, capitals, continent) is localized/keyed per language in `countries.json`.
 
-### Game Flow
+### Game Flow (Seterra mechanic: stay on question until correct)
 
-A question is displayed (continent, country name, or capital depending on mode) → the player clicks/taps directly on the answer on the board (globe or map) → feedback on whether the click was correct, with the correct answer revealed on a miss. A visible timer bar paces each round; if it runs out with no click, the round auto-resolves as a miss. 5 rounds per game (or fewer/more when replaying only past mistakes — see below).
+A quiz is one full pass through the target pool (`buildQuizPool()`): all filtered countries for Pays/Capitales, or all 6 continents + 5 oceans for Continent et Océans — shuffled once at quiz start (`quizOrder`), not re-randomized per round. The HUD shows a running score pill (`correctCount / quizOrder.length · pct%`), the current question, an up-counting elapsed-time stopwatch (`updateTimer()`, no countdown/auto-fail), a Skip button, and a home/close button.
+
+- **Correct click** (`handleCorrect()`) — green flash, advances to the next item in `quizOrder`, `correctCount++`.
+- **Wrong click** (`handleWrong()`) — red flash + shake, shows a hint tooltip ("Clique sur *Target*") under the HUD, briefly highlights the wrong pick — but the round does **not** advance and the target is **not** added to `missedTargets`; the player must find the right answer.
+- **Skip** (`handleSkip()`, also bound to the icon button) — reveals the correct answer in green, adds the target to `missedTargets`, then advances. This is the only way a round counts as missed.
+- **Water click outside Continent et Océans** — ignored, no penalty, round continues.
 
 ### Mistake Retry & Score
 
-At the end of a game, the player sees a percentage (score / rounds) and, if any round was missed, a "Rejoue tes erreurs" button that replays a shorter game built only from `missedTargets` — the same board/mode/scope as the game just played.
+At the end of a quiz (`endGame()`), the player sees `correctCount / total (pct%)` and, if `missedTargets` isn't empty, a "Rejoue tes erreurs" button that starts a new quiz whose `quizOrder` is built only from `missedTargets` (`startRetryGame()`) — same board/mode/scope as the quiz just played. Once that retry quiz ends, `missedTargets` resets and a plain "Rejouer" goes back to the full pool.
 
 ## Code Conventions
 
 - Prettier for formatting (auto-format on save via VS Code workspace config)
-- Google Fonts loaded via CSS: Baloo 2 (rounded cartoon headings), Nunito (sans-serif body)
-- Cartoon kid-friendly visual style (bright colors, thick dark outlines via `-webkit-text-stroke`/canvas strokes) — no mascot/character, just a plain SVG Earth illustration on the start screen
+- Google Fonts loaded via CSS: Poppins (bold italic, Seterra-style headings/HUD/buttons)
+- Flat, Seterra-style visual design — no mascot/character, no decorative illustrations, no confetti; feedback is limited to overlay tint + shake + inline highlight on the board itself
