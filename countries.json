@@ -1,6 +1,7 @@
 [
  {
   "geoId": "Afghanistan",
+  "continent": "asie",
   "fr": {
    "name": "Afghanistan",
    "capital": "Kaboul"
@@ -17,6 +18,7 @@
  },
  {
   "geoId": "Albania",
+  "continent": "europe",
   "fr": {
    "name": "Albanie",
    "capital": "Tirana"
@@ -33,6 +35,7 @@
  },
  {
   "geoId": "Algeria",
+  "continent": "afrique",
   "fr": {
    "name": "Algérie",
    "capital": "Alger"
@@ -49,6 +52,7 @@
  },
  {
   "geoId": "Angola",
+  "continent": "afrique",
   "fr": {
    "name": "Angola",
    "capital": "Luanda"
@@ -65,6 +69,7 @@
  },
  {
   "geoId": "Argentina",
+  "continent": "amerique_sud",
   "fr": {
    "name": "Argentine",
    "capital": "Buenos Aires"
@@ -81,6 +86,7 @@
  },
  {
   "geoId": "Armenia",
+  "continent": "asie",
   "fr": {
    "name": "Arménie",
    "capital": "Erevan"
@@ -97,6 +103,7 @@
  },
  {
   "geoId": "Australia",
+  "continent": "oceanie",
   "fr": {
    "name": "Australie",
    "capital": "Canberra"
@@ -113,6 +120,7 @@
  },
  {
   "geoId": "Austria",
+  "continent": "europe",
   "fr": {
    "name": "Autriche",
    "capital": "Vienne"
@@ -129,6 +137,7 @@
  },
  {
   "geoId": "Azerbaijan",
+  "continent": "asie",
   "fr": {
    "name": "Azerbaïdjan",
    "capital": "Bakou"
@@ -145,6 +154,7 @@
  },
  {
   "geoId": "Bangladesh",
+  "continent": "asie",
   "fr": {
    "name": "Bangladesh",
    "capital": "Dacca"
@@ -161,6 +171,7 @@
  },
  {
   "geoId": "Belarus",
+  "continent": "europe",
   "fr": {
    "name": "Biélorussie",
    "capital": "Minsk"
@@ -177,6 +188,7 @@
  },
  {
   "geoId": "Belgium",
+  "continent": "europe",
   "fr": {
    "name": "Belgique",
    "capital": "Bruxelles"
@@ -193,6 +205,7 @@
  },
  {
   "geoId": "Belize",
+  "continent": "amerique_nord",
   "fr": {
    "name": "Belize",
    "capital": "Belmopan"
@@ -209,6 +222,7 @@
  },
  {
   "geoId": "Benin",
+  "continent": "afrique",
   "fr": {
    "name": "Bénin",
    "capital": "Porto-Novo"
@@ -225,6 +239,7 @@
  },
  {
   "geoId": "Bhutan",
+  "continent": "asie",
   "fr": {
    "name": "Bhoutan",
    "capital": "Thimphou"
@@ -241,6 +256,7 @@
  },
  {
   "geoId": "Bolivia",
+  "continent": "amerique_sud",
   "fr": {
    "name": "Bolivie",
    "capital": "Sucre"
@@ -257,6 +273,7 @@
  },
  {
   "geoId": "Bosnia and Herzegovina",
+  "continent": "europe",
   "fr": {
    "name": "Bosnie",
    "capital": "Sarajevo"
@@ -273,6 +290,7 @@
  },
  {
   "geoId": "Botswana",
+  "continent": "afrique",
   "fr": {
    "name": "Botswana",
    "capital": "Gaborone"
@@ -289,6 +307,7 @@
  },
  {
   "geoId": "Brazil",
+  "continent": "amerique_sud",
   "fr": {
    "name": "Brésil",
    "capital": "Brasilia"
@@ -305,6 +324,7 @@
  },
  {
   "geoId": "Brunei",
+  "continent": "asie",
   "fr": {
    "name": "Brunei",
    "capital": "Bandar Seri Begawan"
@@ -321,6 +341,7 @@
  },
  {
   "geoId": "Bulgaria",
+  "continent": "europe",
   "fr": {
    "name": "Bulgarie",
    "capital": "Sofia"
@@ -337,6 +358,7 @@
  },
  {
   "geoId": "Burkina Faso",
+  "continent": "afrique",
   "fr": {
    "name": "Burkina Faso",
    "capital": "Ouagadougou"
@@ -353,6 +375,7 @@
  },
  {
   "geoId": "Burundi",
+  "continent": "afrique",
   "fr": {
    "name": "Burundi",
    "capital": "Gitega"
@@ -369,6 +392,7 @@
  },
  {
   "geoId": "Cambodia",
+  "continent": "asie",
   "fr": {
    "name": "Cambodge",
    "capital": "Phnom Penh"
@@ -385,6 +409,7 @@
  },
  {
   "geoId": "Cameroon",
+  "continent": "afrique",
   "fr": {
    "name": "Cameroun",
    "capital": "Yaoundé"
@@ -401,6 +426,7 @@
  },
  {
   "geoId": "Canada",
+  "continent": "amerique_nord",
   "fr": {
    "name": "Canada",
    "capital": "Ottawa"
@@ -417,6 +443,7 @@
  },
  {
   "geoId": "Central African Republic",
+  "continent": "afrique",
   "fr": {
    "name": "République Centrafricaine",
    "capital": "Bangui"
@@ -433,6 +460,7 @@
  },
  {
   "geoId": "Chad",
+  "continent": "afrique",
   "fr": {
    "name": "Tchad",
    "capital": "N'Djamena"
@@ -449,6 +477,7 @@
  },
  {
   "geoId": "Chile",
+  "continent": "amerique_sud",
   "fr": {
    "name": "Chili",
    "capital": "Santiago"
@@ -465,6 +494,7 @@
  },
  {
   "geoId": "China",
+  "continent": "asie",
   "fr": {
    "name": "Chine",
    "capital": "Pékin"
@@ -481,6 +511,7 @@
  },
  {
   "geoId": "Colombia",
+  "continent": "amerique_sud",
   "fr": {
    "name": "Colombie",
    "capital": "Bogotá"
@@ -497,6 +528,7 @@
  },
  {
   "geoId": "Costa Rica",
+  "continent": "amerique_nord",
   "fr": {
    "name": "Costa Rica",
    "capital": "San José"
@@ -513,6 +545,7 @@
  },
  {
   "geoId": "Croatia",
+  "continent": "europe",
   "fr": {
    "name": "Croatie",
    "capital": "Zagreb"
@@ -529,6 +562,7 @@
  },
  {
   "geoId": "Cuba",
+  "continent": "amerique_nord",
   "fr": {
    "name": "Cuba",
    "capital": "La Havane"
@@ -545,6 +579,7 @@
  },
  {
   "geoId": "Cyprus",
+  "continent": "europe",
   "fr": {
    "name": "Chypre",
    "capital": "Nicosie"
@@ -561,6 +596,7 @@
  },
  {
   "geoId": "Czech Republic",
+  "continent": "europe",
   "fr": {
    "name": "République Tchèque",
    "capital": "Prague"
@@ -577,6 +613,7 @@
  },
  {
   "geoId": "Democratic Republic of the Congo",
+  "continent": "afrique",
   "fr": {
    "name": "République Démocratique du Congo",
    "capital": "Kinshasa"
@@ -593,6 +630,7 @@
  },
  {
   "geoId": "Denmark",
+  "continent": "europe",
   "fr": {
    "name": "Danemark",
    "capital": "Copenhague"
@@ -609,6 +647,7 @@
  },
  {
   "geoId": "Djibouti",
+  "continent": "afrique",
   "fr": {
    "name": "Djibouti",
    "capital": "Djibouti"
@@ -625,6 +664,7 @@
  },
  {
   "geoId": "Dominican Republic",
+  "continent": "amerique_nord",
   "fr": {
    "name": "République Dominicaine",
    "capital": "Saint-Domingue"
@@ -641,6 +681,7 @@
  },
  {
   "geoId": "East Timor",
+  "continent": "asie",
   "fr": {
    "name": "Timor oriental",
    "capital": "Dili"
@@ -657,6 +698,7 @@
  },
  {
   "geoId": "Ecuador",
+  "continent": "amerique_sud",
   "fr": {
    "name": "Équateur",
    "capital": "Quito"
@@ -673,6 +715,7 @@
  },
  {
   "geoId": "Egypt",
+  "continent": "afrique",
   "fr": {
    "name": "Égypte",
    "capital": "Le Caire"
@@ -689,6 +732,7 @@
  },
  {
   "geoId": "El Salvador",
+  "continent": "amerique_nord",
   "fr": {
    "name": "El Salvador",
    "capital": "San Salvador"
@@ -705,6 +749,7 @@
  },
  {
   "geoId": "England",
+  "continent": "europe",
   "fr": {
    "name": "Royaume Uni",
    "capital": "Londres"
@@ -721,6 +766,7 @@
  },
  {
   "geoId": "Equatorial Guinea",
+  "continent": "afrique",
   "fr": {
    "name": "Guinée équatoriale",
    "capital": "Malabo"
@@ -737,6 +783,7 @@
  },
  {
   "geoId": "Eritrea",
+  "continent": "afrique",
   "fr": {
    "name": "Erythrée",
    "capital": "Asmara"
@@ -753,6 +800,7 @@
  },
  {
   "geoId": "Estonia",
+  "continent": "europe",
   "fr": {
    "name": "Estonie",
    "capital": "Tallinn"
@@ -769,6 +817,7 @@
  },
  {
   "geoId": "Ethiopia",
+  "continent": "afrique",
   "fr": {
    "name": "Éthiopie",
    "capital": "Addis-Abeba"
@@ -785,6 +834,7 @@
  },
  {
   "geoId": "Fiji",
+  "continent": "oceanie",
   "fr": {
    "name": "Fidji",
    "capital": "Suva"
@@ -801,6 +851,7 @@
  },
  {
   "geoId": "Finland",
+  "continent": "europe",
   "fr": {
    "name": "Finlande",
    "capital": "Helsinki"
@@ -817,6 +868,7 @@
  },
  {
   "geoId": "France",
+  "continent": "europe",
   "fr": {
    "name": "France",
    "capital": "Paris"
@@ -833,6 +885,7 @@
  },
  {
   "geoId": "Gabon",
+  "continent": "afrique",
   "fr": {
    "name": "Gabon",
    "capital": "Libreville"
@@ -849,6 +902,7 @@
  },
  {
   "geoId": "Gambia",
+  "continent": "afrique",
   "fr": {
    "name": "Gambie",
    "capital": "Banjul"
@@ -865,6 +919,7 @@
  },
  {
   "geoId": "Georgia",
+  "continent": "asie",
   "fr": {
    "name": "Géorgie",
    "capital": "Tbilissi"
@@ -881,6 +936,7 @@
  },
  {
   "geoId": "Germany",
+  "continent": "europe",
   "fr": {
    "name": "Allemagne",
    "capital": "Berlin"
@@ -897,6 +953,7 @@
  },
  {
   "geoId": "Ghana",
+  "continent": "afrique",
   "fr": {
    "name": "Ghana",
    "capital": "Accra"
@@ -913,6 +970,7 @@
  },
  {
   "geoId": "Greece",
+  "continent": "europe",
   "fr": {
    "name": "Grèce",
    "capital": "Athènes"
@@ -929,6 +987,7 @@
  },
  {
   "geoId": "Guatemala",
+  "continent": "amerique_nord",
   "fr": {
    "name": "Guatemala",
    "capital": "Guatemala"
@@ -945,6 +1004,7 @@
  },
  {
   "geoId": "Guinea",
+  "continent": "afrique",
   "fr": {
    "name": "Guinée",
    "capital": "Conakry"
@@ -961,6 +1021,7 @@
  },
  {
   "geoId": "Guinea Bissau",
+  "continent": "afrique",
   "fr": {
    "name": "Guinée-Bissau",
    "capital": "Bissau"
@@ -977,6 +1038,7 @@
  },
  {
   "geoId": "Guyana",
+  "continent": "amerique_sud",
   "fr": {
    "name": "Guyana",
    "capital": "Georgetown"
@@ -993,6 +1055,7 @@
  },
  {
   "geoId": "Haiti",
+  "continent": "amerique_nord",
   "fr": {
    "name": "Haïti",
    "capital": "Port-au-Prince"
@@ -1009,6 +1072,7 @@
  },
  {
   "geoId": "Honduras",
+  "continent": "amerique_nord",
   "fr": {
    "name": "Honduras",
    "capital": "Tegucigalpa"
@@ -1025,6 +1089,7 @@
  },
  {
   "geoId": "Hungary",
+  "continent": "europe",
   "fr": {
    "name": "Hongrie",
    "capital": "Budapest"
@@ -1041,6 +1106,7 @@
  },
  {
   "geoId": "Iceland",
+  "continent": "europe",
   "fr": {
    "name": "Islande",
    "capital": "Reykjavik"
@@ -1057,6 +1123,7 @@
  },
  {
   "geoId": "India",
+  "continent": "asie",
   "fr": {
    "name": "Inde",
    "capital": "New Delhi"
@@ -1073,6 +1140,7 @@
  },
  {
   "geoId": "Indonesia",
+  "continent": "asie",
   "fr": {
    "name": "Indonésie",
    "capital": "Jakarta"
@@ -1089,6 +1157,7 @@
  },
  {
   "geoId": "Iran",
+  "continent": "asie",
   "fr": {
    "name": "Iran",
    "capital": "Téhéran"
@@ -1105,6 +1174,7 @@
  },
  {
   "geoId": "Iraq",
+  "continent": "asie",
   "fr": {
    "name": "Irak",
    "capital": "Bagdad"
@@ -1121,6 +1191,7 @@
  },
  {
   "geoId": "Ireland",
+  "continent": "europe",
   "fr": {
    "name": "Irlande",
    "capital": "Dublin"
@@ -1137,6 +1208,7 @@
  },
  {
   "geoId": "Israel",
+  "continent": "asie",
   "fr": {
    "name": "Israël",
    "capital": "Jérusalem"
@@ -1153,6 +1225,7 @@
  },
  {
   "geoId": "Italy",
+  "continent": "europe",
   "fr": {
    "name": "Italie",
    "capital": "Rome"
@@ -1169,6 +1242,7 @@
  },
  {
   "geoId": "Ivory Coast",
+  "continent": "afrique",
   "fr": {
    "name": "Côte d'Ivoire",
    "capital": "Yamoussoukro"
@@ -1185,6 +1259,7 @@
  },
  {
   "geoId": "Jamaica",
+  "continent": "amerique_nord",
   "fr": {
    "name": "Jamaïque",
    "capital": "Kingston"
@@ -1201,6 +1276,7 @@
  },
  {
   "geoId": "Japan",
+  "continent": "asie",
   "fr": {
    "name": "Japon",
    "capital": "Tokyo"
@@ -1217,6 +1293,7 @@
  },
  {
   "geoId": "Jordan",
+  "continent": "asie",
   "fr": {
    "name": "Jordanie",
    "capital": "Amman"
@@ -1233,6 +1310,7 @@
  },
  {
   "geoId": "Kazakhstan",
+  "continent": "asie",
   "fr": {
    "name": "Kazakhstan",
    "capital": "Noursoultan"
@@ -1249,6 +1327,7 @@
  },
  {
   "geoId": "Kenya",
+  "continent": "afrique",
   "fr": {
    "name": "Kenya",
    "capital": "Nairobi"
@@ -1265,6 +1344,7 @@
  },
  {
   "geoId": "Kosovo",
+  "continent": "europe",
   "fr": {
    "name": "Kosovo",
    "capital": "Pristina"
@@ -1281,6 +1361,7 @@
  },
  {
   "geoId": "Kuwait",
+  "continent": "asie",
   "fr": {
    "name": "Koweït",
    "capital": "Koweït"
@@ -1297,6 +1378,7 @@
  },
  {
   "geoId": "Kyrgyzstan",
+  "continent": "asie",
   "fr": {
    "name": "Kirghizistan",
    "capital": "Bichkek"
@@ -1313,6 +1395,7 @@
  },
  {
   "geoId": "Laos",
+  "continent": "asie",
   "fr": {
    "name": "Laos",
    "capital": "Vientiane"
@@ -1329,6 +1412,7 @@
  },
  {
   "geoId": "Latvia",
+  "continent": "europe",
   "fr": {
    "name": "Lettonie",
    "capital": "Riga"
@@ -1345,6 +1429,7 @@
  },
  {
   "geoId": "Lebanon",
+  "continent": "asie",
   "fr": {
    "name": "Liban",
    "capital": "Beyrouth"
@@ -1361,6 +1446,7 @@
  },
  {
   "geoId": "Lesotho",
+  "continent": "afrique",
   "fr": {
    "name": "Lesotho",
    "capital": "Maseru"
@@ -1377,6 +1463,7 @@
  },
  {
   "geoId": "Liberia",
+  "continent": "afrique",
   "fr": {
    "name": "Libéria",
    "capital": "Monrovia"
@@ -1393,6 +1480,7 @@
  },
  {
   "geoId": "Libya",
+  "continent": "afrique",
   "fr": {
    "name": "Libye",
    "capital": "Tripoli"
@@ -1409,6 +1497,7 @@
  },
  {
   "geoId": "Lithuania",
+  "continent": "europe",
   "fr": {
    "name": "Lituanie",
    "capital": "Vilnius"
@@ -1425,6 +1514,7 @@
  },
  {
   "geoId": "Luxembourg",
+  "continent": "europe",
   "fr": {
    "name": "Luxembourg",
    "capital": "Luxembourg"
@@ -1441,6 +1531,7 @@
  },
  {
   "geoId": "Macedonia",
+  "continent": "europe",
   "fr": {
    "name": "Macédoine",
    "capital": "Skopje"
@@ -1457,6 +1548,7 @@
  },
  {
   "geoId": "Madagascar",
+  "continent": "afrique",
   "fr": {
    "name": "Madagascar",
    "capital": "Antananarivo"
@@ -1473,6 +1565,7 @@
  },
  {
   "geoId": "Malawi",
+  "continent": "afrique",
   "fr": {
    "name": "Malawi",
    "capital": "Lilongwe"
@@ -1489,6 +1582,7 @@
  },
  {
   "geoId": "Malaysia",
+  "continent": "asie",
   "fr": {
    "name": "Malaisie",
    "capital": "Kuala Lumpur"
@@ -1505,6 +1599,7 @@
  },
  {
   "geoId": "Mali",
+  "continent": "afrique",
   "fr": {
    "name": "Mali",
    "capital": "Bamako"
@@ -1521,6 +1616,7 @@
  },
  {
   "geoId": "Mauritania",
+  "continent": "afrique",
   "fr": {
    "name": "Mauritanie",
    "capital": "Nouakchott"
@@ -1537,6 +1633,7 @@
  },
  {
   "geoId": "Mexico",
+  "continent": "amerique_nord",
   "fr": {
    "name": "Mexique",
    "capital": "Mexico"
@@ -1553,6 +1650,7 @@
  },
  {
   "geoId": "Moldova",
+  "continent": "europe",
   "fr": {
    "name": "Moldavie",
    "capital": "Chișinău"
@@ -1569,6 +1667,7 @@
  },
  {
   "geoId": "Mongolia",
+  "continent": "asie",
   "fr": {
    "name": "Mongolie",
    "capital": "Oulan-Bator"
@@ -1585,6 +1684,7 @@
  },
  {
   "geoId": "Montenegro",
+  "continent": "europe",
   "fr": {
    "name": "Monténégro",
    "capital": "Podgorica"
@@ -1601,6 +1701,7 @@
  },
  {
   "geoId": "Morocco",
+  "continent": "afrique",
   "fr": {
    "name": "Maroc",
    "capital": "Rabat"
@@ -1617,6 +1718,7 @@
  },
  {
   "geoId": "Mozambique",
+  "continent": "afrique",
   "fr": {
    "name": "Mozambique",
    "capital": "Maputo"
@@ -1633,6 +1735,7 @@
  },
  {
   "geoId": "Myanmar",
+  "continent": "asie",
   "fr": {
    "name": "Birmanie",
    "capital": "Naypyidaw"
@@ -1649,6 +1752,7 @@
  },
  {
   "geoId": "Namibia",
+  "continent": "afrique",
   "fr": {
    "name": "Namibie",
    "capital": "Windhoek"
@@ -1665,6 +1769,7 @@
  },
  {
   "geoId": "Nepal",
+  "continent": "asie",
   "fr": {
    "name": "Népal",
    "capital": "Katmandou"
@@ -1681,6 +1786,7 @@
  },
  {
   "geoId": "Netherlands",
+  "continent": "europe",
   "fr": {
    "name": "Pays-Bas",
    "capital": "Amsterdam"
@@ -1697,6 +1803,7 @@
  },
  {
   "geoId": "New Zealand",
+  "continent": "oceanie",
   "fr": {
    "name": "Nouvelle-Zélande",
    "capital": "Wellington"
@@ -1713,6 +1820,7 @@
  },
  {
   "geoId": "Nicaragua",
+  "continent": "amerique_nord",
   "fr": {
    "name": "Nicaragua",
    "capital": "Managua"
@@ -1729,6 +1837,7 @@
  },
  {
   "geoId": "Niger",
+  "continent": "afrique",
   "fr": {
    "name": "Niger",
    "capital": "Niamey"
@@ -1745,6 +1854,7 @@
  },
  {
   "geoId": "Nigeria",
+  "continent": "afrique",
   "fr": {
    "name": "Nigéria",
    "capital": "Abuja"
@@ -1761,6 +1871,7 @@
  },
  {
   "geoId": "North Korea",
+  "continent": "asie",
   "fr": {
    "name": "Corée du Nord",
    "capital": "Pyongyang"
@@ -1777,6 +1888,7 @@
  },
  {
   "geoId": "Norway",
+  "continent": "europe",
   "fr": {
    "name": "Norvège",
    "capital": "Oslo"
@@ -1793,6 +1905,7 @@
  },
  {
   "geoId": "Oman",
+  "continent": "asie",
   "fr": {
    "name": "Oman",
    "capital": "Mascate"
@@ -1809,6 +1922,7 @@
  },
  {
   "geoId": "Pakistan",
+  "continent": "asie",
   "fr": {
    "name": "Pakistan",
    "capital": "Islamabad"
@@ -1825,6 +1939,7 @@
  },
  {
   "geoId": "Panama",
+  "continent": "amerique_nord",
   "fr": {
    "name": "Panama",
    "capital": "Panama"
@@ -1841,6 +1956,7 @@
  },
  {
   "geoId": "Papua New Guinea",
+  "continent": "oceanie",
   "fr": {
    "name": "Papouasie-Nouvelle-Guinée",
    "capital": "Port Moresby"
@@ -1857,6 +1973,7 @@
  },
  {
   "geoId": "Paraguay",
+  "continent": "amerique_sud",
   "fr": {
    "name": "Paraguay",
    "capital": "Asunción"
@@ -1873,6 +1990,7 @@
  },
  {
   "geoId": "Peru",
+  "continent": "amerique_sud",
   "fr": {
    "name": "Pérou",
    "capital": "Lima"
@@ -1889,6 +2007,7 @@
  },
  {
   "geoId": "Philippines",
+  "continent": "asie",
   "fr": {
    "name": "Philippines",
    "capital": "Manille"
@@ -1905,6 +2024,7 @@
  },
  {
   "geoId": "Poland",
+  "continent": "europe",
   "fr": {
    "name": "Pologne",
    "capital": "Varsovie"
@@ -1921,6 +2041,7 @@
  },
  {
   "geoId": "Portugal",
+  "continent": "europe",
   "fr": {
    "name": "Portugal",
    "capital": "Lisbonne"
@@ -1937,6 +2058,7 @@
  },
  {
   "geoId": "Qatar",
+  "continent": "asie",
   "fr": {
    "name": "Qatar",
    "capital": "Doha"
@@ -1953,6 +2075,7 @@
  },
  {
   "geoId": "Republic of Serbia",
+  "continent": "europe",
   "fr": {
    "name": "Serbie",
    "capital": "Belgrade"
@@ -1969,6 +2092,7 @@
  },
  {
   "geoId": "Republic of the Congo",
+  "continent": "afrique",
   "fr": {
    "name": "République du Congo",
    "capital": "Brazzaville"
@@ -1985,6 +2109,7 @@
  },
  {
   "geoId": "Romania",
+  "continent": "europe",
   "fr": {
    "name": "Roumanie",
    "capital": "Bucarest"
@@ -2001,6 +2126,7 @@
  },
  {
   "geoId": "Russia",
+  "continent": "asie",
   "fr": {
    "name": "Russie",
    "capital": "Moscou"
@@ -2017,6 +2143,7 @@
  },
  {
   "geoId": "Rwanda",
+  "continent": "afrique",
   "fr": {
    "name": "Rwanda",
    "capital": "Kigali"
@@ -2033,6 +2160,7 @@
  },
  {
   "geoId": "Saudi Arabia",
+  "continent": "asie",
   "fr": {
    "name": "Arabie Saoudite",
    "capital": "Riyad"
@@ -2049,6 +2177,7 @@
  },
  {
   "geoId": "Senegal",
+  "continent": "afrique",
   "fr": {
    "name": "Sénégal",
    "capital": "Dakar"
@@ -2065,6 +2194,7 @@
  },
  {
   "geoId": "Sierra Leone",
+  "continent": "afrique",
   "fr": {
    "name": "Sierra Leone",
    "capital": "Freetown"
@@ -2081,6 +2211,7 @@
  },
  {
   "geoId": "Slovakia",
+  "continent": "europe",
   "fr": {
    "name": "Slovaquie",
    "capital": "Bratislava"
@@ -2097,6 +2228,7 @@
  },
  {
   "geoId": "Slovenia",
+  "continent": "europe",
   "fr": {
    "name": "Slovénie",
    "capital": "Ljubljana"
@@ -2113,6 +2245,7 @@
  },
  {
   "geoId": "Solomon Islands",
+  "continent": "oceanie",
   "fr": {
    "name": "Îles Salomon",
    "capital": "Honiara"
@@ -2129,6 +2262,7 @@
  },
  {
   "geoId": "Somalia",
+  "continent": "afrique",
   "fr": {
    "name": "Somalie",
    "capital": "Mogadiscio"
@@ -2145,6 +2279,7 @@
  },
  {
   "geoId": "South Africa",
+  "continent": "afrique",
   "fr": {
    "name": "Afrique du Sud",
    "capital": "Pretoria"
@@ -2161,6 +2296,7 @@
  },
  {
   "geoId": "South Korea",
+  "continent": "asie",
   "fr": {
    "name": "Corée du Sud",
    "capital": "Séoul"
@@ -2177,6 +2313,7 @@
  },
  {
   "geoId": "South Sudan",
+  "continent": "afrique",
   "fr": {
    "name": "Soudan du Sud",
    "capital": "Juba"
@@ -2193,6 +2330,7 @@
  },
  {
   "geoId": "Spain",
+  "continent": "europe",
   "fr": {
    "name": "Espagne",
    "capital": "Madrid"
@@ -2209,6 +2347,7 @@
  },
  {
   "geoId": "Sri Lanka",
+  "continent": "asie",
   "fr": {
    "name": "Sri Lanka",
    "capital": "Sri Jayawardenepura Kotte"
@@ -2225,6 +2364,7 @@
  },
  {
   "geoId": "Sudan",
+  "continent": "afrique",
   "fr": {
    "name": "Soudan",
    "capital": "Khartoum"
@@ -2241,6 +2381,7 @@
  },
  {
   "geoId": "Suriname",
+  "continent": "amerique_sud",
   "fr": {
    "name": "Suriname",
    "capital": "Paramaribo"
@@ -2257,6 +2398,7 @@
  },
  {
   "geoId": "Swaziland",
+  "continent": "afrique",
   "fr": {
    "name": "Eswatini",
    "capital": "Mbabane"
@@ -2273,6 +2415,7 @@
  },
  {
   "geoId": "Sweden",
+  "continent": "europe",
   "fr": {
    "name": "Suède",
    "capital": "Stockholm"
@@ -2289,6 +2432,7 @@
  },
  {
   "geoId": "Switzerland",
+  "continent": "europe",
   "fr": {
    "name": "Suisse",
    "capital": "Berne"
@@ -2305,6 +2449,7 @@
  },
  {
   "geoId": "Syria",
+  "continent": "asie",
   "fr": {
    "name": "Syrie",
    "capital": "Damas"
@@ -2321,6 +2466,7 @@
  },
  {
   "geoId": "Taiwan",
+  "continent": "asie",
   "fr": {
    "name": "Taïwan",
    "capital": "Taipei"
@@ -2337,6 +2483,7 @@
  },
  {
   "geoId": "Tajikistan",
+  "continent": "asie",
   "fr": {
    "name": "Tadjikistan",
    "capital": "Douchanbé"
@@ -2353,6 +2500,7 @@
  },
  {
   "geoId": "Thailand",
+  "continent": "asie",
   "fr": {
    "name": "Thaïlande",
    "capital": "Bangkok"
@@ -2369,6 +2517,7 @@
  },
  {
   "geoId": "The Bahamas",
+  "continent": "amerique_nord",
   "fr": {
    "name": "Bahamas",
    "capital": "Nassau"
@@ -2385,6 +2534,7 @@
  },
  {
   "geoId": "Togo",
+  "continent": "afrique",
   "fr": {
    "name": "Togo",
    "capital": "Lomé"
@@ -2401,6 +2551,7 @@
  },
  {
   "geoId": "Trinidad and Tobago",
+  "continent": "amerique_nord",
   "fr": {
    "name": "Trinité-et-Tobago",
    "capital": "Port-d'Espagne"
@@ -2417,6 +2568,7 @@
  },
  {
   "geoId": "Tunisia",
+  "continent": "afrique",
   "fr": {
    "name": "Tunisie",
    "capital": "Tunis"
@@ -2433,6 +2585,7 @@
  },
  {
   "geoId": "Turkey",
+  "continent": "asie",
   "fr": {
    "name": "Turquie",
    "capital": "Ankara"
@@ -2449,6 +2602,7 @@
  },
  {
   "geoId": "Turkmenistan",
+  "continent": "asie",
   "fr": {
    "name": "Turkménistan",
    "capital": "Achgabat"
@@ -2465,6 +2619,7 @@
  },
  {
   "geoId": "USA",
+  "continent": "amerique_nord",
   "fr": {
    "name": "États-Unis",
    "capital": "Washington, D.C."
@@ -2481,6 +2636,7 @@
  },
  {
   "geoId": "Uganda",
+  "continent": "afrique",
   "fr": {
    "name": "Ouganda",
    "capital": "Kampala"
@@ -2497,6 +2653,7 @@
  },
  {
   "geoId": "Ukraine",
+  "continent": "europe",
   "fr": {
    "name": "Ukraine",
    "capital": "Kiev"
@@ -2513,6 +2670,7 @@
  },
  {
   "geoId": "United Arab Emirates",
+  "continent": "asie",
   "fr": {
    "name": "Émirats Arabes Unis",
    "capital": "Abou Dabi"
@@ -2529,6 +2687,7 @@
  },
  {
   "geoId": "United Republic of Tanzania",
+  "continent": "afrique",
   "fr": {
    "name": "Tanzanie",
    "capital": "Dodoma"
@@ -2545,6 +2704,7 @@
  },
  {
   "geoId": "Uruguay",
+  "continent": "amerique_sud",
   "fr": {
    "name": "Uruguay",
    "capital": "Montevideo"
@@ -2561,6 +2721,7 @@
  },
  {
   "geoId": "Uzbekistan",
+  "continent": "asie",
   "fr": {
    "name": "Ouzbékistan",
    "capital": "Tachkent"
@@ -2577,6 +2738,7 @@
  },
  {
   "geoId": "Vanuatu",
+  "continent": "oceanie",
   "fr": {
    "name": "Vanuatu",
    "capital": "Port-Vila"
@@ -2593,6 +2755,7 @@
  },
  {
   "geoId": "Venezuela",
+  "continent": "amerique_sud",
   "fr": {
    "name": "Venezuela",
    "capital": "Caracas"
@@ -2609,6 +2772,7 @@
  },
  {
   "geoId": "Vietnam",
+  "continent": "asie",
   "fr": {
    "name": "Vietnam",
    "capital": "Hanoï"
@@ -2625,6 +2789,7 @@
  },
  {
   "geoId": "Western Sahara",
+  "continent": "afrique",
   "fr": {
    "name": "Sahara Occidental",
    "capital": "Laâyoune"
@@ -2641,6 +2806,7 @@
  },
  {
   "geoId": "Yemen",
+  "continent": "asie",
   "fr": {
    "name": "Yémen",
    "capital": "Sanaa"
@@ -2657,6 +2823,7 @@
  },
  {
   "geoId": "Zambia",
+  "continent": "afrique",
   "fr": {
    "name": "Zambie",
    "capital": "Lusaka"
@@ -2673,6 +2840,7 @@
  },
  {
   "geoId": "Zimbabwe",
+  "continent": "afrique",
   "fr": {
    "name": "Zimbabwe",
    "capital": "Harare"
@@ -2686,5 +2854,22 @@
    "capital": "Harare"
   },
   "flag": "🇿🇼"
+ },
+ {
+  "geoId": "Greenland",
+  "continent": "europe",
+  "fr": {
+   "name": "Groenland",
+   "capital": "Nuuk"
+  },
+  "en": {
+   "name": "Greenland",
+   "capital": "Nuuk"
+  },
+  "es": {
+   "name": "Groenlandia",
+   "capital": "Nuuk"
+  },
+  "flag": "🇬🇱"
  }
 ]

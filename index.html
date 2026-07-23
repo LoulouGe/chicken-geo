@@ -3,59 +3,95 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chicken Geo</title>
+    <title>Geo Quiz</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,600;0,700;1,700;1,800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0c2151" />
+    <meta name="description" content="Jeu éducatif de géo - Clique sur le bon pays, sur un globe 3D ou une carte !" />
+    <link rel="icon" href="assets/icon-512.png?v=3" type="image/png" />
+    <link rel="apple-touch-icon" href="assets/icon-512.png?v=3" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="stylesheet" href="style.css?v=20" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   </head>
   <body>
-    <!-- Start Screen -->
+    <!-- Start Screen: choose board (globe or map) -->
     <div id="start-screen" class="screen active">
       <div class="lang-toggle">
         <button class="btn-lang selected" data-lang="fr">&#x1F1EB;&#x1F1F7;</button>
         <button class="btn-lang" data-lang="en">&#x1F1EC;&#x1F1E7;</button>
         <button class="btn-lang" data-lang="es">&#x1F1EA;&#x1F1F8;</button>
       </div>
-      <h1 class="title">Chicken Geo</h1>
+      <h1 class="title">Geo Quiz</h1>
+      <p class="subtitle" id="start-subtitle">Choisis un plateau de jeu</p>
       <div class="mode-buttons">
-        <button class="btn-mode" data-mode="countries" id="btn-mode-countries">Pays</button>
-        <button class="btn-mode" data-mode="flags" id="btn-mode-flags">Drapeaux</button>
-        <button class="btn-mode" data-mode="capitals" id="btn-mode-capitals">Capitales</button>
+        <button class="btn-pill btn-board" data-board="globe" id="btn-board-globe">Globe 3D</button>
+        <button class="btn-pill btn-board" data-board="map" id="btn-board-map">Carte</button>
       </div>
+    </div>
+
+    <!-- Mode Screen: choose Continent / Pays / Capitale -->
+    <div id="mode-screen" class="screen">
+      <p class="subtitle" id="choose-mode-title">Choisis un mode de jeu</p>
+      <div class="mode-buttons">
+        <button class="btn-pill btn-mode-choice" data-mode="continent" id="btn-mode-continent">Continent</button>
+        <button class="btn-pill btn-mode-choice" data-mode="countries" id="btn-mode-countries">Pays</button>
+        <button class="btn-pill btn-mode-choice" data-mode="capitals" id="btn-mode-capitals">Capitales</button>
+      </div>
+      <button class="btn-outline" id="btn-mode-back">Retour</button>
+    </div>
+
+    <!-- Scope Screen: choose Monde or a specific continent -->
+    <div id="scope-screen" class="screen">
+      <p class="subtitle" id="choose-scope-title">Choisis une zone</p>
+      <div class="mode-buttons">
+        <button class="btn-pill btn-scope-choice" data-scope="world" id="btn-scope-world">Monde</button>
+        <button class="btn-pill btn-scope-choice" data-scope="europe" id="btn-scope-europe">Europe</button>
+        <button class="btn-pill btn-scope-choice" data-scope="asie" id="btn-scope-asie">Asie</button>
+        <button class="btn-pill btn-scope-choice" data-scope="afrique" id="btn-scope-afrique">Afrique</button>
+        <button class="btn-pill btn-scope-choice" data-scope="amerique_nord" id="btn-scope-amerique_nord">Amérique du Nord</button>
+        <button class="btn-pill btn-scope-choice" data-scope="amerique_sud" id="btn-scope-amerique_sud">Amérique du Sud</button>
+        <button class="btn-pill btn-scope-choice" data-scope="oceanie" id="btn-scope-oceanie">Océanie</button>
+      </div>
+      <button class="btn-outline" id="btn-scope-back">Retour</button>
     </div>
 
     <!-- Game Screen -->
     <div id="game-screen" class="screen">
       <div id="hud">
-        <div id="timer-container">
-          <div id="timer-bar"></div>
+        <div id="hud-score" class="hud-pill">0%</div>
+        <div id="hud-question" class="hud-pill hud-pill-outline"></div>
+        <div id="hud-right">
+          <span id="hud-timer">00:00</span>
+          <button id="btn-skip" class="hud-icon-btn" title="Passer">&#8677;</button>
+          <button id="btn-home" class="hud-icon-btn" title="Accueil">&#10005;</button>
         </div>
-        <p class="subtitle" id="game-subtitle">Fais atterrir la poule sur le bon pays !</p>
-        <div id="country-name"></div>
-        <div id="score-display"></div>
       </div>
-      <button id="btn-accelerate" class="btn-accelerate">Acc&eacute;l&eacute;rer !</button>
+      <p id="hud-wrong-label" class="hud-wrong-label"></p>
       <div id="scene-container"></div>
+      <div id="map-container" class="hidden">
+        <canvas id="map-canvas"></canvas>
+      </div>
       <div id="feedback-overlay"></div>
-      <img id="feedback-chicken" src="" alt="" />
-      <img id="feedback-chicken-point" src="" alt="" />
     </div>
 
     <!-- End Screen -->
     <div id="end-screen" class="screen">
-      <h1 class="title end-title" id="end-title">Partie termin&eacute;e !</h1>
+      <h1 class="title end-title" id="end-title">Partie terminée !</h1>
       <p id="final-score" class="final-score"></p>
-      <button id="btn-replay" class="btn-play">Rejouer</button>
-      <button id="btn-back-menu" class="btn-secondary">Retour au menu</button>
+      <div class="mode-buttons">
+        <button id="btn-replay" class="btn-pill">Rejouer</button>
+        <button id="btn-retry-mistakes" class="btn-pill hidden">Rejoue tes erreurs</button>
+      </div>
+      <button id="btn-back-menu" class="btn-outline">Retour au menu</button>
     </div>
 
-    <canvas id="particles-canvas"></canvas>
-
-    <script src="script.js"></script>
+    <script src="script.js?v=20"></script>
   </body>
 </html>
