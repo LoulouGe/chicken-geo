@@ -7,19 +7,20 @@ Jouer en ligne : https://loulouge.github.io/chicken-geo/
 ## Fonctionnalités
 
 - **2 plateaux** : Globe 3D interactif (rotation tactile et souris) ou Carte plate 2D
-- **3 modes de jeu** : Continent et Océans (trouver un continent ou un océan), Pays (trouver le pays), Capitales (trouver le pays d'une capitale)
+- **3 modes de jeu** : Continent (trouver un continent), Pays (trouver le pays), Capitales (trouver le pays d'une capitale)
 - **Zones** : Monde entier ou un continent précis (pour Pays / Capitales)
 - **Style Seterra** : fond de carte vert uni, océan bleu-gris uni, fines frontières blanches, typographie grasse italique
 - **3 langues** : Français, English, Español
 - **168 pays** du monde entier
-- **Reste sur la question** : un clic faux affiche juste une pastille d'indice ("Clique sur ...") et ne fait pas avancer la partie ; seul un clic juste ou le bouton **Passer** fait avancer
+- **Reste sur la question** : un clic faux nomme brièvement ce que tu as cliqué et affiche une pastille d'indice ("Clique sur ...") sans faire avancer la partie ; au 3ᵉ clic faux, la bonne réponse clignote en rouge jusqu'à ce que tu cliques dessus
+- **Carte de résultats en direct** : chaque pays/continent trouvé reste coloré et nommé sur la carte pour le reste de la partie — blanc du premier coup, jaune au 2ᵉ essai, jaune foncé au 3ᵉ, rouge si raté (3 essais ou Passer)
 - **Chronomètre** qui compte le temps écoulé (pas de compte à rebours ni d'échec automatique)
-- **Pourcentage de réussite** et bouton **Rejoue tes erreurs** en fin de partie pour retravailler uniquement ce qui a été raté (raté = passé, pas juste une erreur de clic)
+- **Pourcentage de réussite** (proportionnel au nombre d'essais, pas juste bonne/mauvaise réponse) et bouton **Rejoue tes erreurs** en fin de partie pour retravailler uniquement ce qui a été raté
 
 ## Comment jouer
 
 1. Choisis ta langue, puis le Globe 3D ou la Carte
-2. Choisis un mode : Continent et Océans, Pays ou Capitale
+2. Choisis un mode : Continent, Pays ou Capitale
 3. Pour Pays / Capitale, choisis Monde ou un continent précis
 4. Un pays, un continent ou une capitale s'affiche à l'écran
 5. Clique sur la bonne réponse, sur le globe ou la carte — si tu te trompes, réessaie ; utilise Passer si tu ne trouves pas

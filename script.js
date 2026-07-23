@@ -16,13 +16,7 @@ const UI_STRINGS = {
     continent_amerique_nord: "Amérique du Nord",
     continent_amerique_sud: "Amérique du Sud",
     continent_oceanie: "Océanie",
-    ocean_pacifique: "Océan Pacifique",
-    ocean_atlantique: "Océan Atlantique",
-    ocean_indien: "Océan Indien",
-    ocean_arctique: "Océan Arctique",
-    ocean_austral: "Océan Austral",
     back: "Retour",
-    click_on: "Clique sur",
     end_title: "Partie terminée !",
     replay: "Rejouer",
     btn_retry_mistakes: "Rejoue tes erreurs",
@@ -46,13 +40,7 @@ const UI_STRINGS = {
     continent_amerique_nord: "North America",
     continent_amerique_sud: "South America",
     continent_oceanie: "Oceania",
-    ocean_pacifique: "Pacific Ocean",
-    ocean_atlantique: "Atlantic Ocean",
-    ocean_indien: "Indian Ocean",
-    ocean_arctique: "Arctic Ocean",
-    ocean_austral: "Southern Ocean",
     back: "Back",
-    click_on: "Click on",
     end_title: "Game over!",
     replay: "Play again",
     btn_retry_mistakes: "Retry my mistakes",
@@ -76,13 +64,7 @@ const UI_STRINGS = {
     continent_amerique_nord: "América del Norte",
     continent_amerique_sud: "América del Sur",
     continent_oceanie: "Oceanía",
-    ocean_pacifique: "Océano Pacífico",
-    ocean_atlantique: "Océano Atlántico",
-    ocean_indien: "Océano Índico",
-    ocean_arctique: "Océano Ártico",
-    ocean_austral: "Océano Austral",
     back: "Atrás",
-    click_on: "Haz clic en",
     end_title: "¡Partida terminada!",
     replay: "Volver a jugar",
     btn_retry_mistakes: "Repite tus errores",
@@ -102,20 +84,14 @@ function formatCountryLabel(cf) {
   return cf.flag ? cf.flag + " " + cf[currentLang].name : cf[currentLang].name;
 }
 
-// The current target's display name: a continent/ocean has no flag, a
+// The current target's display name: a continent has no flag, a
 // country/capital target is shown with its flag.
 function formatTargetLabel(target) {
-  if (currentMode === "continent") {
-    return OCEANS.includes(target) ? t("ocean_" + target) : t("continent_" + target);
-  }
+  if (currentMode === "continent") return t("continent_" + target);
   return formatCountryLabel(target);
 }
 
-// A clicked answer can be a country object (Pays/Capitales, or a country
-// clicked in Continent mode) or a plain ocean slug string (water clicked in
-// Continent mode).
 function formatClickedLabel(clicked) {
-  if (typeof clicked === "string") return t("ocean_" + clicked);
   return formatCountryLabel(clicked);
 }
 
@@ -131,8 +107,6 @@ const CONTINENTS = [
   "amerique_sud",
   "oceanie",
 ];
-const OCEANS = ["pacifique", "atlantique", "indien", "arctique", "austral"];
-
 // Flat single-color palette (matches Seterra: land is one uniform color,
 // not colored per country/continent — the player must know borders/regions).
 const LAND_COLOR = "#1e8346";
@@ -145,85 +119,25 @@ const CORRECT_GLOW = "rgba(80,230,140,0.9)";
 const WRONG_FILL = "rgba(217,83,79,0.9)";
 const WRONG_GLOW = "rgba(255,90,86,0.9)";
 
-// Ocean regions are hand-drawn shapes (no real marine-boundary data exists),
-// bent at major capes/straits (Panama, Cape Horn, Cape of Good Hope,
-// Indonesia) instead of straight lon/lat lines. The Pacific wraps the
-// antimeridian, so it's split into two ring entries sharing the same slug.
-const OCEAN_REGIONS = [
-  {
-    slug: "atlantique",
-    ring: [
-      [-75, 75], [-72, 40], [-80, 9], [-77, 0], [-70, -20], [-68, -56],
-      [-40, -68], [20, -68], [20, -35], [10, 5], [-6, 35], [-10, 60],
-    ],
-  },
-  {
-    slug: "indien",
-    ring: [
-      [20, -35], [20, -68], [110, -68], [113, -35], [105, -5],
-      [100, 8], [80, 15], [60, 25], [43, 12], [35, -10],
-    ],
-  },
-  {
-    slug: "pacifique",
-    ring: [[145, 75], [145, -35], [113, -35], [105, -5], [100, 8], [130, 25], [145, 55]],
-  },
-  {
-    slug: "pacifique",
-    ring: [
-      [-180, 75], [-180, -68], [-40, -68], [-68, -56], [-70, -20],
-      [-77, 0], [-80, 9], [-130, 30], [-165, 60],
-    ],
-  },
-];
+// Outcome tiers for the attempt-based scoring/coloring, à la Seterra: solved
+// first try = white, 2nd try = yellow, 3rd try = darker yellow, given up
+// (Skip or 3 wrong attempts) = red. The final score is the sum of points
+// earned (out of 3 per target) over the max possible — so it's proportional
+// to how many attempts each target took, not just a correct/incorrect count.
+const TIER_COLORS = { 1: "#ffffff", 2: "#ffe066", 3: "#e0a800", 4: "#d9534f" };
+const TIER_POINTS = { 1: 3, 2: 2, 3: 1, 4: 0 };
 
-// Polar caps use a wavy latitude threshold (not a polygon — a ring
-// enclosing a pole needs special handling) so their edge isn't a flat line.
-function waveLat(lon, base, amp, freq, phase) {
-  return base + amp * Math.sin(lon * freq * DEG + phase);
-}
-const ARCTIC_WAVE = { base: 66, amp: 5, freq: 2.5, phase: 0.6 };
-const AUSTRAL_WAVE = { base: -60, amp: 5, freq: 2.2, phase: 1.3 };
-
-// A representative lon/lat used to recenter the globe on an ocean answer.
-const OCEAN_CENTERS = {
-  pacifique: { lon: 180, lat: 0 },
-  atlantique: { lon: -25, lat: 10 },
-  indien: { lon: 75, lat: -10 },
-  arctique: { lon: 0, lat: 80 },
-  austral: { lon: 0, lat: -75 },
+// A representative lon/lat used to recenter the board and place the
+// persistent name label for a continent target — a continent has no single
+// "centroid" polygon of its own.
+const CONTINENT_CENTERS = {
+  europe: { lon: 15, lat: 50 },
+  asie: { lon: 90, lat: 45 },
+  afrique: { lon: 20, lat: 2 },
+  amerique_nord: { lon: -100, lat: 45 },
+  amerique_sud: { lon: -60, lat: -15 },
+  oceanie: { lon: 140, lat: -25 },
 };
-
-function oceanAtLonLat(lon, lat) {
-  if (lat >= waveLat(lon, ARCTIC_WAVE.base, ARCTIC_WAVE.amp, ARCTIC_WAVE.freq, ARCTIC_WAVE.phase)) {
-    return "arctique";
-  }
-  if (lat <= waveLat(lon, AUSTRAL_WAVE.base, AUSTRAL_WAVE.amp, AUSTRAL_WAVE.freq, AUSTRAL_WAVE.phase)) {
-    return "austral";
-  }
-  for (const region of OCEAN_REGIONS) {
-    if (pointInPoly(region.ring, lon, lat)) return region.slug;
-  }
-  return "pacifique";
-}
-
-// Build a renderable ring for a polar cap: the wavy boundary latitude
-// across all longitudes, closed off across the pole itself.
-function polarCapRing(wave, poleLat) {
-  const ring = [];
-  for (let lon = -180; lon <= 180; lon += 10) {
-    ring.push([lon, waveLat(lon, wave.base, wave.amp, wave.freq, wave.phase)]);
-  }
-  ring.push([180, poleLat]);
-  ring.push([-180, poleLat]);
-  return ring;
-}
-
-function getOceanRings(slug) {
-  if (slug === "arctique") return [polarCapRing(ARCTIC_WAVE, 90)];
-  if (slug === "austral") return [polarCapRing(AUSTRAL_WAVE, -90)];
-  return OCEAN_REGIONS.filter((r) => r.slug === slug).map((r) => r.ring);
-}
 
 // ── State ───────────────────────────────────────────────────
 let currentLang = "fr";
@@ -247,6 +161,17 @@ let previousTarget = null;
 let roundActive = false;
 let quizActive = false;
 let quizStartTime = 0;
+
+// Attempt-based scoring: resets every round. 3 wrong attempts on the same
+// target auto-reveals it (blinking red) instead of letting the player retry
+// forever — the player must then click the revealed target to move on.
+let wrongAttempts = 0;
+let forcedReveal = false;
+let forcedRevealBlinkTimer = null;
+// answer-id (geoId / continent slug / ocean slug) -> outcome tier (1-4),
+// kept for the whole quiz so every resolved target stays colored + labeled.
+let targetOutcomes = new Map();
+let scorePoints = 0; // sum of TIER_POINTS earned so far, out of quizOrder.length * 3
 
 // Drag / rotation state
 let dragging = false;
@@ -406,6 +331,8 @@ function setupMenuEvents() {
   document.getElementById("btn-home").addEventListener("click", () => {
     quizActive = false;
     roundActive = false;
+    forcedReveal = false;
+    stopForcedRevealBlink();
     recenterAnim = null;
     setHover(null);
     showScreen("start-screen");
@@ -464,10 +391,15 @@ function initThree() {
   renderer.setClearColor(0x000000, 0); // transparent — CSS background shows through
   container.appendChild(renderer.domElement);
 
-  // Lights
-  const ambient = new THREE.AmbientLight(0xffffff, 0.75);
+  // Lights. Kept deliberately dim: with no tone mapping set on the renderer,
+  // light values over 1.0 just clip to pure white — ambient(0.75) +
+  // directional(up to 0.6 at direct incidence) clipped the point on the
+  // sphere most directly facing the light to white, which happened to be
+  // the pole in some rotations, bleaching the Arctic/Antarctic ocean color
+  // out and making that whole region look blank/missing.
+  const ambient = new THREE.AmbientLight(0xffffff, 0.65);
   scene.add(ambient);
-  const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.3);
   dirLight.position.set(5, 3, 8);
   scene.add(dirLight);
 
@@ -490,10 +422,12 @@ function initThree() {
   globeTexture.minFilter = THREE.LinearFilter;
   globeTexture.magFilter = THREE.LinearFilter;
 
-  const globeMat = new THREE.MeshPhongMaterial({
+  // Lambert (diffuse-only, no specular): a specular highlight from the fixed
+  // directional light would wash out whatever region of the globe happens to
+  // face it as it rotates — including the pole, making the Arctic/Antarctic
+  // look bleached-out/missing instead of showing the flat ocean color.
+  const globeMat = new THREE.MeshLambertMaterial({
     map: globeTexture,
-    specular: 0x111111,
-    shininess: 8,
   });
 
   globeMesh = new THREE.Mesh(sphereGeo, globeMat);
@@ -560,37 +494,6 @@ function drawFeature(ctx, feature, w, h, color, glowColor, projFn) {
   }
 }
 
-// Project every vertex of a lon/lat ring through the current projection.
-function projectRing(ring, w, h, projFn) {
-  return ring.map(([lon, lat]) => projFn(lon, lat, w, h));
-}
-
-function pathFromPoints(ctx, points) {
-  ctx.beginPath();
-  points.forEach(([x, y], i) => {
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  });
-  ctx.closePath();
-}
-
-// Highlight (green/red reveal) every ring belonging to an ocean slug.
-function highlightOceanRegion(ctx, w, h, slug, fillColor, glowColor, projFn) {
-  for (const ring of getOceanRings(slug)) {
-    const points = projectRing(ring, w, h, projFn);
-    ctx.save();
-    ctx.shadowColor = glowColor;
-    ctx.shadowBlur = 20;
-    ctx.fillStyle = fillColor;
-    pathFromPoints(ctx, points);
-    ctx.fill();
-    ctx.strokeStyle = glowColor;
-    ctx.lineWidth = 3;
-    ctx.stroke();
-    ctx.restore();
-  }
-}
-
 // Draw every country in its normal (uniform) land color. Used to build the
 // base layer, and to restore land after an ocean highlight (ocean regions
 // are simple lon/lat shapes, not real coastlines, so they must never stay
@@ -624,39 +527,73 @@ function buildGlobeTexture(correctAnswer, wrongAnswer) {
   const h = globeTexCanvas.height;
 
   ctx.drawImage(baseTexCanvas, 0, 0);
+  drawPersistentOutcomes(ctx, w, h, defaultProj);
   drawAnswerHighlights(ctx, w, h, correctAnswer, wrongAnswer, defaultProj);
 
   globeTexture.needsUpdate = true;
 }
 
-// Shared by the globe and the map: paint the correct-answer / wrong-answer
-// highlight(s) (country, continent's countries, or an ocean region).
-function drawAnswerHighlights(ctx, w, h, correctAnswer, wrongAnswer, projFn) {
-  const correctIsOcean = correctAnswer && OCEANS.includes(correctAnswer);
-  const wrongIsOcean = wrongAnswer && OCEANS.includes(wrongAnswer);
-  if (correctIsOcean) {
-    highlightOceanRegion(ctx, w, h, correctAnswer, CORRECT_FILL, CORRECT_GLOW, projFn);
+// Every target already resolved this quiz stays tinted by its outcome tier
+// (white/yellow/darker yellow/red) and labeled with its name for the rest of
+// the quiz — a running "result map" like Seterra's own end-of-quiz review,
+// built up live instead of only shown at the end.
+function drawPersistentOutcomes(ctx, w, h, projFn) {
+  for (const [answerId, tier] of targetOutcomes) {
+    const color = TIER_COLORS[tier];
+    for (const cf of countryFeatures) {
+      if (cf.geoId === answerId || cf.continent === answerId) {
+        drawFeature(ctx, cf.feature, w, h, color, null, projFn);
+      }
+    }
   }
-  if (wrongIsOcean) {
-    highlightOceanRegion(ctx, w, h, wrongAnswer, WRONG_FILL, WRONG_GLOW, projFn);
+  for (const answerId of targetOutcomes.keys()) {
+    drawAnswerLabel(ctx, answerId, w, h, projFn);
   }
-  if (correctIsOcean || wrongIsOcean) {
-    drawAllCountries(ctx, w, h, projFn);
-  }
+}
 
+// A stable lon/lat anchor to place an answer's persistent name label: a
+// country's real centroid, or a fixed representative point for a continent
+// (which has no single polygon of its own).
+function getLabelAnchor(answerId) {
+  if (CONTINENT_CENTERS[answerId]) return CONTINENT_CENTERS[answerId];
+  const cf = countryFeatureByName.get(answerId);
+  return cf ? getCountryCentroid(cf) : null;
+}
+
+// No flag here — just the name, so it stays small and centered on the
+// country shape instead of the flag pushing it off to one side.
+function labelTextForAnswerId(answerId) {
+  if (currentMode === "continent") return formatTargetLabel(answerId);
+  const cf = countryFeatureByName.get(answerId);
+  return cf ? cf[currentLang].name : answerId;
+}
+
+function drawAnswerLabel(ctx, answerId, w, h, projFn) {
+  const anchor = getLabelAnchor(answerId);
+  if (!anchor) return;
+  const [x, y] = projFn(anchor.lon, anchor.lat, w, h);
+  const fontSize = Math.round(h * 0.01);
+  const text = labelTextForAnswerId(answerId);
+  ctx.save();
+  ctx.font = "700 " + fontSize + "px Poppins, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.lineWidth = Math.max(1, fontSize * 0.15);
+  ctx.strokeStyle = "rgba(255,255,255,0.9)";
+  ctx.strokeText(text, x, y);
+  ctx.fillStyle = "#12213f";
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+// Shared by the globe and the map: paint the correct-answer / wrong-answer
+// highlight (a single country, or every country in a continent).
+function drawAnswerHighlights(ctx, w, h, correctAnswer, wrongAnswer, projFn) {
   for (const cf of countryFeatures) {
     const isCorrect =
-      correctAnswer &&
-      !OCEANS.includes(correctAnswer) &&
-      (currentMode === "continent"
-        ? cf.continent === correctAnswer
-        : cf.geoId === correctAnswer);
+      correctAnswer && (cf.geoId === correctAnswer || cf.continent === correctAnswer);
     const isWrong =
-      wrongAnswer &&
-      !OCEANS.includes(wrongAnswer) &&
-      (currentMode === "continent"
-        ? cf.continent === wrongAnswer
-        : cf.geoId === wrongAnswer);
+      wrongAnswer && (cf.geoId === wrongAnswer || cf.continent === wrongAnswer);
     if (isCorrect) {
       drawFeature(ctx, cf.feature, w, h, CORRECT_FILL, CORRECT_GLOW, projFn);
     } else if (isWrong) {
@@ -674,6 +611,7 @@ function applyGlobeHover(hoverCf) {
   const h = globeTexCanvas.height;
 
   ctx.drawImage(baseTexCanvas, 0, 0);
+  drawPersistentOutcomes(ctx, w, h, defaultProj);
   if (hoverCf) {
     drawFeature(ctx, hoverCf.feature, w, h, LAND_HOVER, null);
   }
@@ -701,11 +639,6 @@ function getFilteredCountryFeatures() {
   return countryFeatures.filter((cf) => cf.continent === currentScope);
 }
 
-function pickCountryInContinent(slug) {
-  const pool = countryFeatures.filter((cf) => cf.continent === slug);
-  return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
-}
-
 function shuffle(arr) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
@@ -716,38 +649,23 @@ function shuffle(arr) {
 }
 
 function buildQuizPool() {
-  if (currentMode === "continent") {
-    return [...CONTINENTS, ...OCEANS];
-  }
+  if (currentMode === "continent") return [...CONTINENTS];
   return getFilteredCountryFeatures();
 }
 
-// Get a representative lon/lat centroid for any target: a country/capital
-// target (a countryFeature), or — in Continent mode — a continent (via one
-// of its countries) or an ocean (a fixed representative point).
+// Get a representative lon/lat centroid for a country/capital target, or a
+// continent's fixed representative point (a continent has no centroid of
+// its own).
 function getCentroidForTarget(target) {
   if (!target) return null;
-  if (currentMode === "continent") {
-    if (OCEANS.includes(target)) return OCEAN_CENTERS[target] || null;
-    const cf = pickCountryInContinent(target);
-    return cf ? getCountryCentroid(cf) : null;
-  }
+  if (currentMode === "continent") return CONTINENT_CENTERS[target] || null;
   return getCountryCentroid(target);
 }
 
-// Resolve a click: a country if it landed on land; in Continent mode, an
-// ocean slug (plain string) if it landed on water instead.
+// Resolve a click: the country landed on, or null if it landed on water
+// (there's no ocean quizzing/classification — a water click is just ignored).
 function resolveClickAtLonLat(lon, lat) {
-  const cf = findCountryAtLonLat(lon, lat);
-  if (cf) return cf;
-  if (currentMode === "continent") return oceanAtLonLat(lon, lat);
-  return null;
-}
-
-function isContinentModeCorrect(clicked, target) {
-  if (!clicked) return false;
-  if (typeof clicked === "string") return clicked === target; // clicked an ocean
-  return clicked.continent === target; // clicked a country
+  return findCountryAtLonLat(lon, lat);
 }
 
 // ── Point-in-polygon ────────────────────────────────────────
@@ -936,10 +854,16 @@ function sizeMapCanvas() {
   mapCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
+// World bounds: -75°/85°, not a generous symmetric ±85° — a full ±85° wastes
+// a huge empty band below Antarctica with no gameplay content (no country
+// reaches that far south; the southernmost is Chile at ~-55.6°), which
+// skewed the "cover" fit and squeezed the real content (Canada/Greenland/
+// Russia, and Antarctica's own southern edge) toward the middle of the
+// screen instead of Arctic-at-top/Antarctic-at-bottom like a real map.
 function updateMapProjection() {
   mapProjection =
     currentScope === "world"
-      ? { minLon: -180, maxLon: 180, minLat: -85, maxLat: 85 }
+      ? { minLon: -180, maxLon: 180, minLat: -75, maxLat: 85 }
       : { ...CONTINENT_BOUNDS[currentScope] };
 }
 
@@ -954,14 +878,21 @@ function mercatorYInv(y) {
   return (2 * Math.atan(Math.exp(y)) - Math.PI / 2) / DEG;
 }
 
-// Fit the lon/lat bounds into a w×h canvas at a single uniform scale
-// (letterboxed/pillarboxed rather than stretched). Both axes are expressed
-// in the same radian-based unit (lon in radians, lat via mercatorY) so the
-// scale is uniform in both directions, keeping the projection conformal.
+// A bit of headroom on top of the strict "cover" scale below, so the map
+// isn't cropped right at the edge of the viewport (more of each pole stays
+// visible on wide screens) — the extra margin is just more ocean color,
+// which already fills the whole canvas, so the map still reads as filling
+// the screen edge to edge.
+const MAP_ZOOM_OUT = 0.85;
+
+// Fit the lon/lat bounds to fully cover the w×h canvas at a single uniform
+// scale (no distortion, unlike stretching each axis independently) — like a
+// CSS `background-size: cover`, so the shorter axis may crop slightly at the
+// edges rather than leaving blank letterbox bars.
 function getMapFit(w, h) {
   const boundsW = (mapProjection.maxLon - mapProjection.minLon) * DEG;
   const boundsH = mercatorY(mapProjection.maxLat) - mercatorY(mapProjection.minLat);
-  const scale = Math.min(w / boundsW, h / boundsH);
+  const scale = Math.max(w / boundsW, h / boundsH) * MAP_ZOOM_OUT;
   return {
     scale,
     offsetX: (w - boundsW * scale) / 2,
@@ -973,13 +904,17 @@ function getMapFit(w, h) {
 // horizontal parallels — no curved/pinched poles like a sinusoidal
 // projection. The globe's texture (defaultProj) stays plain equirectangular
 // — that one wraps onto an actual sphere, which needs no flat-map correction.
+// Latitude is clamped to the visible range before projecting: shapes that
+// reach the actual pole (90°, e.g. the polar ocean caps) would otherwise
+// hit mercatorY's ±Infinity asymptote and render as a broken/joined shape.
 function mapProjFn(lon, lat, w, h) {
   const fit = getMapFit(w, h);
   const centerLonRad = ((mapProjection.minLon + mapProjection.maxLon) / 2) * DEG;
   const boundsW = (mapProjection.maxLon - mapProjection.minLon) * DEG;
+  const clampedLat = Math.min(mapProjection.maxLat, Math.max(mapProjection.minLat, lat));
   const sx = lon * DEG - centerLonRad;
   const x = fit.offsetX + (sx + boundsW / 2) * fit.scale;
-  const y = fit.offsetY + (mercatorY(mapProjection.maxLat) - mercatorY(lat)) * fit.scale;
+  const y = fit.offsetY + (mercatorY(mapProjection.maxLat) - mercatorY(clampedLat)) * fit.scale;
   return [x, y];
 }
 
@@ -995,6 +930,7 @@ function drawMapBase() {
   ctx.fillRect(0, 0, w, h);
 
   drawAllCountries(ctx, w, h, mapProjFn);
+  drawPersistentOutcomes(ctx, w, h, mapProjFn);
 }
 
 function drawMapOverlay(correctAnswer, wrongAnswer) {
@@ -1087,6 +1023,8 @@ function showScreen(id) {
 
 function startGame() {
   missedTargets = [];
+  targetOutcomes = new Map();
+  scorePoints = 0;
   quizOrder = shuffle(buildQuizPool());
   quizIndex = 0;
   correctCount = 0;
@@ -1098,6 +1036,8 @@ function startRetryGame() {
   if (missedTargets.length === 0) return;
   quizOrder = shuffle(missedTargets.slice());
   missedTargets = [];
+  targetOutcomes = new Map();
+  scorePoints = 0;
   quizIndex = 0;
   correctCount = 0;
   previousTarget = null;
@@ -1128,7 +1068,10 @@ function nextQuizItem() {
 
   roundActive = true;
   hoveredCf = null;
-  hideHint();
+  wrongAttempts = 0;
+  forcedReveal = false;
+  stopForcedRevealBlink();
+  hideWrongLabel();
 
   currentTarget = quizOrder[quizIndex];
 
@@ -1175,23 +1118,35 @@ function updateHudQuestion() {
   }
 }
 
-function updateHudScore() {
+// The score is proportional to how many attempts each target took (3 points
+// for a first-try correct answer, down to 0 for a given-up/failed one), not
+// just a plain correct/incorrect count — so it climbs slower after mistakes.
+function computeScorePct() {
   const total = quizOrder.length;
-  const pct = total ? Math.round((correctCount / total) * 100) : 0;
-  document.getElementById("hud-score").textContent =
-    correctCount + " / " + total + "  ·  " + pct + "%";
+  if (!total) return 0;
+  return Math.round((scorePoints / (total * 3)) * 100);
 }
 
-function showHint() {
-  const el = document.getElementById("hud-hint");
-  el.innerHTML = t("click_on") + " <b>" + formatTargetLabel(currentTarget) + "</b>";
+function updateHudScore() {
+  document.getElementById("hud-score").textContent = computeScorePct() + "%";
+}
+
+let wrongLabelTimeout = null;
+
+// Briefly names whatever the player actually clicked on a wrong guess, so
+// they learn what that country/continent/ocean was — separate from the
+// persistent "Clique sur X" hint, which keeps naming the real target.
+function showWrongLabel(text) {
+  const el = document.getElementById("hud-wrong-label");
+  el.textContent = text;
   el.classList.add("show");
+  clearTimeout(wrongLabelTimeout);
+  wrongLabelTimeout = setTimeout(() => el.classList.remove("show"), 2000);
 }
 
-function hideHint() {
-  const el = document.getElementById("hud-hint");
-  el.classList.remove("show");
-  el.textContent = "";
+function hideWrongLabel() {
+  clearTimeout(wrongLabelTimeout);
+  document.getElementById("hud-wrong-label").classList.remove("show");
 }
 
 function endGame() {
@@ -1203,10 +1158,7 @@ function endGame() {
   document.getElementById("btn-replay").textContent = t("replay");
   document.getElementById("btn-back-menu").textContent = t("back_menu");
 
-  const total = quizOrder.length;
-  const pct = total ? Math.round((correctCount / total) * 100) : 0;
-  document.getElementById("final-score").textContent =
-    correctCount + " / " + total + "  (" + pct + "%)";
+  document.getElementById("final-score").textContent = computeScorePct() + "%";
 
   const retryBtn = document.getElementById("btn-retry-mistakes");
   retryBtn.textContent = t("btn_retry_mistakes");
@@ -1416,14 +1368,23 @@ function updateTimer() {
 // Entry point for both boards' click handlers.
 function handleAnswerClick(clicked) {
   if (!roundActive) return;
-  if (!clicked) return; // water click outside Continent mode: ignored
+  if (!clicked) return; // water click: ignored
 
-  const correct =
+  const isTarget =
     currentMode === "continent"
-      ? isContinentModeCorrect(clicked, currentTarget)
+      ? clicked.continent === currentTarget
       : clicked.geoId === currentTarget.geoId;
 
-  if (correct) {
+  // After 3 wrong attempts, the target is revealed (blinking red) and the
+  // round only ends once the player clicks specifically on it — any other
+  // click just names what was clicked, same as a normal wrong guess.
+  if (forcedReveal) {
+    if (isTarget) confirmForcedReveal();
+    else showWrongLabel(formatClickedLabel(clicked));
+    return;
+  }
+
+  if (isTarget) {
     handleCorrect();
   } else {
     handleWrong(clicked);
@@ -1435,12 +1396,28 @@ function targetAsAnswerId() {
 }
 
 function clickedAsAnswerId(clicked) {
-  if (currentMode !== "continent") return clicked.geoId;
-  return typeof clicked === "string" ? clicked : clicked.continent;
+  return currentMode === "continent" ? clicked.continent : clicked.geoId;
+}
+
+// Records the outcome tier for the current target: 1-3 by attempt count on
+// success, or 4 when given up (Skip or 3 wrong attempts) — feeds both the
+// persistent board coloring/labels and the attempt-weighted final score.
+function recordOutcome(tier) {
+  targetOutcomes.set(targetAsAnswerId(), tier);
+  scorePoints += TIER_POINTS[tier];
+}
+
+function stopForcedRevealBlink() {
+  if (forcedRevealBlinkTimer) {
+    clearInterval(forcedRevealBlinkTimer);
+    forcedRevealBlinkTimer = null;
+  }
 }
 
 function handleCorrect() {
   roundActive = false;
+  const tier = wrongAttempts === 0 ? 1 : wrongAttempts === 1 ? 2 : 3;
+  recordOutcome(tier);
   correctCount++;
   updateHudScore();
 
@@ -1463,6 +1440,8 @@ function handleCorrect() {
 }
 
 function handleWrong(clicked) {
+  wrongAttempts++;
+
   const overlay = document.getElementById("feedback-overlay");
   overlay.className = "incorrect";
   const shakeTarget =
@@ -1472,7 +1451,13 @@ function handleWrong(clicked) {
   shakeTarget.classList.add("shake");
   setTimeout(() => shakeTarget.classList.remove("shake"), 400);
 
-  showHint();
+  showWrongLabel(formatClickedLabel(clicked));
+
+  if (wrongAttempts >= 3) {
+    setTimeout(() => (overlay.className = ""), 500);
+    triggerForcedReveal();
+    return;
+  }
 
   const wrongAnswer = clickedAsAnswerId(clicked);
   if (currentBoard === "globe") {
@@ -1492,11 +1477,57 @@ function handleWrong(clicked) {
   }, 500);
 }
 
+// After 3 wrong attempts: blink the target in red (reusing the "wrong"
+// reveal color) until the player clicks specifically on it.
+function triggerForcedReveal() {
+  forcedReveal = true;
+  const correctAnswer = targetAsAnswerId();
+  let on = false;
+  stopForcedRevealBlink();
+  forcedRevealBlinkTimer = setInterval(() => {
+    on = !on;
+    const highlightId = on ? correctAnswer : null;
+    if (currentBoard === "globe") {
+      buildGlobeTexture(null, highlightId);
+    } else {
+      drawMapOverlay(null, highlightId);
+    }
+  }, 400);
+}
+
+function confirmForcedReveal() {
+  stopForcedRevealBlink();
+  forcedReveal = false;
+  roundActive = false;
+  recordOutcome(4);
+  missedTargets.push(currentTarget);
+  updateHudScore();
+
+  // Stays red (tier 4's color), not the usual green Skip reveal — this was
+  // a failed round, just confirmed by clicking the now-obvious target.
+  const correctAnswer = targetAsAnswerId();
+  if (currentBoard === "globe") {
+    buildGlobeTexture(null, correctAnswer);
+  } else {
+    drawMapOverlay(null, correctAnswer);
+  }
+
+  previousTarget = currentTarget;
+  setTimeout(() => {
+    quizIndex++;
+    nextQuizItem();
+  }, 700);
+}
+
 function handleSkip() {
   if (!roundActive) return;
   roundActive = false;
+  forcedReveal = false;
+  stopForcedRevealBlink();
+  recordOutcome(4);
+  updateHudScore();
   missedTargets.push(currentTarget);
-  hideHint();
+  hideWrongLabel();
 
   const correctAnswer = targetAsAnswerId();
   if (currentBoard === "globe") {
