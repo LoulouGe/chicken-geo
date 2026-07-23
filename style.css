@@ -261,6 +261,31 @@ body {
   font-weight: 700;
 }
 
+/* Names whatever the player just clicked on a wrong guess, briefly. */
+.hud-wrong-label {
+  position: absolute;
+  top: 62px;
+  right: 16px;
+  z-index: 10;
+  background: rgba(217, 83, 79, 0.92);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: clamp(0.8rem, 2vw, 0.95rem);
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 8px;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+}
+
+.hud-wrong-label.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 #scene-container {
   position: absolute;
   inset: 0;
